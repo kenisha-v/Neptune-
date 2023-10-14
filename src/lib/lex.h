@@ -29,7 +29,7 @@ public:
     SyntaxError(int r, int c){
         row = r;
         col = c;
-        message = "Syntax error at line " + std::to_string(row) + ", column " + std::to_string(col) + ".";
+        message = "Syntax error on line " + std::to_string(row) + " column " + std::to_string(col) + ".";
     }
 
     const char* what() const noexcept override {
@@ -38,7 +38,7 @@ public:
 };
 
 
-std::vector<token> tokenize(std::string input);
+std::vector<token> tokenize(const std::string& input);
 // This function will "THROW SyntaxError" on encountering invalid characters.
 // Requesting Parser team to try-catch SytaxError while calling tokenize, and elemintate parser execution if error is already caught during lexer.
 
