@@ -21,8 +21,10 @@ class AST{
     public:
         Node* main;
         int position_n;
+        std::string expression;
         AST();
         void construct(std::vector<token> tokenized);
+        int error(std::string expression);
         void print(Node* main);
     private:
         Node* create(std::vector<token> tokenized, int position = 0);

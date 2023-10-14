@@ -24,6 +24,7 @@ Node* AST::create(std::vector<token> tokenized, int position){
         return nullptr;
     }
     std::string value = tokenized[position].text;
+    expression.append(value+" ");
     while (value=="(" || value==")") {
         ++position;
         value = tokenized[position].text;
@@ -32,20 +33,23 @@ Node* AST::create(std::vector<token> tokenized, int position){
     while (tokenized[position_n].text=="(" || tokenized[position_n].text==")") {
         ++position_n;
     }
-    if (value=="+" || value=="-" || value=="*"  || value=="/") {
+    if (tokenized[position].type == TokenType::OPERATOR) {
         Node* new_main = new Node(value);
         new_main->l_child = create(tokenized, position_n);
         new_main->r_child = create(tokenized, position_n);
         return new_main;
     } 
-    else if (value=="0" || value=="1" || value=="2" || value=="3" || value=="4" || 
-    value=="5" || value=="6" || value=="7" || value=="8" || value=="9") {
+    else if (tokenized[position].type == TokenType::NUMBER) {
         Node* new_main = new Node(value);
         return new_main;
     }
     else {
         return nullptr;
     }
+}
+
+int AST::error(std::string expression) {
+    
 }
 
 void AST::print(Node* main) {
