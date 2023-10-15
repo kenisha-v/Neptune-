@@ -85,9 +85,9 @@ std::vector<token> tokenize(const std::string& input) {
             temp_str_num += in_char;
         }
         else if (in_char == '.') {
-            if (hasDecimal || !isdigit(stream.peek())) {
+            if (!isdigit(stream.peek())) {
                 throw SyntaxError(row, col + temp_str_num.length()+1);
-            } else if (temp_str_num.empty()){
+            } else if (hasDecimal || temp_str_num.empty()){
                 throw SyntaxError(row, col + temp_str_num.length());
             }
             hasDecimal = true;
@@ -111,7 +111,7 @@ int main() {
     std::string input;
     char ch;
     
-    while ((ch = std::cin.get()) != EOF) {
+    while (std::cin.get(ch)) {
         input += ch;
     }
 
