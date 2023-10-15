@@ -50,7 +50,7 @@ The LEXER serves as the first step in processing and understanding input strings
 
 ---
 
-#PARSER Documentation
+# PARSER Documentation
 
 **NOTE TO PARSER TEAM**: Please include your README documentation below this note.
 
