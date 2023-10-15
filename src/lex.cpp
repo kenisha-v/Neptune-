@@ -109,12 +109,10 @@ std::vector<token> tokenize(const std::string& input) {
 
 int main() {
     std::string input;
-    std::string line;
+    char ch;
     
-    while (true) {
-        std::getline(std::cin, line);
-        if (line.empty()) break; // Stop input when an empty line is entered.
-        input += line + '\n'; // Add a newline for each line input.
+    while ((ch = std::cin.get()) != EOF) {
+        input += ch;
     }
 
     try {
