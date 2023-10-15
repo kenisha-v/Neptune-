@@ -25,22 +25,22 @@ Node* AST::create(std::vector<token> tokenized, int position){
     if ((size_t)position>tokenized.size()){
         return nullptr;
     }
+    TokenType type = tokenized[position].type;
     std::string value = tokenized[position].text;
-    while (value=="(" || value==")") {
+    while (type==TokenType::LEFT_PAREN || type==TokenType::RIGHT_PAREN){
         ++position;
+        type = tokenized[position].type;
         value = tokenized[position].text;
     }
-    position_n = position+1;
-    while (tokenized[position_n].type==TokenType::LEFT_PAREN || tokenized[position_n].type==TokenType::RIGHT_PAREN) {
-        ++position_n;
-    }
-    if (tokenized[position].type == TokenType::OPERATOR) {
+    next_position = position+1;
+    
+    if (type == TokenType::OPERATOR) {
         Node* new_main = new Node(value, position, tokenized[position].type);
-        new_main->l_child = create(tokenized, position_n);
-        new_main->r_child = create(tokenized, position_n);
+        new_main->l_child = create(tokenized, next_position);
+        new_main->r_child = create(tokenized, next_position);
         return new_main;
     } 
-    else if (tokenized[position].type == TokenType::NUMBER) {
+    else if (type == TokenType::NUMBER) {
         Node* new_main = new Node(value, position, tokenized[position].type);
         return new_main;
     }
@@ -60,22 +60,23 @@ int AST::counter(std::vector<token> tokenized, TokenType type) {
 }
 
 int AST::syntax_error(std::vector<token> tokenized, Node* main) {
-    if (main->type == TokenType::NUMBER) {
-        if (main->l_child != nullptr & main->r_child != nullptr) {
-            std::cout << "Syntax error on line " << tokenized[main->position].row << " and column " << tokenized[main->position].col << "." << std::endl;
-            return 1;
-        }
-    }
+    //redundant as number can never have a l_child or r_child due to construct
+    // if (main->type == TokenType::NUMBER) {
+    //     if (main->l_child != nullptr & main->r_child != nullptr) {
+    //         std::cout << "Syntax error on line " << tokenized[main->position].row << " and column " << tokenized[main->position].col << "." << std::endl;
+    //         return 1;
+    //     }
+    // }
     if (main->type == TokenType::OPERATOR) {
-        if (main->l_child == nullptr || main->r_child == nullptr) {
-            std::cout << "Syntax error on line " << tokenized[main->position].row << " and column " << tokenized[main->position].col << "." << std::endl;
+        if (main->l_child == nullptr || main->r_child == nullptr || tokenized[main->position-1].type != TokenType::LEFT_PAREN) { 
+            std::cout << "Unexpected token at line " << tokenized[main->position].row << " and column " << tokenized[main->position].col << ": " << tokenized[main->position].text << std::endl;
             return 1;
         }
-        if (tokenized[main->position-1].type == TokenType::LEFT_PAREN || 
-            tokenized[(main->r_child->position)+1].type == TokenType::RIGHT_PAREN) {
-                std::cout << "Syntax error on line " << tokenized[main->position].row << " and column " << tokenized[main->position].col << "." << std::endl;
-                return 1;
-        }
+        // if (tokenized[main->position-1].type == TokenType::LEFT_PAREN || 
+        //     tokenized[(main->r_child->position)+1].type == TokenType::RIGHT_PAREN) {
+        //         std::cout << "Syntax error on line " << tokenized[main->position].row << " and column " << tokenized[main->position].col << "." << std::endl;
+        //         return 1;
+        // }
     }
     if (main->type == TokenType::LEFT_PAREN || main->type == TokenType::RIGHT_PAREN) {
         if (counter(tokenized, TokenType::LEFT_PAREN) != counter(tokenized, TokenType::RIGHT_PAREN)) {
@@ -84,7 +85,7 @@ int AST::syntax_error(std::vector<token> tokenized, Node* main) {
         }
     }
     if (main->l_child==nullptr && main->r_child==nullptr) {
-        ;
+        ; //what??????
     }
     else {
         if (main->l_child!=nullptr) {
@@ -97,25 +98,54 @@ int AST::syntax_error(std::vector<token> tokenized, Node* main) {
             syntax_error(tokenized, main->r_child);
         }
     }
+    return 0;
 }
 
 void AST::print(Node* main) {
     if (main->l_child==nullptr && main->r_child==nullptr) {
-        std::cout << main->text;
+        infix += main->text;
     }
     else {
         if (main->l_child!=nullptr) {
-            std::cout << "(";
+            infix += "(";
             print(main->l_child);
-            std::cout << " ";
+            infix += " ";
         }
         if (main!=nullptr) {
-            std::cout << main->text;
+            infix += main->text;
         }
         if (main->r_child!=nullptr) {
-            std::cout << " ";
+            infix += " ";
             print(main->r_child);
-            std::cout << ")";
+            infix += ")";
         }
     }
+}
+
+double AST::evaluate(Node* main){
+    if (main->type == TokenType::NUMBER) {
+        return std::stod(main->text);
+    }
+
+    // If the node is an operator, perform the operation
+    if (main->type == TokenType::OPERATOR) {
+        double left_result = evaluate(main->l_child);
+        double right_result = evaluate(main->r_child);
+
+        if (main->text == "+") {
+            return left_result + right_result;
+        } else if (main->text == "-") {
+            return left_result - right_result;
+        } else if (main->text == "*") {
+            return left_result * right_result;
+        } else if (main->text == "/") {
+            if (right_result == 0) {
+                // Handle division by zero
+                std::cout << "Runtime error: Division by zero." << std::endl;
+                exit(1);
+            }
+            return left_result / right_result;
+        }
+    }
+    return 0;
 }
