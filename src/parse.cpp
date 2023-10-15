@@ -70,7 +70,7 @@ int AST::syntax_error(std::vector<token> tokenized, Node* main) {
     if (main->type == TokenType::OPERATOR) {
         if (main->l_child == nullptr || main->r_child == nullptr || tokenized[main->position-1].type != TokenType::LEFT_PAREN) { 
             std::cout << "Unexpected token at line " << tokenized[main->position].row << " and column " << tokenized[main->position].col << ": " << tokenized[main->position].text << std::endl;
-            return 1;
+            return 2;
         }
         // if (tokenized[main->position-1].type == TokenType::LEFT_PAREN || 
         //     tokenized[(main->r_child->position)+1].type == TokenType::RIGHT_PAREN) {
@@ -81,7 +81,7 @@ int AST::syntax_error(std::vector<token> tokenized, Node* main) {
     if (main->type == TokenType::LEFT_PAREN || main->type == TokenType::RIGHT_PAREN) {
         if (counter(tokenized, TokenType::LEFT_PAREN) != counter(tokenized, TokenType::RIGHT_PAREN)) {
             std::cout << "Syntax error on line " << tokenized[-1].row << " and column " << tokenized[-1].col <<std::endl;
-            return 1;
+            return 2;
         }
     }
     if (main->l_child==nullptr && main->r_child==nullptr) {
@@ -142,10 +142,38 @@ double AST::evaluate(Node* main){
             if (right_result == 0) {
                 // Handle division by zero
                 std::cout << "Runtime error: Division by zero." << std::endl;
-                exit(1);
+                exit(3);
             }
             return left_result / right_result;
         }
     }
+    return 0;
+}
+
+int main(){
+    std::string input;
+    char ch;
+    vector<token> tokens;
+    while (std::cin.get(ch)) { //reading input character by character to ensure pre-eof chararcter detection.
+        input += ch;
+    }
+
+    try {
+        tokens = tokenize(input);
+    } catch(const SyntaxError& e) {
+        std::cout << e.what() << std::endl;
+        return 1;
+    }
+
+    AST ast;
+    ast.construct(tokens);
+    int error = ast.syntax_error(tokens, ast.main);
+    if(error == 2){
+        return 2;
+    }
+    ast.print(ast.main);
+    std::cout << ast.infix << std::endl;
+    std::cout << ast.evaluate(ast.main) << std::endl;
+
     return 0;
 }
