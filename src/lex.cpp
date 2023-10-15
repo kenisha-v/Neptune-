@@ -31,14 +31,14 @@ token getToken(int r, int c, string t, TokenType p) {
 void printTokens(const std::vector<token>& tokens) {
     
     for(const token& token : tokens) {
-        std::cout << std::setw(5) << std::right << token.row << "\t"  << std::setw(5) << std::right << token.col << "\t" << std::left << token.text << "\t" << std::endl;
+        std::cout << std::setw(4) << std::right << token.row << "    " << std::setw(2) << std::right << token.col << "  " << token.text << std::endl;
     }
 }
 
 std::vector<token> tokenize(const std::string& input) {
     vector<token> all_tokens;
     std::istringstream stream(input);
-    char ar_op[7] = {'+', '-', '*', '/', '(', ')', ' '};
+    char ar_op[8] = {'+', '-', '*', '/', '(', ')', ' ', '\t'};
     int row = 1;
     int col = 1;
     std::string temp_str_num = "";
@@ -67,7 +67,9 @@ std::vector<token> tokenize(const std::string& input) {
                 hasDecimal = false;
             }
             // Now processing the operator
-            if (in_char != ' ') {
+            if (in_char == '\t') {
+                col += 4;
+            } else if (in_char != ' ') {
                 all_tokens.push_back(getToken(row, col, string(1, in_char), getType(in_char)));
                 col++;
             } else {
