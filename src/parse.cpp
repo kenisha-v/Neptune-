@@ -84,17 +84,17 @@ int AST::syntax_error(std::vector<token> tokenized, Node* main) {
         }
     }
     if (main->l_child==nullptr && main->r_child==nullptr) {
-        std::cout << main->text;
+        ;
     }
     else {
         if (main->l_child!=nullptr) {
-            print(main->l_child);
+            syntax_error(tokenized, main->l_child);
         }
         if (main!=nullptr) {
             ;
         }
         if (main->r_child!=nullptr) {
-            print(main->r_child);
+            syntax_error(tokenized, main->r_child);
         }
     }
 }
