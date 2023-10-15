@@ -52,20 +52,21 @@ std::vector<token> tokenize(const std::string& input) {
                 all_tokens.push_back(getToken(row, col, temp_str_num, TokenType::NUMBER));
                 col += temp_str_num.length();
                 temp_str_num = "";
+                hasDecimal = false;
             }
             row++;
             col = 1;
             continue;
         }
         else if (std::find(std::begin(ar_op), std::end(ar_op), in_char) != std::end(ar_op)) {
-            // If there's a number accumulated in temp_str_num, process it first
+            // If there's a number accumulated in temp_str_num, processing it first
             if (!temp_str_num.empty()) {
                 all_tokens.push_back(getToken(row, col, temp_str_num, TokenType::NUMBER));
                 col += temp_str_num.length();
                 temp_str_num = "";
                 hasDecimal = false;
             }
-            // Now process the operator or parenthesis
+            // Now processing the operator
             if (in_char != ' ') {
                 all_tokens.push_back(getToken(row, col, string(1, in_char), getType(in_char)));
                 col++;
