@@ -1,56 +1,42 @@
 
-# LEXER Documentation
+## LEXER Documentation
 
-## Introduction
+### Introduction
 
-This documentation pertains to the LEXER part of the project, which is responsible for tokenizing input strings. The LEXER breaks down input strings into meaningful tokens, which are then processed by the PARSER. This documentation does not cover the PARSER, and another team will provide details on that component.
+This documentation is for the LEXER part of the project, which is in charge of reading text input and transforming it into a sequence of tokens that can be processed by the PARSER, or printed onto the standard output.
 
-## Files
+### Files
 
-1. **lex.h**: This header file provides definitions and declarations for the LEXER. 
-    - `TokenType`: An enumeration representing different types of tokens.
-    - `token`: A structure to represent individual tokens.
-    - `SyntaxError`: An exception class to capture syntax errors during tokenization.
-    - `tokenize`: A function to tokenize input strings.
+1. **lex.h** includes:
+    - `TokenType`: An enum representing different types of tokens, that helps the parser categorize tokens.
+    - `token`: A structure to represent individual tokens including {line, column, token itself, & type of the token}
+    - `SyntaxError` {contains location (line# & column#) of the error.}
+    - declaration of `tokenize`
 
-2. **lex.cpp**: This is the implementation file for the LEXER.
-    - Contains functions to determine token types, create tokens, and tokenize input strings.
+2. **lex.cpp** includes:
+    - definition of `tokenize`
+    - definition of the `print` function, used in the main function of this code
+    - main: takes input and prints a table of tokens with their location, or gives a SyntaxError with location (if any).
 
-## Usage
-
-To use the LEXER:
-
-1. Include "lib/lex.h".
-2. Call the `tokenize` function with your input string.
-3. The function will return a vector of tokens.
-
-```cpp
-#include "lib/lex.h"
-...
-std::vector<token> my_tokens = tokenize(my_input_string);
-```
+### Usage of tokenize fn
+- arguments: Input string
+- possible returns:  
+    1. vector of tokens
+    2. Syntax Error
 
 ### Handling Errors
 
-When using the `tokenize` function, it is essential to handle potential `SyntaxError` exceptions. If an invalid character is encountered during tokenization, a `SyntaxError` is thrown. The PARSER team should wrap calls to `tokenize` in a try-catch block and halt parsing if a lexer error is caught.
+When using the `tokenize` function, it is important to call it in a try-catch block, because it throws a 'SyntaxError' when encountering an invalid character.
+Otherwise, the program might terminate as the error was not caught.
 
-```cpp
-try {
-    std::vector<token> my_tokens = tokenize(my_input_string);
-    // Continue with parsing
-} catch (const SyntaxError& e) {
-    std::cerr << e.what() << std::endl;
-    // Halt parsing
-}
-```
+### Conclusion
 
-## Conclusion
-
-The LEXER serves as the first step in processing and understanding input strings. Proper error handling is crucial to ensure that only valid tokens proceed to the parsing stage.
+The LEXER serves as the first step in processing and understanding string inputs for our final aim Calculator.
+It ensures that only valid characters are given to the parser in an easily readable format.
 
 ---
 
-# PARSER Documentation
+## PARSER Documentation
 
-**NOTE TO PARSER TEAM**: Please include your README documentation below this note.
+_NOTE TO PARSER TEAM: Please include your README documentation here._
 
