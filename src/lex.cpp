@@ -67,7 +67,7 @@ std::vector<token> tokenize(const std::string& input) {
                 hasDecimal = false;
             }
             // Now processing the operator
-            if (in_char != ' ') {
+            if (in_char != ' ' || in_char != '\t') {
                 all_tokens.push_back(getToken(row, col, string(1, in_char), getType(in_char)));
                 col++;
             } else {
