@@ -58,36 +58,27 @@ std::vector<token> tokenize(const std::string& input) {
             continue;
         }
         else if (std::find(std::begin(ar_op), std::end(ar_op), in_char) != std::end(ar_op)) {
-            if (temp_str_num.empty() && in_char != ' ') {
-                all_tokens.push_back(getToken(row, col, string(1, in_char), getType(in_char)));
-                col++;
-            }
-            else if (temp_str_num.empty() && in_char == ' ') {
-                col++;
-            }
-            else if (in_char != ' ') {
+            // If there's a number accumulated in temp_str_num, process it first
+            if (!temp_str_num.empty()) {
                 all_tokens.push_back(getToken(row, col, temp_str_num, TokenType::NUMBER));
                 col += temp_str_num.length();
                 temp_str_num = "";
                 hasDecimal = false;
+            }
+            // Now process the operator or parenthesis
+            if (in_char != ' ') {
                 all_tokens.push_back(getToken(row, col, string(1, in_char), getType(in_char)));
                 col++;
-            }
-            else if (in_char == ' ') {
-                all_tokens.push_back(getToken(row, col, temp_str_num, TokenType::NUMBER));
-                col += temp_str_num.length();
-                temp_str_num = "";
-                hasDecimal = false;
+            } else {
                 col++;
             }
         }
+
         else if (isdigit(in_char)) {
             temp_str_num += in_char;
         }
         else if (in_char == '.') {
-            if (!isdigit(stream.peek())) {
-                throw SyntaxError(row, col + temp_str_num.length()+1);
-            } else if (hasDecimal || temp_str_num.empty()){
+            if (hasDecimal || temp_str_num.empty() || !isdigit(stream.peek())) {
                 throw SyntaxError(row, col + temp_str_num.length());
             }
             hasDecimal = true;
