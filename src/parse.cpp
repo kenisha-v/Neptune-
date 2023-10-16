@@ -15,7 +15,7 @@ Node::~Node(){
 
 
 AST::AST(std::vector<token> tokenized) {
-    curr_ptr = new Node(nullptr, "root");
+    Node* curr_ptr = new Node(nullptr, "root");
     this->head = curr_ptr;
     int i = 0;
     token curr_token = tokenized[i];
@@ -57,7 +57,6 @@ AST::AST(std::vector<token> tokenized) {
 
 
 AST::~AST() {
-    curr_ptr=nullptr;
     delete head;
     //delete curr_ptr;
 }

@@ -23,7 +23,7 @@ class AST{
     public:
         Node* head;
         std::string infix;
-        Node* curr_ptr;
+        //Node* curr_ptr;
         AST(std::vector<token> tokenized);
         ~AST();
         double evaluate(Node* head);
