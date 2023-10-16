@@ -11,48 +11,58 @@ using namespace std;
 
 struct Node {
     std::string text;
-    int position;
-    TokenType type;
     std::vector<Node*> children;
-    // Node* l_child;
-    // Node* r_child;
-    Node();
-    Node(std::string text, int position, TokenType type, std::vector<Node*> children = {});
-    //~Node();
+    Node* parent;
+
+    //constructor and destructor
+    Node(Node* parent, std::string text = "");
+    ~Node();
 };
 
 class AST{
     public:
-        Node* main;
+        Node* head;
         std::string infix;
-        AST();
+        Node* curr_ptr;
+        AST(std::vector<token> tokenized);
         ~AST();
-        void construct(std::vector<token> tokenized);
-        int counter(std::vector<token> tokenized, TokenType type);
-        int syntax_error(std::vector<token> tokenized, Node* main);
-        void print(Node* main);
-        double evaluate(Node* main);
-        Node* add_child(Node* new_main, std::vector<token> tokenized);
+        double evaluate(Node* head);
+        void printAST(Node* head);
     private:
-        int next_position;
-        Node* create(std::vector<token> tokenized, int position = 0);
+        
+
 };
 
-// class ParseError : public std::exception {
-// public:
-//     int row;
-//     int col;
-//     std::string message;
+class ParseError : public std::exception {
+public:
+    int row;
+    int col;
+    token error_token;
+    std::string message;
     
-//     ParseError(int r, int c){
-//         row = r;
-//         col = c;
-//         message = "Unexpected token at line " + std::to_string(row) + ", column " + std::to_string(col) + ".";
-//     }
+    ParseError(int r, int c, token t){
+        row = r;
+        col = c;
+        error_token = t;
+        message = "Unexpected token at line " + std::to_string(row) + " column " + std::to_string(col) + ": " + error_token.text;
+    }
 
-//     const char* what() const noexcept override {
-//         return message.c_str();
-//     }
-// };
+    const char* what() const noexcept override {
+        return message.c_str();
+    }
+};
+
+class EvaluationError : public std::exception {
+public:
+    std::string message;
+    
+    EvaluationError(std::string message){
+        this->message = "Runtime error: " + message;
+    }
+
+    const char* what() const noexcept override {
+        return message.c_str();
+    }
+};
 
 #endif
