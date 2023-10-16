@@ -45,10 +45,10 @@ AST::AST(std::vector<token> tokenized) {
                 if(i == 0){ //no parentheses before operator while starting
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
-                // else if(tokenized[i-1].type != TokenType::LEFT_PAREN){ //no parentheses before operator in general
-                //     throw ParseError(curr_token.row, curr_token.col, curr_token);
-                // }
-                if(tokenized[i+1].type == TokenType::OPERATOR){
+                else if(tokenized[i-1].type != TokenType::LEFT_PAREN){ //no parentheses before operator in general
+                    throw ParseError(curr_token.row, curr_token.col, curr_token);
+                }
+                if(tokenized[i+1].type == TokenType::RIGHT_PAREN){
                     throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
                 }
                 curr_ptr->text = curr_token.text;
