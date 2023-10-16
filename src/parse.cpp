@@ -151,7 +151,7 @@ double AST::evaluate(Node* main){
     return 0;
 }
 
-// int main(){
+int main(){
 //     std::string input;
 //     char ch;
 //     vector<token> tokens;
@@ -176,5 +176,5 @@ double AST::evaluate(Node* main){
 //     std::cout << ast.infix << std::endl;
 //     std::cout << ast.evaluate(ast.main) << std::endl;
 
-//     return 0;
-// }
+     return 0;
+}
