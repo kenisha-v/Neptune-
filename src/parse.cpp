@@ -152,29 +152,29 @@ double AST::evaluate(Node* main){
 }
 
 int main(){
-//     std::string input;
-//     char ch;
-//     vector<token> tokens;
-//     while (std::cin.get(ch)) { //reading input character by character to ensure pre-eof chararcter detection.
-//         input += ch;
-//     }
+    std::string input;
+    char ch;
+    vector<token> tokens;
+    while (std::cin.get(ch)) { //reading input character by character to ensure pre-eof chararcter detection.
+        input += ch;
+    }
 
-//     try {
-//         tokens = tokenize(input);
-//     } catch(const SyntaxError& e) {
-//         std::cout << e.what() << std::endl;
-//         return 1;
-//     }
+    try {
+        tokens = tokenize(input);
+    } catch(const SyntaxError& e) {
+        std::cout << e.what() << std::endl;
+        return 1;
+    }
 
-//     AST ast;
-//     ast.construct(tokens);
-//     int error = ast.syntax_error(tokens, ast.main);
-//     if(error == 2){
-//         return 2;
-//     }
-//     ast.print(ast.main);
-//     std::cout << ast.infix << std::endl;
-//     std::cout << ast.evaluate(ast.main) << std::endl;
+    AST ast;
+    ast.construct(tokens);
+    int error = ast.syntax_error(tokens, ast.main);
+    if(error == 2){
+        return 2;
+    }
+    ast.print(ast.main);
+    std::cout << ast.infix << std::endl;
+    std::cout << ast.evaluate(ast.main) << std::endl;
 
      return 0;
 }
