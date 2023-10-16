@@ -33,9 +33,6 @@ AST::AST(std::vector<token> tokenized) {
                 throw ParseError(curr_token.row, curr_token.col, curr_token);
             }
             if (curr_token.type == TokenType::LEFT_PAREN) {
-                if(tokenized[i+1].type != TokenType::OPERATOR){
-                    throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
-                }
                 Node* tmp_ptr = new Node(curr_ptr, "");
                 curr_ptr->children.push_back(tmp_ptr); //curr_ptr null case
                 curr_ptr = tmp_ptr;
@@ -48,9 +45,9 @@ AST::AST(std::vector<token> tokenized) {
                 if(i == 0){ //no parentheses before operator while starting
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
-                else if(tokenized[i-1].type != TokenType::LEFT_PAREN){ //no parentheses before operator in general
-                    throw ParseError(curr_token.row, curr_token.col, curr_token);
-                }
+                // else if(tokenized[i-1].type != TokenType::LEFT_PAREN){ //no parentheses before operator in general
+                //     throw ParseError(curr_token.row, curr_token.col, curr_token);
+                // }
                 if(tokenized[i+1].type == TokenType::OPERATOR){
                     throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
                 }
