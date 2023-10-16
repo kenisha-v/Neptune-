@@ -38,6 +38,9 @@ AST::AST(std::vector<token> tokenized) {
                 if (curr_ptr->parent == nullptr) {
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
+                if(curr_ptr->children.size() < 2){
+                    throw ParseError(curr_token.row, curr_token.col, curr_token);
+                }
                 curr_ptr = curr_ptr->parent;
             } else if (curr_token.type == TokenType::OPERATOR) {
                 if(tokenized[i+1].type == TokenType::OPERATOR){
