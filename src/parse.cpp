@@ -1,4 +1,4 @@
-
+#include "lib/parse.h"
 
 Node::Node(Node* parent, std::string text) {
     this->text = text;
