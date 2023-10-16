@@ -19,39 +19,44 @@ AST::AST(std::vector<token> tokenized) {
     this->head = curr_ptr;
     int i = 0;
     token curr_token = tokenized[i];
-    if(tokenized.size()<= 1){
-        throw ParseError(curr_token.row, curr_token.col, curr_token);
-    }
-    while (curr_token.type != TokenType::END) {
-        if(curr_ptr->text == "" && curr_token.type != TokenType::OPERATOR){
+    try {
+        if(tokenized.size()<= 1){
             throw ParseError(curr_token.row, curr_token.col, curr_token);
         }
-        if (curr_token.type == TokenType::LEFT_PAREN) {
-            if(tokenized[i+1].type != TokenType::OPERATOR){
-                throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
-            }
-            Node* tmp_ptr = new Node(curr_ptr, "");
-            curr_ptr->children.push_back(tmp_ptr);
-            curr_ptr = tmp_ptr;
-        } else if (curr_token.type == TokenType::RIGHT_PAREN) {
-            if (curr_ptr->parent == nullptr) {
+        while (curr_token.type != TokenType::END) {
+            if(curr_ptr->text == "" && curr_token.type != TokenType::OPERATOR){
                 throw ParseError(curr_token.row, curr_token.col, curr_token);
             }
-            curr_ptr = curr_ptr->parent;
-        } else if (curr_token.type == TokenType::OPERATOR) {
-            if(tokenized[i+1].type == TokenType::OPERATOR){
-                throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
+            if (curr_token.type == TokenType::LEFT_PAREN) {
+                if(tokenized[i+1].type != TokenType::OPERATOR){
+                    throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
+                }
+                Node* tmp_ptr = new Node(curr_ptr, "");
+                curr_ptr->children.push_back(tmp_ptr);
+                curr_ptr = tmp_ptr;
+            } else if (curr_token.type == TokenType::RIGHT_PAREN) {
+                if (curr_ptr->parent == nullptr) {
+                    throw ParseError(curr_token.row, curr_token.col, curr_token);
+                }
+                curr_ptr = curr_ptr->parent;
+            } else if (curr_token.type == TokenType::OPERATOR) {
+                if(tokenized[i+1].type == TokenType::OPERATOR){
+                    throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
+                }
+                curr_ptr->text = curr_token.text;
+            } else if (curr_token.type == TokenType::NUMBER) {
+                curr_ptr->children.push_back(new Node(curr_ptr, curr_token.text));
             }
-            curr_ptr->text = curr_token.text;
-        } else if (curr_token.type == TokenType::NUMBER) {
-            curr_ptr->children.push_back(new Node(curr_ptr, curr_token.text));
+            i++;
+            curr_token = tokenized[i];
         }
-        i++;
-        curr_token = tokenized[i];
-    }
 
-    if (curr_ptr != head || curr_ptr->parent != nullptr) {
-        throw ParseError(curr_token.row, curr_token.col, curr_token);
+        if (curr_ptr != head || curr_ptr->parent != nullptr) {
+            throw ParseError(curr_token.row, curr_token.col, curr_token);
+        }
+    } catch(const ParseError& e){
+        delete head;
+        throw e;
     }
 }
 
