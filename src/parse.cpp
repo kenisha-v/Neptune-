@@ -60,7 +60,7 @@ AST::AST(std::vector<token> tokenized) {
         }
         // checking parenthesis balanced
         if (curr_ptr != head || curr_ptr->parent != nullptr) {
-            throw ParseError(curr_token.row, curr_token.col + curr_token.text.length(), curr_token);
+            throw ParseError(curr_token.row, curr_token.col + curr_token.text.length()-1, curr_token);
         }
     } catch(const ParseError& e){
         delete head;
