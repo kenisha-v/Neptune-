@@ -1,4 +1,5 @@
 #include "lib/parse.h"
+#include "lib/lex.h"
 
 Node::Node() {
     text="";
