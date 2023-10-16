@@ -45,6 +45,12 @@ AST::AST(std::vector<token> tokenized) {
                 }
                 curr_ptr = curr_ptr->parent;
             } else if (curr_token.type == TokenType::OPERATOR) {
+                if(i == 0){
+                    throw ParseError(curr_token.row, curr_token.col, curr_token);
+                }
+                else if(tokenized[i-1].type != TokenType::LEFT_PAREN){
+                    throw ParseError(curr_token.row, curr_token.col, curr_token);
+                }
                 if(tokenized[i+1].type == TokenType::OPERATOR){
                     throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
                 }
