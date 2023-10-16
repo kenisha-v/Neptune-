@@ -70,6 +70,7 @@ AST::AST(std::vector<token> tokenized) {
 
 // Destructor to clean up memory
 AST::~AST() {
+    delete curr_ptr;
     delete head;
 }
 
