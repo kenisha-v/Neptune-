@@ -2,6 +2,7 @@
 
 using namespace std;
 
+
 void printTokens(const std::vector<token>& tokens) {
     
     for(const token& token : tokens) {
