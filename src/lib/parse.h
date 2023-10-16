@@ -13,10 +13,12 @@ struct Node {
     std::string text;
     int position;
     TokenType type;
-    Node* l_child;
-    Node* r_child;
+    std::vector<Node*> children;
+    // Node* l_child;
+    // Node* r_child;
     Node();
-    Node(std::string text, int position, TokenType type, Node* l_child = nullptr, Node* r_child = nullptr);
+    Node(std::string text, int position, TokenType type, std::vector<Node*> children = {});
+    //~Node();
 };
 
 class AST{
@@ -24,11 +26,13 @@ class AST{
         Node* main;
         std::string infix;
         AST();
+        ~AST();
         void construct(std::vector<token> tokenized);
         int counter(std::vector<token> tokenized, TokenType type);
         int syntax_error(std::vector<token> tokenized, Node* main);
         void print(Node* main);
         double evaluate(Node* main);
+        Node* add_child(Node* new_main, std::vector<token> tokenized);
     private:
         int next_position;
         Node* create(std::vector<token> tokenized, int position = 0);
