@@ -75,17 +75,27 @@ void AST::printAST(Node* node) {
         for (size_t index = 0; index < node->children.size(); index++) {
             printAST(node->children.at(index));
             if(index != node->children.size() - 1){
-                std::cout << " " << node->text << " ";
+                if(isdigit(node->text.at(0))){
+                    std::cout << " " << stod(node->text) << " ";
+                }
+                else{
+                    std::cout << " " << node->text << " ";
+                }
             }
         }
         std::cout << ")";
     } else {
-        std::cout << node->text;
+        if(isdigit(node->text.at(0))){
+            std::cout << stod(node->text);
+        }
+        else{
+            std::cout << node->text;                
+        }
     }
 
 }
 
- double AST::evaluate(Node* node) {
+double AST::evaluate(Node* node) {
     if (node == nullptr) {
         throw EvaluationError("Null node encountered");
     }
