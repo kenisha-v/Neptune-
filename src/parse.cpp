@@ -34,6 +34,9 @@ AST::AST(std::vector<token> tokenized) {
             }
             curr_ptr = curr_ptr->parent;
         } else if (curr_token.type == TokenType::OPERATOR) {
+            if(tokenized[i+1].type == TokenType::OPERATOR){
+                throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
+            }
             curr_ptr->text = curr_token.text;
         } else if (curr_token.type == TokenType::NUMBER) {
             curr_ptr->children.push_back(new Node(curr_ptr, curr_token.text));
