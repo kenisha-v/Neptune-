@@ -130,8 +130,10 @@ int main(){
 
     try {
         AST ast(tokenize(input));
-        ast.printAST(ast.head->children[0]);
-        std::cout << "\n" << ast.evaluate(ast.head->children[0]) << std::endl;
+        if(!ast.head->children.empty()){
+            ast.printAST(ast.head->children[0]);
+            std::cout << "\n" << ast.evaluate(ast.head->children[0]) << std::endl;
+        }
     } catch(const SyntaxError& e) {
         std::cout << e.what() << std::endl;
         return 1;
