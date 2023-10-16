@@ -19,11 +19,16 @@ AST::AST(std::vector<token> tokenized) {
     this->head = curr_ptr;
     int i = 0;
     token curr_token = tokenized[i];
+    bool started = false;
     try {
         if(tokenized.size()<= 1){
             throw ParseError(curr_token.row, curr_token.col, curr_token);
         }
         while (curr_token.type != TokenType::END) {
+            if(curr_ptr == head && curr_token.type != TokenType::END && started){
+                throw ParseError(curr_token.row, curr_token.col, curr_token);
+            }
+            started = true;
             if(curr_ptr->text == "" && curr_token.type != TokenType::OPERATOR){
                 throw ParseError(curr_token.row, curr_token.col, curr_token);
             }
@@ -32,13 +37,10 @@ AST::AST(std::vector<token> tokenized) {
                     throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
                 }
                 Node* tmp_ptr = new Node(curr_ptr, "");
-                curr_ptr->children.push_back(tmp_ptr);
+                curr_ptr->children.push_back(tmp_ptr); //curr_ptr null case
                 curr_ptr = tmp_ptr;
             } else if (curr_token.type == TokenType::RIGHT_PAREN) {
                 if (curr_ptr->parent == nullptr) {
-                    throw ParseError(curr_token.row, curr_token.col, curr_token);
-                }
-                if(curr_ptr->children.size() < 2){
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
                 curr_ptr = curr_ptr->parent;
@@ -53,7 +55,7 @@ AST::AST(std::vector<token> tokenized) {
             i++;
             curr_token = tokenized[i];
         }
-
+        // checking parenthesis balanced
         if (curr_ptr != head || curr_ptr->parent != nullptr) {
             throw ParseError(curr_token.row, curr_token.col, curr_token);
         }
@@ -167,9 +169,7 @@ int main(){
             std::cout << "\n" << ast.evaluate(ast.head->children[0]) << std::endl;
         }
         else{
-            // std::cout << "Unexpected token at line 1 column 1: END" << std::endl;
             ast.printAST(ast.head);
-            return 2;
         }
     } catch(const SyntaxError& e) {
         std::cout << e.what() << std::endl;
