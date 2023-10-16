@@ -1,13 +1,6 @@
 #include "lib/lex.h"
-#include <vector>
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <iomanip>
-#include <algorithm>
 
 using namespace std;
-
 
 
 void printTokens(const std::vector<token>& tokens) {
@@ -21,7 +14,7 @@ int main() {
     std::string input;
     char ch;
     
-    while (std::cin.get(ch)) { //reading input character by character to ensure pre-eof chararcter detection.
+    while (std::cin.get(ch)) {
         input += ch;
     }
 

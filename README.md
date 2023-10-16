@@ -39,4 +39,3 @@ It ensures that only valid characters are given to the parser in an easily reada
 ## PARSER Documentation
 
 _NOTE TO PARSER TEAM: Please include your README documentation here._
-

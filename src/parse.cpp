@@ -1,5 +1,4 @@
-#include "lib/parse.h"
-#include "lib/lex.h"
+
 
 Node::Node(Node* parent, std::string text) {
     this->text = text;
@@ -187,3 +186,4 @@ int main(){
 
     return 0;
 }
+
