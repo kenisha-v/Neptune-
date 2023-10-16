@@ -73,12 +73,6 @@ AST::~AST() {
     delete head;
 }
 
-
-
-AST::~AST() {
-    delete head;
-}
-
 void AST::printAST(Node* node) {
     if (node == nullptr) {
         return;
