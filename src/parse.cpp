@@ -8,9 +8,10 @@ Node::Node(Node* parent, std::string text) {
 }
 
 Node::~Node(){
-    for(auto i: children){
-        delete i;
+    for(auto child: children){
+        delete child;
     }
+    delete this;
 }
 
 
@@ -19,7 +20,9 @@ AST::AST(std::vector<token> tokenized) {
     this->head = curr_ptr;
     int i = 0;
     token curr_token = tokenized[i];
-    
+    if(tokenized.size()<= 1){
+        throw ParseError(curr_token.row, curr_token.col, curr_token);
+    }
     while (curr_token.type != TokenType::END) {
         if(curr_ptr->text == "" && curr_token.type != TokenType::OPERATOR){
             throw ParseError(curr_token.row, curr_token.col, curr_token);
@@ -146,7 +149,8 @@ int main(){
             std::cout << "\n" << ast.evaluate(ast.head->children[0]) << std::endl;
         }
         else{
-            std::cout << "Unexpected token at line 1 column 1: END" << std::endl;
+            // std::cout << "Unexpected token at line 1 column 1: END" << std::endl;
+            ast.printAST(ast.head);
             return 2;
         }
     } catch(const SyntaxError& e) {
