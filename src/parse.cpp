@@ -21,6 +21,9 @@ AST::AST(std::vector<token> tokenized) {
     token curr_token = tokenized[i];
     
     while (curr_token.type != TokenType::END) {
+        if(curr_ptr->text == "" && curr_token.type != TokenType::OPERATOR){
+            throw ParseError(curr_token.row, curr_token.col, curr_token);
+        }
         if (curr_token.type == TokenType::LEFT_PAREN) {
             if(tokenized[i+1].type != TokenType::OPERATOR){
                 throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
@@ -55,7 +58,6 @@ AST::~AST() {
     delete head;
 }
 
-//remove one extra parenthesis by converting to string
 void AST::printAST(Node* node) {
     if (node == nullptr) {
         return;
@@ -83,6 +85,9 @@ void AST::printAST(Node* node) {
     if (!node->children.empty()) {
         if (node->text == "+") {
             double result = 0.0;
+            if (node->children.size() == 0) {
+                throw EvaluationError("Invalid number of operands for operator: " + node->text);
+            }
             for (Node* child : node->children) {
                 result += evaluate(child);
             }
@@ -98,6 +103,9 @@ void AST::printAST(Node* node) {
             return result;
         } else if (node->text == "*") {
             double result = 1.0;
+            if (node->children.size() == 0) {
+                throw EvaluationError("Invalid number of operands for operator: " + node->text);
+            }
             for (Node* child : node->children) {
                 result *= evaluate(child);
             }
@@ -136,6 +144,9 @@ int main(){
         if(!ast.head->children.empty()){
             ast.printAST(ast.head->children[0]);
             std::cout << "\n" << ast.evaluate(ast.head->children[0]) << std::endl;
+        }
+        else{
+            return 2;
         }
     } catch(const SyntaxError& e) {
         std::cout << e.what() << std::endl;
