@@ -28,7 +28,6 @@ class AST{
         ~AST();
         double evaluate(Node* head);
         void printAST(Node* head);
-        void debugPrintAST(Node* node, int level = 0);
     private:
         
 
