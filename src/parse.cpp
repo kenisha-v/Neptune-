@@ -66,14 +66,16 @@ AST::AST(std::vector<token> tokenized) {
                 curr_ptr->text = curr_token.text;
             } 
             else if (curr_token.type == TokenType::NUMBER) {
-                curr_ptr->children.push_back(new Node(curr_ptr, curr_token.text));
+                if(curr_ptr){
+                    curr_ptr->children.push_back(new Node(curr_ptr, curr_token.text));
+                }
             }
             i++;
             curr_token = tokenized[i];
         }
         // checking parenthesis balanced
         if (curr_ptr != nullptr) {
-            throw ParseError(curr_token.row, curr_token.col + curr_token.text.length()-1, curr_token);
+            throw ParseError(tokenized[i].row, tokenized[i].col, curr_token);
         }
     } catch(const ParseError& e){
         delete head;
