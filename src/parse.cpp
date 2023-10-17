@@ -12,35 +12,48 @@ Node::~Node(){
     }
 }
 
-
+//constructor
 AST::AST(std::vector<token> tokenized) {
-    Node* curr_ptr = new Node(nullptr, "root");
+    Node* curr_ptr = nullptr;
     this->head = curr_ptr;
     int i = 0;
     token curr_token = tokenized[i];
     bool started = false;
     try {
+        //check if tokenize only has end token
         if(tokenized.size()<= 1){
             throw ParseError(curr_token.row, curr_token.col, curr_token);
         }
+        //loop to traverse through each token and create tree
         while (curr_token.type != TokenType::END) {
-            if(curr_ptr == head && curr_token.type != TokenType::END && started){
+            //if statement to check that there are no more tokens after all "(" have been closed by ")"
+            if(curr_ptr == nullptr && curr_token.type != TokenType::END && started){
                 throw ParseError(curr_token.row, curr_token.col, curr_token);
             }
+            //above condition would always be true without this bool. declares that ast construction has started
             started = true;
-            if(curr_ptr->text == "" && curr_token.type != TokenType::OPERATOR){
+            //makes sure that left parentheses is only followed by an operator
+            if(curr_ptr != nullptr && curr_ptr->text == "" && curr_token.type != TokenType::OPERATOR){
                 throw ParseError(curr_token.row, curr_token.col, curr_token);
             }
             if (curr_token.type == TokenType::LEFT_PAREN) {
                 Node* tmp_ptr = new Node(curr_ptr, "");
-                curr_ptr->children.push_back(tmp_ptr); //curr_ptr null case
+                if(curr_ptr != nullptr){
+                    curr_ptr->children.push_back(tmp_ptr);
+                }
+                else{
+                    head = tmp_ptr;
+                }
                 curr_ptr = tmp_ptr;
-            } else if (curr_token.type == TokenType::RIGHT_PAREN) {
-                if (curr_ptr->parent == nullptr) {
+            } 
+            else if (curr_token.type == TokenType::RIGHT_PAREN) {
+                //extra ")" after all parentheses have been closed
+                if (curr_ptr == nullptr) {
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
                 curr_ptr = curr_ptr->parent;
-            } else if (curr_token.type == TokenType::OPERATOR) {
+            } 
+            else if (curr_token.type == TokenType::OPERATOR) {
                 if(i == 0){ //no parentheses before operator while starting
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
@@ -51,14 +64,15 @@ AST::AST(std::vector<token> tokenized) {
                     throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
                 }
                 curr_ptr->text = curr_token.text;
-            } else if (curr_token.type == TokenType::NUMBER) {
+            } 
+            else if (curr_token.type == TokenType::NUMBER) {
                 curr_ptr->children.push_back(new Node(curr_ptr, curr_token.text));
             }
             i++;
             curr_token = tokenized[i];
         }
         // checking parenthesis balanced
-        if (curr_ptr != head || curr_ptr->parent != nullptr) {
+        if (curr_ptr != nullptr) {
             throw ParseError(curr_token.row, curr_token.col + curr_token.text.length()-1, curr_token);
         }
     } catch(const ParseError& e){
