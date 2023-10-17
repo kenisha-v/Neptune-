@@ -12,6 +12,17 @@ Node::~Node(){
     }
 }
 
+void AST::debugPrintAST(Node* node, int level) {
+    if (node == nullptr) {
+        std::cout << std::string(level, ' ') << "NULL NODE" << std::endl;
+        return;
+    }
+    std::cout << std::string(level, ' ') << node->text << std::endl;
+    for (Node* child : node->children) {
+        debugPrintAST(child, level + 2);
+    }
+}
+
 //constructor
 AST::AST(std::vector<token> tokenized) {
     Node* curr_ptr = nullptr;
@@ -75,7 +86,7 @@ AST::AST(std::vector<token> tokenized) {
         }
         // checking parenthesis balanced
         if (curr_ptr != nullptr) {
-            throw ParseError(tokenized[i].row, tokenized[i].col - 1, curr_token);
+            throw ParseError(curr_token.row, curr_token.col + curr_token.text.length()-1, curr_token);
         }
     } catch(const ParseError& e){
         delete head;
@@ -182,6 +193,10 @@ int main(){
 
     try {
         AST ast(tokenize(input));
+        std::cout << "DEBUG: Constructed AST:" << std::endl;
+        ast.debugPrintAST(ast.head);
+        std::cout << "DEBUG: End of AST" << std::endl << std::endl;
+
         ast.printAST(ast.head);
         std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
     } catch(const SyntaxError& e) {
