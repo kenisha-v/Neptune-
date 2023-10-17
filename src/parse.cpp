@@ -75,7 +75,7 @@ AST::AST(std::vector<token> tokenized) {
         }
         // checking parenthesis balanced
         if (curr_ptr != nullptr) {
-            throw ParseError(tokenized[i].row, tokenized[i].col, curr_token);
+            throw ParseError(tokenized[i].row, tokenized[i].col - 1, curr_token);
         }
     } catch(const ParseError& e){
         delete head;
