@@ -15,7 +15,7 @@ Node::~Node(){
 //constructor
 AST::AST(std::vector<token> tokenized) {
     Node* curr_ptr = nullptr;
-    this->head = curr_ptr;
+    this->head = nullptr;
     int i = 0;
     token curr_token = tokenized[i];
     bool started = false;
@@ -180,13 +180,8 @@ int main(){
 
     try {
         AST ast(tokenize(input));
-        if(!ast.head->children.empty()){
-            ast.printAST(ast.head->children[0]);
-            std::cout << "\n" << ast.evaluate(ast.head->children[0]) << std::endl;
-        }
-        else{
-            ast.printAST(ast.head);
-        }
+        ast.printAST(ast.head);
+        std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
     } catch(const SyntaxError& e) {
         std::cout << e.what() << std::endl;
         return 1;
