@@ -12,17 +12,6 @@ Node::~Node(){
     }
 }
 
-void AST::debugPrintAST(Node* node, int level) {
-    if (node == nullptr) {
-        std::cout << std::string(level, ' ') << "NULL NODE" << std::endl;
-        return;
-    }
-    std::cout << std::string(level, ' ') << node->text << std::endl;
-    for (Node* child : node->children) {
-        debugPrintAST(child, level + 2);
-    }
-}
-
 //constructor
 AST::AST(std::vector<token> tokenized) {
     Node* curr_ptr = nullptr;
@@ -30,6 +19,7 @@ AST::AST(std::vector<token> tokenized) {
     int i = 0;
     token curr_token = tokenized[i];
     bool started = false;
+    //try block to deal with memory leaks when constructor encounters a parse error
     try {
         //check if tokenize only has end token
         if(tokenized.size()<= 1){
@@ -47,6 +37,7 @@ AST::AST(std::vector<token> tokenized) {
             if(curr_ptr != nullptr && curr_ptr->text == "" && curr_token.type != TokenType::OPERATOR){
                 throw ParseError(curr_token.row, curr_token.col, curr_token);
             }
+            //if token is left parentheses, create an empty node and manage children and parent connections (does not insert text in node yet as that requires the operator which we get in the next iteration)
             if (curr_token.type == TokenType::LEFT_PAREN) {
                 Node* tmp_ptr = new Node(curr_ptr, "");
                 if(curr_ptr != nullptr){
@@ -56,26 +47,32 @@ AST::AST(std::vector<token> tokenized) {
                     head = tmp_ptr;
                 }
                 curr_ptr = tmp_ptr;
-            } 
+            }
+            //if token is right parentheses, shifts current pointer to parent which helps check that number of "(" equals ")"
             else if (curr_token.type == TokenType::RIGHT_PAREN) {
                 //extra ")" after all parentheses have been closed
                 if (curr_ptr == nullptr) {
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
                 curr_ptr = curr_ptr->parent;
-            } 
+            }
+            //if token is operator adds it as a text to the empty node we created during left parentheses
             else if (curr_token.type == TokenType::OPERATOR) {
-                if(i == 0){ //no parentheses before operator while starting
+                //no parentheses before operator (start case as i-1 becomes negative)
+                if(i == 0){
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
-                else if(tokenized[i-1].type != TokenType::LEFT_PAREN){ //no parentheses before operator in general
+                //no parentheses before operator in general
+                else if(tokenized[i-1].type != TokenType::LEFT_PAREN){
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
+                //operator cannot be followed by right parentheses
                 if(tokenized[i+1].type == TokenType::RIGHT_PAREN){
                     throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
                 }
                 curr_ptr->text = curr_token.text;
             } 
+            //if token is a number add it as a child to current node. if it is the only node point head to it
             else if (curr_token.type == TokenType::NUMBER) {
                 if(curr_ptr){
                     curr_ptr->children.push_back(new Node(curr_ptr, curr_token.text));
@@ -100,7 +97,6 @@ AST::AST(std::vector<token> tokenized) {
 
 AST::~AST() {
     delete head;
-    //delete curr_ptr;
 }
 
 void AST::printAST(Node* node) {
@@ -112,6 +108,7 @@ void AST::printAST(Node* node) {
         for (size_t index = 0; index < node->children.size(); index++) {
             printAST(node->children.at(index));
             if(index != node->children.size() - 1){
+                //converting string to double if text is a digit to deal with formatting issues
                 if(isdigit(node->text.at(0))){
                     std::cout << " " << stod(node->text) << " ";
                 }
@@ -122,6 +119,7 @@ void AST::printAST(Node* node) {
         }
         std::cout << ")";
     } else {
+        //converting string to double if text is a digit to deal with formatting issues
         if(isdigit(node->text.at(0))){
             std::cout << stod(node->text);
         }
