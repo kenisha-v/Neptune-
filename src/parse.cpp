@@ -12,53 +12,80 @@ Node::~Node(){
     }
 }
 
-
+//constructor
 AST::AST(std::vector<token> tokenized) {
-    Node* curr_ptr = new Node(nullptr, "root");
-    this->head = curr_ptr;
+    Node* curr_ptr = nullptr;
+    this->head = nullptr;
     int i = 0;
     token curr_token = tokenized[i];
     bool started = false;
+    //try block to deal with memory leaks when constructor encounters a parse error
     try {
+        //check if tokenize only has end token
         if(tokenized.size()<= 1){
             throw ParseError(curr_token.row, curr_token.col, curr_token);
         }
+        //loop to traverse through each token and create tree
         while (curr_token.type != TokenType::END) {
-            if(curr_ptr == head && curr_token.type != TokenType::END && started){
+            //if statement to check that there are no more tokens after all "(" have been closed by ")"
+            if(curr_ptr == nullptr && curr_token.type != TokenType::END && started){
                 throw ParseError(curr_token.row, curr_token.col, curr_token);
             }
+            //above condition would always be true without this bool. declares that ast construction has started
             started = true;
-            if(curr_ptr->text == "" && curr_token.type != TokenType::OPERATOR){
+            //makes sure that left parentheses is only followed by an operator
+            if(curr_ptr != nullptr && curr_ptr->text == "" && curr_token.type != TokenType::OPERATOR){
                 throw ParseError(curr_token.row, curr_token.col, curr_token);
             }
+            //if token is left parentheses, create an empty node and manage children and parent connections (does not insert text in node yet as that requires the operator which we get in the next iteration)
             if (curr_token.type == TokenType::LEFT_PAREN) {
                 Node* tmp_ptr = new Node(curr_ptr, "");
-                curr_ptr->children.push_back(tmp_ptr); //curr_ptr null case
+                if(curr_ptr != nullptr){
+                    curr_ptr->children.push_back(tmp_ptr);
+                }
+                else{
+                    head = tmp_ptr;
+                }
                 curr_ptr = tmp_ptr;
-            } else if (curr_token.type == TokenType::RIGHT_PAREN) {
-                if (curr_ptr->parent == nullptr) {
+            }
+            //if token is right parentheses, shifts current pointer to parent which helps check that number of "(" equals ")"
+            else if (curr_token.type == TokenType::RIGHT_PAREN) {
+                //extra ")" after all parentheses have been closed
+                if (curr_ptr == nullptr) {
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
                 curr_ptr = curr_ptr->parent;
-            } else if (curr_token.type == TokenType::OPERATOR) {
-                if(i == 0){ //no parentheses before operator while starting
+            }
+            //if token is operator adds it as a text to the empty node we created during left parentheses
+            else if (curr_token.type == TokenType::OPERATOR) {
+                //no parentheses before operator (start case as i-1 becomes negative)
+                if(i == 0){
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
-                else if(tokenized[i-1].type != TokenType::LEFT_PAREN){ //no parentheses before operator in general
+                //no parentheses before operator in general
+                else if(tokenized[i-1].type != TokenType::LEFT_PAREN){
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
+                //operator cannot be followed by right parentheses
                 if(tokenized[i+1].type == TokenType::RIGHT_PAREN){
                     throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
                 }
                 curr_ptr->text = curr_token.text;
-            } else if (curr_token.type == TokenType::NUMBER) {
-                curr_ptr->children.push_back(new Node(curr_ptr, curr_token.text));
+            } 
+            //if token is a number add it as a child to current node. if it is the only node point head to it
+            else if (curr_token.type == TokenType::NUMBER) {
+                if(curr_ptr){
+                    curr_ptr->children.push_back(new Node(curr_ptr, curr_token.text));
+                } 
+                else if (head == nullptr) {
+                    head = new Node(nullptr, curr_token.text);
+                }
             }
             i++;
             curr_token = tokenized[i];
         }
         // checking parenthesis balanced
-        if (curr_ptr != head || curr_ptr->parent != nullptr) {
+        if (curr_ptr != nullptr) {
             throw ParseError(curr_token.row, curr_token.col + curr_token.text.length()-1, curr_token);
         }
     } catch(const ParseError& e){
@@ -70,7 +97,6 @@ AST::AST(std::vector<token> tokenized) {
 
 AST::~AST() {
     delete head;
-    //delete curr_ptr;
 }
 
 void AST::printAST(Node* node) {
@@ -82,6 +108,7 @@ void AST::printAST(Node* node) {
         for (size_t index = 0; index < node->children.size(); index++) {
             printAST(node->children.at(index));
             if(index != node->children.size() - 1){
+                //converting string to double if text is a digit to deal with formatting issues
                 if(isdigit(node->text.at(0))){
                     std::cout << " " << stod(node->text) << " ";
                 }
@@ -92,6 +119,7 @@ void AST::printAST(Node* node) {
         }
         std::cout << ")";
     } else {
+        //converting string to double if text is a digit to deal with formatting issues
         if(isdigit(node->text.at(0))){
             std::cout << stod(node->text);
         }
@@ -166,13 +194,8 @@ int main(){
 
     try {
         AST ast(tokenize(input));
-        if(!ast.head->children.empty()){
-            ast.printAST(ast.head->children[0]);
-            std::cout << "\n" << ast.evaluate(ast.head->children[0]) << std::endl;
-        }
-        else{
-            ast.printAST(ast.head);
-        }
+        ast.printAST(ast.head);
+        std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
     } catch(const SyntaxError& e) {
         std::cout << e.what() << std::endl;
         return 1;
