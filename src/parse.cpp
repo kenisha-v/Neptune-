@@ -1,12 +1,5 @@
 #include "lib/parse.h"
 
-void printTokens(const std::vector<token>& tokens) {
-    
-    for(const token& token : tokens) {
-        std::cout << std::setw(4) << std::right << token.row << "   " << std::setw(2) << std::right << token.col << "  " << token.text << std::endl;
-    }
-}
-
 Node::Node(Node* parent, std::string text) {
     this->text = text;
     this->parent = parent;
@@ -86,6 +79,9 @@ AST::AST(std::vector<token> tokenized) {
             else if (curr_token.type == TokenType::NUMBER) {
                 if(curr_ptr){
                     curr_ptr->children.push_back(new Node(curr_ptr, curr_token.text));
+                } 
+                else if (head == nullptr) {
+                    head = new Node(nullptr, curr_token.text);
                 }
             }
             i++;
@@ -200,10 +196,6 @@ int main(){
 
     try {
         AST ast(tokenize(input));
-        std::cout << "DEBUG: Constructed AST:" << std::endl;
-        printTokens(tokenize(input));
-        std::cout << "DEBUG: End of AST" << std::endl << std::endl;
-
         ast.printAST(ast.head);
         std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
     } catch(const SyntaxError& e) {
