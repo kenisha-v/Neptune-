@@ -11,20 +11,34 @@ void printTokens(const std::vector<token>& tokens) {
 }
 
 int main() {
-    std::string input;
-    char ch;
+    std::string line;
+    int row = 1;
+    while(std::getline(std::cin, line)) {
+        try {
+            auto tokens = tokenize(line, row);
+            printTokens(tokens);
+        } catch(const SyntaxError& e) {
+            std::cout << e.what() << std::endl;
+            return 1;
+        }
+        ++row;
+    }
     
-    while (std::cin.get(ch)) {
-        input += ch;
-    }
 
-    try {
-        auto tokens = tokenize(input);
-        printTokens(tokens);
-    } catch(const SyntaxError& e) {
-        std::cout << e.what() << std::endl;
-        return 1;
-    }
+    //std::string input;
+    //char ch;
+
+    // while (std::cin.get(ch)) {
+    //     input += ch;
+    // }
+
+    // try {
+    //     auto tokens = tokenize(input);
+    //     printTokens(tokens);
+    // } catch(const SyntaxError& e) {
+    //     std::cout << e.what() << std::endl;
+    //     return 1;
+    // }
     
     return 0;
 }

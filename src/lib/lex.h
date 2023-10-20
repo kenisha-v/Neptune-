@@ -17,7 +17,8 @@ enum class TokenType {
     OPERATOR,
     LEFT_PAREN,
     RIGHT_PAREN,
-    END
+    END,
+    VARIABLES
 };
 
 struct token {
@@ -46,7 +47,7 @@ public:
 
 TokenType getType(char in);
 token getToken(int r, int c, string t, TokenType p);
-std::vector<token> tokenize(const std::string& input);
+std::vector<token> tokenize(const std::string& input, int row);
 
 
 // This function will "THROW SyntaxError" on encountering invalid characters.
