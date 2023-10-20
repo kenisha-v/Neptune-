@@ -47,7 +47,7 @@ public:
 
 TokenType getType(char in);
 token getToken(int r, int c, string t, TokenType p);
-std::vector<token> tokenize(const std::string& input, int row, int col);
+std::vector<token> tokenize(const std::string& input);
 
 
 // This function will "THROW SyntaxError" on encountering invalid characters.

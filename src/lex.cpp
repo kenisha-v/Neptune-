@@ -14,18 +14,18 @@ void printTokens(const std::vector<token>& tokens) {
 
 int main() {
     std::string line;
-    int row = 1;
-    int col = 1;
+    std::string input;
     while(std::getline(std::cin, line)) {
         std::cout << "INPUT: " << line << std::endl;
-        try {
-            auto tokens = tokenize(line, row, col);
-            printTokens(tokens);
-        } catch(const SyntaxError& e) {
-            std::cout << e.what() << std::endl;
-            return 1;
-        }
-        ++row;
+        input += line;
+        input += "\n";
+    }
+    try {
+        auto tokens = tokenize(input);
+        printTokens(tokens);
+    } catch(const SyntaxError& e) {
+        std::cout << e.what() << std::endl;
+        return 1;
     }
     
 

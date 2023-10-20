@@ -190,7 +190,7 @@ int main(){
     int col = 1;
     while(std::getline(std::cin, line)) {
         try {
-            AST ast(tokenize(line, row, col));
+            AST ast(tokenize(line));
             ast.printAST(ast.head);
             std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
         } catch(const SyntaxError& e) {

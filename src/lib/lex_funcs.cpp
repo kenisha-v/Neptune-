@@ -23,12 +23,12 @@ token getToken(int r, int c, string t, TokenType p) {
     return tk;
 }
 
-std::vector<token> tokenize(const std::string& input, int row, int col) {
+std::vector<token> tokenize(const std::string& input) {
     vector<token> all_tokens;
     std::istringstream stream(input);
     char ar_op[9] = {'=','+', '-', '*', '/', '(', ')', ' ', '\t'};
-    //int row = 1;
-    col = 1;
+    int row = 1;
+    int col = 1;
     std::string temp_str_num = "";
     char in_char;
     bool hasDecimal = false; // Track if current number being processed has a decimal
