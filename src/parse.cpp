@@ -187,9 +187,10 @@ double AST::evaluate(Node* node) {
 int main(){
     std::string line;
     int row = 1;
+    int col = 1;
     while(std::getline(std::cin, line)) {
         try {
-            AST ast(tokenize(line, row));
+            AST ast(tokenize(line, row, col));
             ast.printAST(ast.head);
             std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
         } catch(const SyntaxError& e) {
