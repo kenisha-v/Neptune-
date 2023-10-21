@@ -6,9 +6,7 @@ using namespace std;
 void printTokens(const std::vector<token>& tokens) {
     
     for(const token& token : tokens) {
-        if (token.text != "END") {
-            std::cout << std::setw(4) << std::right << token.row << "   " << std::setw(2) << std::right << token.col << "  " << token.text << std::endl;
-        }
+        std::cout << std::setw(4) << std::right << token.row << "   " << std::setw(2) << std::right << token.col << "  " << token.text << std::endl;
     }
 }
 
@@ -16,7 +14,6 @@ int main() {
     std::string line;
     std::string input;
     while(std::getline(std::cin, line)) {
-        std::cout << "INPUT: " << line << std::endl;
         input += line;
         input += "\n";
     }

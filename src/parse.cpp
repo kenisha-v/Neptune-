@@ -186,24 +186,24 @@ double AST::evaluate(Node* node) {
 
 int main(){
     std::string line;
-    int row = 1;
-    int col = 1;
+    std::string input;
     while(std::getline(std::cin, line)) {
-        try {
-            AST ast(tokenize(line));
-            ast.printAST(ast.head);
-            std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
-        } catch(const SyntaxError& e) {
-            std::cout << e.what() << std::endl;
-            return 1;
-        } catch(const ParseError& e){
-            std::cout << e.what() << std::endl;
-            return 2;
-        } catch(const EvaluationError& e){
-            std::cout << e.what() << std::endl;
-            return 3;
-        }
-        ++row;
+        input += line;
+        input += "\n";
+    }
+    try {
+        AST ast(tokenize(input));
+        ast.printAST(ast.head);
+        std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
+    } catch(const SyntaxError& e) {
+        std::cout << e.what() << std::endl;
+        return 1;
+    } catch(const ParseError& e){
+        std::cout << e.what() << std::endl;
+        return 2;
+    } catch(const EvaluationError& e){
+        std::cout << e.what() << std::endl;
+        return 3;
     }
 
     return 0;
