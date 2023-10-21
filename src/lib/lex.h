@@ -17,7 +17,8 @@ enum class TokenType {
     OPERATOR,
     LEFT_PAREN,
     RIGHT_PAREN,
-    END
+    END,
+    VARIABLES
 };
 
 struct token {

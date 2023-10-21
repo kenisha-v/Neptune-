@@ -188,10 +188,15 @@ int main(){
     std::string input;
     char ch;
 
-    while (std::cin.get(ch)) { //reading input character by character to ensure pre-eof chararcter detection.
+    while (std::cin.get(ch)) {
         input += ch;
     }
-
+    // std::string line;
+    // std::string input;
+    // while(std::getline(std::cin, line)) {
+    //     input += line;
+    //     input += "\n";
+    // }
     try {
         AST ast(tokenize(input));
         ast.printAST(ast.head);
