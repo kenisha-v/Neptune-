@@ -11,12 +11,19 @@ void printTokens(const std::vector<token>& tokens) {
 }
 
 int main() {
-    std::string line;
     std::string input;
-    while(std::getline(std::cin, line)) {
-        input += line;
-        input += "\n";
+    char ch;
+
+    while (std::cin.get(ch)) {
+        input += ch;
     }
+
+    // std::string line;
+    // std::string input;
+    // while(std::getline(std::cin, line)) {
+    //     input += line;
+    //     input += "\n";
+    // }
     try {
         auto tokens = tokenize(input);
         printTokens(tokens);
