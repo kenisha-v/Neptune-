@@ -274,7 +274,9 @@ void printTokens(const std::vector<token>& tokens) {
 int main(){
     std::string input;
     std::map<std::string, double> symbolTable;
-    //char ch;
+    char ch;
+    std::vector<std::string> lines;
+    std::vector<char> para;
 
     // while (std::cin.get(ch)) {
     //     input += ch;
@@ -292,9 +294,30 @@ int main(){
     is part of the input that the AST constructor will get 
     */
 
-    while(std::getline(std::cin, input)) {
+   while (std::cin.get(ch)) {
+    if (cin.eof()) {
+        lines.push_back(input);
+        input = "";
+        break;
+    }
+    else if (ch == '(') {
+        para.push_back(ch);
+    }
+    else if (ch == ')') {
+        para.pop_back();
+        if (para.size() == 0) {
+            input += ch;
+            lines.push_back(input);
+            input = "";
+            continue;
+        }
+    }
+    input += ch;
+   }
+
+    for (size_t i = 0; i < lines.size(); ++i) {
         try {
-            AST ast(tokenize(input));
+            AST ast(tokenize(lines[i]));
             ast.updateVariables(symbolTable);
             ast.printAST(ast.head);
             std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
