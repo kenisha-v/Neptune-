@@ -286,6 +286,10 @@ int main(){
 
    while (std::cin.get(ch)) {
     if (ch == '(') {
+        if (!input.empty() && para.empty()) {
+            lines.push_back(input);
+            input = "";
+        }
         para.push_back(ch);
     }
     else if (ch == ')') {
