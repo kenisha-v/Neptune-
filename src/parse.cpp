@@ -317,7 +317,8 @@ int main(){
             return 1;
         } catch(const ParseError& e){
             std::cout << e.what() << std::endl;
-            if(e.what() == "Unexpected token at line 1 column 5: END"){
+            std::string yaaaaa = e.what();
+            if(yaaaaa == "Unexpected token at line 1 column 5: END"){
                 printTokens(tokenize(input));
             }
             return 2;
