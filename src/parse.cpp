@@ -314,7 +314,8 @@ int main(){
             ast.updateVariables(symbolTable);
             ast.printAST(ast.head);
             std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
-            if (ast.evaluate(ast.head) == 0.0681818) {
+            double dub = ast.evaluate(ast.head);
+            if (std::abs(dub - 0.0681818) < 1e-6) {
                 printTokens(tokenize(input));
             }
             symbolTable = ast.getVariables();
