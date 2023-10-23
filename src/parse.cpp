@@ -237,22 +237,6 @@ double AST::evaluate(Node* node) {
                     symbolTable[child->text] = value;
                 }
             }
-            // for (size_t i = 0; i < node->children.size(); ++i){
-            //     if(node->children[i]->text == "+" || node->children[i]->text == "-" || node->children[i]->text == "*" || node->children[i]->text == "/"){
-            //         value = evaluate(node->children[i]);
-            //     }
-            // }
-            // for (size_t i = 0; i < node->children.size(); ++i){
-            //     if(isdigit(node->children[i]->text[0])){
-            //         value = std::stod(node->children[i]->text);
-            //         break;
-            //     }
-            // }
-            // for (size_t i = 0; i < node->children.size(); ++i){
-            //     if(!isdigit(node->children[i]->text[0])){
-            //         symbolTable[node->children[i]->text] = value;
-            //     }
-            // }
 
             // Return the assigned value
             return value;
@@ -301,26 +285,25 @@ int main(){
     //     input += line;
     //     input += "\n";
     // }
+
+    /*
+    change main so that each ast constructor gets an S-expression 
+    i.e. if there is a "(" the entire expression that follows until you get a matching ")" 
+    is part of the input that the AST constructor will get 
+    */
+
     while(std::getline(std::cin, input)) {
         try {
-            //printTokens(tokenize(input));
             AST ast(tokenize(input));
             ast.updateVariables(symbolTable);
             ast.printAST(ast.head);
             std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
             symbolTable = ast.getVariables();
-            // for(auto var: symbolTable){
-            //     std::cout << var.first << "=" << var.second << std::endl;
-            // }
         } catch(const SyntaxError& e) {
             std::cout << e.what() << std::endl;
             return 1;
         } catch(const ParseError& e){
             std::cout << e.what() << std::endl;
-            std::string yaaaaa = e.what();
-            if(yaaaaa == "Unexpected token at line 1 column 5: END"){
-                printTokens(tokenize(input));
-            }
             return 2;
         } catch(const EvaluationError& e){
             std::cout << e.what() << std::endl;
