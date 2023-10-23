@@ -245,6 +245,13 @@ void AST::updateVariables(std::map<std::string, double> symbolTable){
     this->symbolTable = symbolTable;
 }
 
+void printTokens(const std::vector<token>& tokens) {
+    
+    for(const token& token : tokens) {
+        std::cout << std::setw(4) << std::right << token.row << "   " << std::setw(2) << std::right << token.col << "  " << token.text << std::endl;
+    }
+}
+
 int main(){
     std::string input;
     std::map<std::string, double> symbolTable;
@@ -261,6 +268,7 @@ int main(){
     // }
     while(std::getline(std::cin, input)) {
         try {
+            printTokens(tokenize(input));
             AST ast(tokenize(input));
             ast.updateVariables(symbolTable);
             ast.printAST(ast.head);
