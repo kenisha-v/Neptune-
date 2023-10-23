@@ -18,7 +18,7 @@ public:
 
     virtual ~ASTNode() = default;
 
-    virtual double evaluate(){
+    virtual double evaluate(std::unordered_map<std::string, double>*){
         return 0.0;
     }
 
@@ -33,7 +33,7 @@ public:
     explicit NumberNode(int line, int column, const std::string& value)
         : ASTNode(line, column), value(value) {}
 
-    double evaluate(){
+    double evaluate(std::unordered_map<std::string, double>*){
         return std::stod(value);
     }
 
@@ -51,6 +51,9 @@ public:
     std::string print() {
         return name;
     }
+    double evaluate(std::unordered_map<std::string, double>* var_map){
+        return (*var_map)[name];
+    }
 };
 
 class AssignmentNode : public ASTNode {
@@ -62,8 +65,10 @@ public:
         delete id;
         delete value;
     }
-    double evaluate(){
-        return value->evaluate();
+    double evaluate(std::unordered_map<std::string, double>* var_map){
+        double solved_value_right_node = value->evaluate(var_map);
+        (*var_map)[id->name] = solved_value_right_node;
+        return solved_value_right_node;
     }
     std::string print(){
         return "(" + id->print() + " = " + value->print() + ")";
@@ -78,8 +83,8 @@ public:
         delete left;
         delete right;
     }
-    double evaluate(){
-        double ans = (left->evaluate() + right->evaluate());
+    double evaluate(std::unordered_map<std::string, double>* var_map){
+        double ans = (left->evaluate(var_map) + right->evaluate(var_map));
         return ans;
     }
     std::string print(){
@@ -95,8 +100,8 @@ public:
         delete left;
         delete right;
     }
-    double evaluate(){
-        double ans = (left->evaluate() - right->evaluate());
+    double evaluate(std::unordered_map<std::string, double>* var_map){
+        double ans = (left->evaluate(var_map) - right->evaluate(var_map));
         return ans;
     }
     std::string print(){
@@ -112,8 +117,8 @@ public:
         delete left;
         delete right;
     }
-    double evaluate(){
-        double ans = (left->evaluate() * right->evaluate());
+    double evaluate(std::unordered_map<std::string, double>* var_map){
+        double ans = (left->evaluate(var_map) * right->evaluate(var_map));
         return ans;
     }
     std::string print(){
@@ -129,12 +134,12 @@ public:
         delete left;
         delete right;
     }
-    double evaluate() {
-        double rightValue = right->evaluate();
+    double evaluate(std::unordered_map<std::string, double>* var_map) {
+        double rightValue = right->evaluate(var_map);
         if (rightValue == 0.0) {
             throw EvaluationError("Division by zero");
         }
-        double ans = left->evaluate() / rightValue;
+        double ans = left->evaluate(var_map) / rightValue;
         return ans;
     }
     std::string print(){
@@ -146,6 +151,7 @@ class ASTree {
     std::vector<token> tokens;
     size_t current_token_index = 0;
     ASTNode* head;
+    std::unordered_map<std::string, double>* var_map;
 
     token get_current_token()   {return tokens[current_token_index];}
     void consume_token()        {current_token_index++;}
@@ -158,8 +164,11 @@ class ASTree {
 
 public:
     
-    ASTree(const std::vector<token>& Tokens)    { tokens=Tokens; head = parse_expression(); } //for variable identification, add unordered map pointer.
-    double evaluate()                   { return head->evaluate(); }
+    ASTree(const std::vector<token>& Tokens, std::unordered_map<std::string, double>* map){
+        tokens=Tokens;
+        head = parse_expression();
+        var_map = map;}
+    double evaluate()                           { return head->evaluate(var_map); }
     void print()                                { std::cout << head->print() << std::endl;}
     ~ASTree()                                   { delete head; }
 };
@@ -269,7 +278,7 @@ int main() {
             }
             std::vector<token> input_tokens = tokenize(input);
             delete curr_tree;
-            curr_tree = new ASTree(input_tokens);
+            curr_tree = new ASTree(input_tokens, &Variable_Values);
         } catch (const ParseError& e) {
             std::cout << e.what() << std::endl;
             delete curr_tree;
