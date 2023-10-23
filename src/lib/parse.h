@@ -6,8 +6,14 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <map>
 
 using namespace std;
+
+#include <vector>
+#include <string>
+#include <map>
+#include <stdexcept>
 
 struct Node {
     std::string text;
@@ -28,8 +34,10 @@ class AST{
         ~AST();
         double evaluate(Node* head);
         void printAST(Node* head);
+        std::map<std::string, double> getVariables();
+        void updateVariables(std::map<std::string, double> symbolTable);
     private:
-        
+        std::map<std::string, double> symbolTable;
 
 };
 
@@ -66,4 +74,3 @@ public:
 };
 
 #endif
-

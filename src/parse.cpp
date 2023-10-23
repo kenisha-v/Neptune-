@@ -16,7 +16,7 @@ Node::~Node(){
 AST::AST(std::vector<token> tokenized) {
     Node* curr_ptr = nullptr;
     this->head = nullptr;
-    int i = 0;
+    size_t i = 0;
     token curr_token = tokenized[i];
     bool started = false;
     //try block to deal with memory leaks when constructor encounters a parse error
@@ -66,6 +66,11 @@ AST::AST(std::vector<token> tokenized) {
                 else if(tokenized[i-1].type != TokenType::LEFT_PAREN){
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
+                if (curr_token.text == "=") {
+                    if(i+1 >= tokenized.size() || tokenized[i+1].type != TokenType::VARIABLES){
+                        throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
+                    }
+                }
                 //operator cannot be followed by right parentheses
                 if(tokenized[i+1].type == TokenType::RIGHT_PAREN){
                     throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
@@ -75,10 +80,26 @@ AST::AST(std::vector<token> tokenized) {
             //if token is a number add it as a child to current node. if it is the only node point head to it
             else if (curr_token.type == TokenType::NUMBER) {
                 if(curr_ptr){
+                    if(curr_ptr->text == "="){
+                        for(auto child: curr_ptr->children){
+                            if(isdigit(child->text[0])){
+                                throw ParseError(curr_token.row, curr_token.col, curr_token);
+                            }
+                        }
+                    }
                     curr_ptr->children.push_back(new Node(curr_ptr, curr_token.text));
                 } 
                 else if (head == nullptr) {
                     head = new Node(nullptr, curr_token.text);
+                }
+            }
+            //if token is a variable add it as a child to current node. if it is the only node throw an error
+            else if (curr_token.type == TokenType::VARIABLES) {
+                if(curr_ptr){
+                    curr_ptr->children.push_back(new Node(curr_ptr, curr_token.text));
+                } 
+                else if (head == nullptr) {
+                    throw ParseError(curr_token.row, curr_token.col, curr_token); //can we give only variable
                 }
             }
             i++;
@@ -176,42 +197,89 @@ double AST::evaluate(Node* node) {
                 result /= denominator;
             }
             return result;
+        } else if (node->text == "=") {
+            if (node->children.size() <= 1) {
+                throw EvaluationError("Assignment requires at least two operands.");
+            }
+            double value;
+            for (size_t i = 0; i < node->children.size(); ++i){
+                if(node->children[i]->text == "+" || node->children[i]->text == "-" || node->children[i]->text == "*" || node->children[i]->text == "/"){
+                    value = evaluate(node->children[i]);
+                }
+            }
+            for (size_t i = 0; i < node->children.size(); ++i){
+                if(isdigit(node->children[i]->text[0])){
+                    value = std::stod(node->children[i]->text);
+                    break;
+                }
+            }
+            for (size_t i = 0; i < node->children.size(); ++i){
+                if(!isdigit(node->children[i]->text[0])){
+                    symbolTable[node->children[i]->text] = value;
+                }
+            }
+
+            // Return the assigned value
+            return value;
         } else {
             throw EvaluationError("Invalid operator: " + node->text);
         }
     } else {
-        return std::stod(node->text);
+        if(isdigit(node->text[0])){
+            return std::stod(node->text);
+        }
+        else{
+            if(symbolTable.find(node->text) != symbolTable.end()){
+                return symbolTable[node->text];
+            }
+            else{
+                throw EvaluationError("Undefined variable: " + node->text);
+            }
+        }
     }
+}
+std::map<std::string, double> AST::getVariables(){
+    return symbolTable;
+}
+void AST::updateVariables(std::map<std::string, double> symbolTable){
+    this->symbolTable = symbolTable;
 }
 
 int main(){
     std::string input;
-    char ch;
+    std::map<std::string, double> symbolTable;
+    //char ch;
 
-    while (std::cin.get(ch)) {
-        input += ch;
-    }
+    // while (std::cin.get(ch)) {
+    //     input += ch;
+    // }
     // std::string line;
     // std::string input;
     // while(std::getline(std::cin, line)) {
     //     input += line;
     //     input += "\n";
     // }
-    try {
-        AST ast(tokenize(input));
-        ast.printAST(ast.head);
-        std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
-    } catch(const SyntaxError& e) {
-        std::cout << e.what() << std::endl;
-        return 1;
-    } catch(const ParseError& e){
-        std::cout << e.what() << std::endl;
-        return 2;
-    } catch(const EvaluationError& e){
-        std::cout << e.what() << std::endl;
-        return 3;
+    while(std::getline(std::cin, input)) {
+        try {
+            AST ast(tokenize(input));
+            ast.updateVariables(symbolTable);
+            ast.printAST(ast.head);
+            std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
+            symbolTable = ast.getVariables();
+            // for(auto var: symbolTable){
+            //     std::cout << var.first << "=" << var.second << std::endl;
+            // }
+        } catch(const SyntaxError& e) {
+            std::cout << e.what() << std::endl;
+            return 1;
+        } catch(const ParseError& e){
+            std::cout << e.what() << std::endl;
+            return 2;
+        } catch(const EvaluationError& e){
+            std::cout << e.what() << std::endl;
+            return 3;
+        }
     }
 
     return 0;
 }
-
