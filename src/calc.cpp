@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <unordered_map>
 
-#include "lib/lex.h" //to use tokenize
+#include "lib/lex.h" //to use tokenize, struct token, enum TokenType
 #include "lib/errors.h"
 
 //base class for AST nodes
@@ -159,7 +159,7 @@ class ASTree {
 public:
     
     ASTree(const std::vector<token>& Tokens)    { tokens=Tokens; head = parse_expression(); } //for variable identification, add unordered map pointer.
-    double ASTree::evaluate()                   { return head->evaluate(); }
+    double evaluate()                   { return head->evaluate(); }
     void print()                                { std::cout << head->print() << std::endl;}
     ~ASTree()                                   { delete head; }
 };
@@ -171,14 +171,14 @@ ASTNode* ASTree::parse_expression() {
 ASTNode* ASTree::parse_assignment() {
     ASTNode* node = parse_addition_subtraction();
 
-    if (get_current_token().tokentype == OPERATOR && get_current_token().text == "=") {
+    if (get_current_token().type == TokenType::OPERATOR && get_current_token().text == "=") {
         int temp_row            = get_current_token().row;
         int temp_col            = get_current_token().col;
-        std::string temp_text   = get_current_token().text;
+        token temp_token = get_current_token();
         consume_token();
 
         if (dynamic_cast<IdentifierNode*>(node) == nullptr) {
-            throw ParseError(temp_row, temp_col, temp_text);//
+            throw ParseError(temp_row, temp_col, temp_token);//
         }
 
         ASTNode* value = parse_assignment();
@@ -191,7 +191,7 @@ ASTNode* ASTree::parse_assignment() {
 ASTNode* ASTree::parse_addition_subtraction() {
     ASTNode* node = parse_multiplication_division();
 
-    while (get_current_token().tokentype == OPERATOR && (get_current_token().text == "+" || get_current_token().text == "-")) {
+    while (get_current_token().type == TokenType::OPERATOR && (get_current_token().text == "+" || get_current_token().text == "-")) {
         if (get_current_token().text == "+") {
             int temp_row            = get_current_token().row;
             int temp_col            = get_current_token().col;
@@ -213,7 +213,7 @@ ASTNode* ASTree::parse_addition_subtraction() {
 ASTNode* ASTree::parse_multiplication_division() {
     ASTNode* node = parse_factor();
 
-    while (get_current_token().tokentype == OPERATOR && (get_current_token().text == "*" || get_current_token().text == "/")) {
+    while (get_current_token().type == TokenType::OPERATOR && (get_current_token().text == "*" || get_current_token().text == "/")) {
         if (get_current_token().text == "*") {
             int temp_row            = get_current_token().row;
             int temp_col            = get_current_token().col;
@@ -233,24 +233,24 @@ ASTNode* ASTree::parse_multiplication_division() {
 }
 
 ASTNode* ASTree::parse_factor() {
-    if (get_current_token().tokentype == L_PAREN) {
+    if (get_current_token().type == TokenType::LEFT_PAREN) {
         consume_token();
         ASTNode* node = parse_expression();
-        if (get_current_token().tokentype != R_PAREN) {
-            throw ParseError(get_current_token().row, get_current_token().col, get_current_token().text);
+        if (get_current_token().type != TokenType::RIGHT_PAREN) {
+            throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
         }
         consume_token();
         return node;
-    } else if (get_current_token().tokentype == NUMBER) {
+    } else if (get_current_token().type == TokenType::NUMBER) {
         ASTNode* node = new NumberNode(get_current_token().row, get_current_token().col, get_current_token().text);
         consume_token();
         return node;
-    } else if (get_current_token().tokentype == VARIABLES) {
+    } else if (get_current_token().type == TokenType::VARIABLES) {
         ASTNode* node = new IdentifierNode(get_current_token().row, get_current_token().col, get_current_token().text);
         consume_token();
         return node;
     } else {
-        throw ParseError(get_current_token().row, get_current_token().col, get_current_token().text);
+        throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
         return nullptr; //will probably be needing to add the case of a unmatched right paren
     }
 }
