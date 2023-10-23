@@ -52,6 +52,9 @@ public:
         return name;
     }
     double evaluate(std::unordered_map<std::string, double>* var_map){
+        if ((*var_map).find(name) == (*var_map).end()) {
+            throw EvaluationError("unknown identifier " + name);
+        }
         return (*var_map)[name];
     }
 };
@@ -279,14 +282,19 @@ int main() {
             std::vector<token> input_tokens = tokenize(input);
             delete curr_tree;
             curr_tree = new ASTree(input_tokens, &Variable_Values);
+            curr_tree->print();
+            std::cout << curr_tree->evaluate() << std::endl;
         } catch (const ParseError& e) {
             std::cout << e.what() << std::endl;
             delete curr_tree;
             curr_tree = nullptr;
             continue;
+        } catch (const EvaluationError& e) {
+            std::cout << e.what() << std::endl;
+            delete curr_tree;
+            curr_tree = nullptr;
+            continue;
         }
-        curr_tree->print();
-        std::cout << curr_tree->evaluate() << std::endl;
     }
 
     delete curr_tree;
