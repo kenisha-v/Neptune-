@@ -280,6 +280,12 @@ void AST::updateVariables(std::map<std::string, double> symbolTable){
     this->symbolTable = symbolTable;
 }
 
+void printTokens(const std::vector<token>& tokens) {
+    
+    for(const token& token : tokens) {
+        std::cout << std::setw(4) << std::right << token.row << "   " << std::setw(2) << std::right << token.col << "  " << token.text << std::endl;
+    }
+}
 
 int main(){
     std::string input;
@@ -311,6 +317,9 @@ int main(){
             return 1;
         } catch(const ParseError& e){
             std::cout << e.what() << std::endl;
+            if(e.what() == "Unexpected token at line 1 column 5: END"){
+                printTokens(tokenize(input));
+            }
             return 2;
         } catch(const EvaluationError& e){
             std::cout << e.what() << std::endl;
