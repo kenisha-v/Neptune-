@@ -252,7 +252,7 @@ double AST::evaluate(Node* node) {
                 return symbolTable[node->text];
             }
             else{
-                throw EvaluationError("Undefined variable: " + node->text);
+                throw EvaluationError("unknown identifier " + node->text);
             }
         }
     }
@@ -317,6 +317,9 @@ int main(){
 
     for (size_t i = 0; i < lines.size(); ++i) {
         try {
+            if (tokenize(lines[i]).size()<=1) {
+                break;
+            }
             AST ast(tokenize(lines[i]));
             ast.updateVariables(symbolTable);
             ast.printAST(ast.head);
