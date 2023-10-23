@@ -1,15 +1,27 @@
 #include <iostream>
-#include "lib/calc.h"
+#include <vector>
+#include <string>
+#include <stdexcept>
+#include <unordered_map>
 
-// Abstract base class for AST nodes
+#include "lib/lex.h" //to use tokenize
+#include "lib/errors.h"
+
+//base class for AST nodes
+
 class ASTNode {
+protected:
     int line;
     int column;
 public:
+    ASTNode(int l, int c) : line(l), column(c) {}
+
     virtual ~ASTNode() = default;
+
     virtual double evaluate(){
         return 0.0;
-    };
+    }
+
     virtual std::string print(){
         return "";
     }
@@ -18,20 +30,24 @@ public:
 class NumberNode : public ASTNode {
 public:
     std::string value;
-    explicit NumberNode(int line, int column, const std::string& value) : value(value), line(line), column(column) {}
+    explicit NumberNode(int line, int column, const std::string& value)
+        : ASTNode(line, column), value(value) {}
+
     double evaluate(){
-        return static_cast<double>(value);
+        return std::stod(value);
     }
+
     std::string print() {
         return value;
     }
 };
 
+
 //add the feature of variable already added in map.
 class IdentifierNode : public ASTNode {
 public:
     std::string name;
-    explicit IdentifierNode(int line, int column, const std::string& name) : name(name), line(line), column(column) {}
+    explicit IdentifierNode(int line, int column, const std::string& name) : ASTNode(line, column), name(name){}
     std::string print() {
         return name;
     }
@@ -41,7 +57,7 @@ class AssignmentNode : public ASTNode {
 public:
     IdentifierNode* id;
     ASTNode* value;
-    AssignmentNode(int line, int column, IdentifierNode* id, ASTNode* value) : id(id), value(value), line(line), column(column) {}
+    AssignmentNode(int line, int column, IdentifierNode* id, ASTNode* value) : ASTNode(line, column), id(id), value(value){}
     ~AssignmentNode(){
         delete id;
         delete value;
@@ -57,7 +73,7 @@ public:
 class AdditionNode : public ASTNode {
 public:
     ASTNode *left, *right;
-    AdditionNode(int line, int column, ASTNode* left, ASTNode* right) : left(left), right(right), line(line), column(column) {}
+    AdditionNode(int line, int column, ASTNode* left, ASTNode* right) : ASTNode(line, column), left(left), right(right){}
     ~AdditionNode(){
         delete left;
         delete right;
@@ -74,7 +90,7 @@ public:
 class SubtractionNode : public ASTNode {
 public:
     ASTNode *left, *right;
-    SubtractionNode(int line, int column, ASTNode* left, ASTNode* right) : left(left), right(right), line(line), column(column) {}
+    SubtractionNode(int line, int column, ASTNode* left, ASTNode* right) : ASTNode(line, column), left(left), right(right){}
     ~SubtractionNode(){
         delete left;
         delete right;
@@ -91,7 +107,7 @@ public:
 class MultiplicationNode : public ASTNode {
 public:
     ASTNode *left, *right;
-    MultiplicationNode(int line, int column, ASTNode* left, ASTNode* right) : left(left), right(right), line(line), column(column) {}
+    MultiplicationNode(int line, int column, ASTNode* left, ASTNode* right) : ASTNode(line, column), left(left), right(right){}
     ~MultiplicationNode(){
         delete left;
         delete right;
@@ -108,7 +124,7 @@ public:
 class DivisionNode : public ASTNode {
 public:
     ASTNode *left, *right;
-    DivisionNode(ASTNode* left, ASTNode* right) : left(left), right(right), line(line), column(column) {}
+    DivisionNode(int line, int column, ASTNode* left, ASTNode* right) : ASTNode(line, column), left(left), right(right){}
     ~DivisionNode(){
         delete left;
         delete right;
@@ -127,11 +143,11 @@ public:
 };
 
 class ASTree {
-    std::vector<Token> tokens;
+    std::vector<token> tokens;
     size_t current_token_index = 0;
     ASTNode* head;
 
-    Token get_current_token()   {return tokens[current_token_index];}
+    token get_current_token()   {return tokens[current_token_index];}
     void consume_token()        {current_token_index++;}
     
     ASTNode* parse_expression();
@@ -142,9 +158,9 @@ class ASTree {
 
 public:
     
-    ASTree(const std::vector<Token>& Tokens)    { tokens=Tokens; head = parse_expression(); } //for variable identification, add unordered map pointer.
+    ASTree(const std::vector<token>& Tokens)    { tokens=Tokens; head = parse_expression(); } //for variable identification, add unordered map pointer.
     double ASTree::evaluate()                   { return head->evaluate(); }
-    std::string print()                         { return head->print(); }
+    void print()                                { std::cout << head->print() << std::endl;}
     ~ASTree()                                   { delete head; }
 };
 
@@ -156,9 +172,9 @@ ASTNode* ASTree::parse_assignment() {
     ASTNode* node = parse_addition_subtraction();
 
     if (get_current_token().tokentype == OPERATOR && get_current_token().text == "=") {
-        int temp_row            = get_current_token.row;
-        int temp_col            = get_current_token.col;
-        std::string temp_text   = get_current_token.text;
+        int temp_row            = get_current_token().row;
+        int temp_col            = get_current_token().col;
+        std::string temp_text   = get_current_token().text;
         consume_token();
 
         if (dynamic_cast<IdentifierNode*>(node) == nullptr) {
@@ -177,15 +193,15 @@ ASTNode* ASTree::parse_addition_subtraction() {
 
     while (get_current_token().tokentype == OPERATOR && (get_current_token().text == "+" || get_current_token().text == "-")) {
         if (get_current_token().text == "+") {
-            int temp_row            = get_current_token.row;
-            int temp_col            = get_current_token.col;
-            std::string temp_text   = get_current_token.text;
+            int temp_row            = get_current_token().row;
+            int temp_col            = get_current_token().col;
+            std::string temp_text   = get_current_token().text;
             consume_token();
             node = new AdditionNode(temp_row, temp_col, node, parse_multiplication_division());
         } else if (get_current_token().text == "-") {
-            int temp_row            = get_current_token.row;
-            int temp_col            = get_current_token.col;
-            std::string temp_text   = get_current_token.text;
+            int temp_row            = get_current_token().row;
+            int temp_col            = get_current_token().col;
+            std::string temp_text   = get_current_token().text;
             consume_token();
             node = new SubtractionNode(temp_row, temp_col, node, parse_multiplication_division());
         }
@@ -199,15 +215,15 @@ ASTNode* ASTree::parse_multiplication_division() {
 
     while (get_current_token().tokentype == OPERATOR && (get_current_token().text == "*" || get_current_token().text == "/")) {
         if (get_current_token().text == "*") {
-            int temp_row            = get_current_token.row;
-            int temp_col            = get_current_token.col;
-            std::string temp_text   = get_current_token.text;
+            int temp_row            = get_current_token().row;
+            int temp_col            = get_current_token().col;
+            std::string temp_text   = get_current_token().text;
             consume_token();
             node = new MultiplicationNode(temp_row, temp_col, node, parse_factor());
         } else if (get_current_token().text == "/") {
-            int temp_row            = get_current_token.row;
-            int temp_col            = get_current_token.col;
-            std::string temp_text   = get_current_token.text;
+            int temp_row            = get_current_token().row;
+            int temp_col            = get_current_token().col;
+            std::string temp_text   = get_current_token().text;
             consume_token();
             node = new DivisionNode(temp_row, temp_col, node, parse_factor());
         }
@@ -226,27 +242,43 @@ ASTNode* ASTree::parse_factor() {
         consume_token();
         return node;
     } else if (get_current_token().tokentype == NUMBER) {
-        ASTNode* node = new NumberNode(get_current_token.row, get_current_token.col, get_current_token().text);
+        ASTNode* node = new NumberNode(get_current_token().row, get_current_token().col, get_current_token().text);
         consume_token();
         return node;
     } else if (get_current_token().tokentype == VARIABLES) {
-        ASTNode* node = new IdentifierNode(get_current_token.row, get_current_token.col, get_current_token().text);
+        ASTNode* node = new IdentifierNode(get_current_token().row, get_current_token().col, get_current_token().text);
         consume_token();
         return node;
     } else {
-        throw ParseError(get_current_token.row, get_current_token.col, get_current_token().text);
-        return nullptr;  // This line is never reached but added to suppress compiler warning
+        throw ParseError(get_current_token().row, get_current_token().col, get_current_token().text);
+        return nullptr; //will probably be needing to add the case of a unmatched right paren
     }
 }
 
 
-
-
 int main() {
-    std::unorderd_map() Variable_Values;
-    try {
-        <#statements#>
-    } catch (catch parameter) {
-        <#statements#>
+    std::string input;
+    std::unordered_map<std::string, double> Variable_Values; 
+    ASTree* curr_tree = nullptr;
+
+    while (true){
+        try {
+            std::getline(std::cin, input);
+            if (std::cin.eof()) {
+                break;
+            }
+            std::vector<token> input_tokens = tokenize(input);
+            delete curr_tree;
+            curr_tree = new ASTree(input_tokens);
+        } catch (const ParseError& e) {
+            std::cout << e.what() << std::endl;
+            delete curr_tree;
+            curr_tree = nullptr;
+            continue;
+        }
+        curr_tree->print();
+        std::cout << curr_tree->evaluate() << std::endl;
     }
+
+    delete curr_tree;
 }
