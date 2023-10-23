@@ -140,7 +140,7 @@ public:
     double evaluate(std::unordered_map<std::string, double>* var_map) {
         double rightValue = right->evaluate(var_map);
         if (rightValue == 0.0) {
-            throw EvaluationError("Division by zero");
+            throw EvaluationError("division by zero.");
         }
         double ans = left->evaluate(var_map) / rightValue;
         return ans;
