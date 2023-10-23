@@ -295,12 +295,7 @@ int main(){
     */
 
    while (std::cin.get(ch)) {
-    if (cin.eof()) {
-        lines.push_back(input);
-        input = "";
-        break;
-    }
-    else if (ch == '(') {
+    if (ch == '(') {
         para.push_back(ch);
     }
     else if (ch == ')') {
@@ -314,6 +309,11 @@ int main(){
     }
     input += ch;
    }
+
+   if (!input.empty()) {
+        lines.push_back(input);
+        input = "";
+    }
 
     for (size_t i = 0; i < lines.size(); ++i) {
         try {
