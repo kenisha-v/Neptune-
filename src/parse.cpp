@@ -1,5 +1,7 @@
 #include "lib/parse.h"
 
+char ar_op[9] = {'=','+', '-', '*', '/', '(', ')', ' ', '\t'};
+
 Node::Node(Node* parent, std::string text) {
     this->text = text;
     this->parent = parent;
@@ -39,6 +41,13 @@ AST::AST(std::vector<token> tokenized) {
             }
             //if token is left parentheses, create an empty node and manage children and parent connections (does not insert text in node yet as that requires the operator which we get in the next iteration)
             if (curr_token.type == TokenType::LEFT_PAREN) {
+                if(curr_ptr && curr_ptr->text == "="){
+                    for(auto child: curr_ptr->children){
+                        if(isdigit(child->text[0]) || child->text == "+" || child->text == "-" || child->text == "*" || child->text == "/"){
+                            throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
+                        }
+                    }
+                }
                 Node* tmp_ptr = new Node(curr_ptr, "");
                 if(curr_ptr != nullptr){
                     curr_ptr->children.push_back(tmp_ptr);
@@ -82,7 +91,7 @@ AST::AST(std::vector<token> tokenized) {
                 if(curr_ptr){
                     if(curr_ptr->text == "="){
                         for(auto child: curr_ptr->children){
-                            if(isdigit(child->text[0])){
+                            if(isdigit(child->text[0]) || child->text == "+" || child->text == "-" || child->text == "*" || child->text == "/"){
                                 throw ParseError(curr_token.row, curr_token.col, curr_token);
                             }
                         }
@@ -202,22 +211,38 @@ double AST::evaluate(Node* node) {
                 throw EvaluationError("Assignment requires at least two operands.");
             }
             double value;
-            for (size_t i = 0; i < node->children.size(); ++i){
-                if(node->children[i]->text == "+" || node->children[i]->text == "-" || node->children[i]->text == "*" || node->children[i]->text == "/"){
-                    value = evaluate(node->children[i]);
+            for(auto child : node->children){
+                if(child->text == "+" || child->text == "-" || child->text == "*" || child->text == "/"){
+                    value = evaluate(child);
                 }
             }
-            for (size_t i = 0; i < node->children.size(); ++i){
-                if(isdigit(node->children[i]->text[0])){
-                    value = std::stod(node->children[i]->text);
+            for(auto child : node->children){
+                if(isdigit(child->text[0])){
+                    value = std::stod(child->text);
                     break;
                 }
             }
-            for (size_t i = 0; i < node->children.size(); ++i){
-                if(!isdigit(node->children[i]->text[0])){
-                    symbolTable[node->children[i]->text] = value;
+            for (auto child : node->children){
+                if(!isdigit(child->text[0])){
+                    symbolTable[child->text] = value;
                 }
             }
+            // for (size_t i = 0; i < node->children.size(); ++i){
+            //     if(node->children[i]->text == "+" || node->children[i]->text == "-" || node->children[i]->text == "*" || node->children[i]->text == "/"){
+            //         value = evaluate(node->children[i]);
+            //     }
+            // }
+            // for (size_t i = 0; i < node->children.size(); ++i){
+            //     if(isdigit(node->children[i]->text[0])){
+            //         value = std::stod(node->children[i]->text);
+            //         break;
+            //     }
+            // }
+            // for (size_t i = 0; i < node->children.size(); ++i){
+            //     if(!isdigit(node->children[i]->text[0])){
+            //         symbolTable[node->children[i]->text] = value;
+            //     }
+            // }
 
             // Return the assigned value
             return value;
@@ -245,12 +270,6 @@ void AST::updateVariables(std::map<std::string, double> symbolTable){
     this->symbolTable = symbolTable;
 }
 
-void printTokens(const std::vector<token>& tokens) {
-    
-    for(const token& token : tokens) {
-        std::cout << std::setw(4) << std::right << token.row << "   " << std::setw(2) << std::right << token.col << "  " << token.text << std::endl;
-    }
-}
 
 int main(){
     std::string input;
