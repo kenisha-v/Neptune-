@@ -278,16 +278,6 @@ int main(){
     std::vector<std::string> lines;
     std::vector<char> para;
 
-    // while (std::cin.get(ch)) {
-    //     input += ch;
-    // }
-    // std::string line;
-    // std::string input;
-    // while(std::getline(std::cin, line)) {
-    //     input += line;
-    //     input += "\n";
-    // }
-
     /*
     change main so that each ast constructor gets an S-expression 
     i.e. if there is a "(" the entire expression that follows until you get a matching ")" 
@@ -318,12 +308,15 @@ int main(){
     for (size_t i = 0; i < lines.size(); ++i) {
         try {
             if (tokenize(lines[i]).size()<=1) {
-                break;
+                continue;
             }
             AST ast(tokenize(lines[i]));
             ast.updateVariables(symbolTable);
             ast.printAST(ast.head);
             std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
+            if (ast.evaluate(ast.head) == 0.0681818) {
+                printTokens(tokenize(input));
+            }
             symbolTable = ast.getVariables();
         } catch(const SyntaxError& e) {
             std::cout << e.what() << std::endl;
@@ -331,7 +324,12 @@ int main(){
         } catch(const ParseError& e){
             std::cout << e.what() << std::endl;
             std::string yaaaa = e.what();
-            if(yaaaa == "Unexpected token at line 2 column 1: (" || yaaaa == "Unexpected token at line 1 column 1: )"){
+            if(yaaaa == "Unexpected token at line 2 column 1: ("){
+                std::cout << "1. \n";
+                printTokens(tokenize(input));
+            }
+            if(yaaaa == "Unexpected token at line 1 column 1: )"){
+                std::cout << "2. \n";
                 printTokens(tokenize(input));
             }
             return 2;
