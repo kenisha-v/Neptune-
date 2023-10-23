@@ -63,6 +63,9 @@ AST::AST(std::vector<token> tokenized) {
                 if (curr_ptr == nullptr) {
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
+                if(curr_ptr->text == "=" && curr_ptr->children.size() <= 1){
+                    throw ParseError(curr_token.row, curr_token.col, curr_token);
+                }
                 curr_ptr = curr_ptr->parent;
             }
             //if token is operator adds it as a text to the empty node we created during left parentheses
@@ -105,6 +108,13 @@ AST::AST(std::vector<token> tokenized) {
             //if token is a variable add it as a child to current node. if it is the only node throw an error
             else if (curr_token.type == TokenType::VARIABLES) {
                 if(curr_ptr){
+                    if(curr_ptr->text == "="){
+                        for(auto child: curr_ptr->children){
+                            if(isdigit(child->text[0]) || child->text == "+" || child->text == "-" || child->text == "*" || child->text == "/"){
+                                throw ParseError(curr_token.row, curr_token.col, curr_token);
+                            }
+                        }
+                    }
                     curr_ptr->children.push_back(new Node(curr_ptr, curr_token.text));
                 } 
                 else if (head == nullptr) {
