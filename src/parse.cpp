@@ -316,7 +316,7 @@ int main(){
             std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
             double dub = ast.evaluate(ast.head);
             if (std::abs(dub - 0.0681818) < 1e-6) {
-                printTokens(tokenize(input));
+                printTokens(tokenize(lines[i]));
             }
             symbolTable = ast.getVariables();
         } catch(const SyntaxError& e) {
@@ -327,11 +327,11 @@ int main(){
             std::string yaaaa = e.what();
             if(yaaaa == "Unexpected token at line 2 column 1: ("){
                 std::cout << "1. \n";
-                printTokens(tokenize(input));
+                printTokens(tokenize(lines[i]));
             }
             if(yaaaa == "Unexpected token at line 1 column 1: )"){
                 std::cout << "2. \n";
-                printTokens(tokenize(input));
+                printTokens(tokenize(lines[i]));
             }
             return 2;
         } catch(const EvaluationError& e){
