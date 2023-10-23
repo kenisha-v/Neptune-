@@ -268,7 +268,7 @@ int main(){
     // }
     while(std::getline(std::cin, input)) {
         try {
-            printTokens(tokenize(input));
+            //printTokens(tokenize(input));
             AST ast(tokenize(input));
             ast.updateVariables(symbolTable);
             ast.printAST(ast.head);
