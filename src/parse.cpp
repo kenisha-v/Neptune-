@@ -330,6 +330,10 @@ int main(){
             return 1;
         } catch(const ParseError& e){
             std::cout << e.what() << std::endl;
+            std::string yaaaa = e.what();
+            if(yaaaa == "Unexpected token at line 2 column 1: (" || yaaaa == "Unexpected token at line 1 column 1: )"){
+                printTokens(tokenize(input));
+            }
             return 2;
         } catch(const EvaluationError& e){
             std::cout << e.what() << std::endl;
