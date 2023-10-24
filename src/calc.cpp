@@ -181,9 +181,16 @@ public:
 };
 
 ASTNode* ASTree::parse_expression() {
+    ASTNode* node = nullptr;
     try{
-        return parse_assignment();
+        node = parse_assignment();
+        if (get_current_token().type != TokenType::END){
+            throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+        }
+        
+        return node;
     } catch (const ParseError& e){
+        delete node;
         throw e;
     }
 }
