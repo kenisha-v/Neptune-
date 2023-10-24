@@ -1,7 +1,6 @@
 #ifndef LEX_H
 #define LEX_H
 
-#include <exception>
 #include <vector>
 #include <string>
 #include <exception>
@@ -17,7 +16,8 @@ enum class TokenType {
     OPERATOR,
     LEFT_PAREN,
     RIGHT_PAREN,
-    END
+    END,
+    VARIABLES
 };
 
 struct token {
@@ -25,23 +25,6 @@ struct token {
     int         col;
     std::string text;
     TokenType   type;
-};
-
-class SyntaxError : public std::exception {
-public:
-    int row;
-    int col;
-    std::string message;
-    
-    SyntaxError(int r, int c){
-        row = r;
-        col = c;
-        message = "Syntax error on line " + std::to_string(row) + " column " + std::to_string(col) + ".";
-    }
-
-    const char* what() const noexcept override {
-        return message.c_str();
-    }
 };
 
 TokenType getType(char in);

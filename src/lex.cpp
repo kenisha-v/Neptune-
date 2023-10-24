@@ -1,4 +1,5 @@
 #include "lib/lex.h"
+#include "lib/errors.h"
 
 using namespace std;
 
@@ -13,11 +14,10 @@ void printTokens(const std::vector<token>& tokens) {
 int main() {
     std::string input;
     char ch;
-    
+
     while (std::cin.get(ch)) {
         input += ch;
     }
-
     try {
         auto tokens = tokenize(input);
         printTokens(tokens);
