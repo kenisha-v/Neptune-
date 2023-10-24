@@ -279,12 +279,6 @@ int main(){
     std::vector<char> para;
     bool tree = false;
 
-    /*
-    change main so that each ast constructor gets an S-expression 
-    i.e. if there is a "(" the entire expression that follows until you get a matching ")" 
-    is part of the input that the AST constructor will get 
-    */
-
    while (std::cin.get(ch)) {
     if (tree == true && ch == '\n') {
         lines.push_back(input);
@@ -331,7 +325,6 @@ int main(){
         } catch(const ParseError& e){
             std::cout << e.what() << std::endl;
             return 2;
-            break;
         } catch(const EvaluationError& e){
             std::cout << e.what() << std::endl;
             return 3;
