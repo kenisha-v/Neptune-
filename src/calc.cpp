@@ -271,6 +271,7 @@ ASTNode* ASTree::parse_factor() {
 int main() {
     std::string input;
     std::unordered_map<std::string, double> Variable_Values; 
+    std::unordered_map<std::string, double> backup;
     ASTree* curr_tree = nullptr;
 
     while (true){
@@ -279,17 +280,23 @@ int main() {
             if (std::cin.eof()) {
                 break;
             }
+            backup = Variable_Values;
             std::vector<token> input_tokens = tokenize(input);
             delete curr_tree;
             curr_tree = new ASTree(input_tokens, &Variable_Values);
             curr_tree->print();
             std::cout << curr_tree->evaluate() << std::endl;
+        } catch (const SyntaxError& e) {
+            std::cout << e.what() << std::endl;
+            continue;
         } catch (const ParseError& e) {
+            Variable_Values = backup; //not needed here, but just to be safe.
             std::cout << e.what() << std::endl;
             delete curr_tree;
             curr_tree = nullptr;
             continue;
         } catch (const EvaluationError& e) {
+            Variable_Values = backup;
             std::cout << e.what() << std::endl;
             delete curr_tree;
             curr_tree = nullptr;
