@@ -1,5 +1,4 @@
 #include "lex.h"
-#include "errors.h"
 using namespace std;
 
 //returns the type of a token, helps while making an AST.
@@ -36,7 +35,7 @@ std::vector<token> tokenize(const std::string& input) {
 
     //for checkpoint 2 adding identifiers
     std::string temp_identifier = "";
-    bool isIdentifier = false; // Track if the current number is a part of an identifier 
+    bool isIdentifier = false; // Track if the current number is a part of an identifier
 
     while (stream.get(in_char)) {
 
@@ -83,6 +82,7 @@ std::vector<token> tokenize(const std::string& input) {
         }
 
         else if (isdigit(in_char)) {
+            //To check if the number is a part of the variable or if it is a digit on its own
             if (isIdentifier) {
                 temp_identifier += in_char;
             }
@@ -94,6 +94,7 @@ std::vector<token> tokenize(const std::string& input) {
             }
         }
         else if (in_char == '.') {
+            //Checking if decimal point is valid or an error
             if (!isdigit(stream.peek())) {
                 if (!temp_identifier.empty()) {
                     throw SyntaxError(row, col + temp_identifier.length());

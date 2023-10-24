@@ -6,6 +6,9 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <map>
+#include <stdexcept>
+
 
 using namespace std;
 
@@ -23,13 +26,14 @@ class AST{
     public:
         Node* head;
         std::string infix;
-        //Node* curr_ptr;
         AST(std::vector<token> tokenized);
         ~AST();
         double evaluate(Node* head);
         void printAST(Node* head);
+        std::map<std::string, double> getVariables();
+        void updateVariables(std::map<std::string, double> symbolTable);
     private:
-        
+        std::map<std::string, double> symbolTable;
 
 };
 
@@ -66,4 +70,3 @@ public:
 };
 
 #endif
-
