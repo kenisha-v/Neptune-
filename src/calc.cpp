@@ -221,7 +221,7 @@ ASTNode* ASTree::parse_assignment() {
 ASTNode* ASTree::parse_addition_subtraction() {
     ASTNode* node = nullptr;
     try {
-        ASTNode* node = parse_multiplication_division();
+        node = parse_multiplication_division();
         
         while (get_current_token().type == TokenType::OPERATOR && (get_current_token().text == "+" || get_current_token().text == "-")) {
             if (get_current_token().text == "+") {
