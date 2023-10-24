@@ -1,4 +1,5 @@
 #include "lib/lex.h"
+#include "lib/errors.h"
 
 using namespace std;
 
