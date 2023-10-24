@@ -41,6 +41,7 @@ AST::AST(std::vector<token> tokenized) {
             }
             //if token is left parentheses, create an empty node and manage children and parent connections (does not insert text in node yet as that requires the operator which we get in the next iteration)
             if (curr_token.type == TokenType::LEFT_PAREN) {
+                //if the operator is an "=" and already has a digit or another operator as a child throw error
                 if(curr_ptr && curr_ptr->text == "="){
                     for(auto child: curr_ptr->children){
                         if(isdigit(child->text[0]) || child->text == "+" || child->text == "-" || child->text == "*" || child->text == "/"){
@@ -63,6 +64,7 @@ AST::AST(std::vector<token> tokenized) {
                 if (curr_ptr == nullptr) {
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
+                //if "=" operator has less than two child throw error
                 if(curr_ptr->text == "=" && curr_ptr->children.size() <= 1){
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
@@ -78,6 +80,7 @@ AST::AST(std::vector<token> tokenized) {
                 else if(tokenized[i-1].type != TokenType::LEFT_PAREN){
                     throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
+                //if operator is "=" and next token is not a variable throw error
                 if (curr_token.text == "=") {
                     if(i+1 >= tokenized.size() || tokenized[i+1].type != TokenType::VARIABLES){
                         throw ParseError(tokenized[i+1].row, tokenized[i+1].col, tokenized[i+1]);
@@ -92,6 +95,7 @@ AST::AST(std::vector<token> tokenized) {
             //if token is a number add it as a child to current node. if it is the only node point head to it
             else if (curr_token.type == TokenType::NUMBER) {
                 if(curr_ptr){
+                    //if the operator is an "=" and already has a digit or another operator as a child no new numbers can be added
                     if(curr_ptr->text == "="){
                         for(auto child: curr_ptr->children){
                             if(isdigit(child->text[0]) || child->text == "+" || child->text == "-" || child->text == "*" || child->text == "/"){
@@ -108,6 +112,7 @@ AST::AST(std::vector<token> tokenized) {
             //if token is a variable add it as a child to current node. if it is the only node throw an error
             else if (curr_token.type == TokenType::VARIABLES) {
                 if(curr_ptr){
+                    //if the operator is an "=" and already has a digit or another operator as a child no new variables can be added
                     if(curr_ptr->text == "="){
                         for(auto child: curr_ptr->children){
                             if(isdigit(child->text[0]) || child->text == "+" || child->text == "-" || child->text == "*" || child->text == "/"){
@@ -118,7 +123,7 @@ AST::AST(std::vector<token> tokenized) {
                     curr_ptr->children.push_back(new Node(curr_ptr, curr_token.text));
                 } 
                 else if (head == nullptr) {
-                    throw ParseError(curr_token.row, curr_token.col, curr_token); //can we give only variable
+                    throw ParseError(curr_token.row, curr_token.col, curr_token);
                 }
             }
             i++;
@@ -264,13 +269,6 @@ void AST::updateVariables(std::map<std::string, double> symbolTable){
     this->symbolTable = symbolTable;
 }
 
-void printTokens(const std::vector<token>& tokens) {
-    
-    for(const token& token : tokens) {
-        std::cout << std::setw(4) << std::right << token.row << "   " << std::setw(2) << std::right << token.col << "  " << token.text << std::endl;
-    }
-}
-
 int main(){
     std::string input;
     std::map<std::string, double> symbolTable;
@@ -279,32 +277,34 @@ int main(){
     std::vector<char> para;
     bool tree = false;
 
-   while (std::cin.get(ch)) {
-    if (tree == true && ch == '\n') {
-        lines.push_back(input);
-        input = "";
-        tree = false;
-        continue;
-    }
-    if (ch == '(') {
-        if (!input.empty() && para.empty()) {
+    // While loop to take in inputs for multiple trees
+    while (std::cin.get(ch)) {
+        if (tree == true && ch == '\n') {
             lines.push_back(input);
             input = "";
-        }
-        para.push_back(ch);
-    }
-    else if (ch == ')') {
-        para.pop_back();
-        if (para.size() == 0) {
-            input += ch;
-            tree = true;
+            tree = false;
             continue;
         }
+        if (ch == '(') {
+            if (!input.empty() && para.empty()) {
+                lines.push_back(input);
+                input = "";
+            }
+            para.push_back(ch);
+        }
+        else if (ch == ')') {
+            para.pop_back();
+            if (para.size() == 0) {
+                input += ch;
+                tree = true;
+                continue;
+            }
+        }
+        input += ch;
     }
-    input += ch;
-   }
 
-   if (!input.empty()) {
+    // Helpful if there is a missing )
+    if (!input.empty()) {
         lines.push_back(input);
         input = "";
     }

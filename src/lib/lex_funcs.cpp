@@ -82,6 +82,7 @@ std::vector<token> tokenize(const std::string& input) {
         }
 
         else if (isdigit(in_char)) {
+            //To check if the number is a part of the variable or if it is a digit on its own
             if (isIdentifier) {
                 temp_identifier += in_char;
             }
@@ -93,6 +94,7 @@ std::vector<token> tokenize(const std::string& input) {
             }
         }
         else if (in_char == '.') {
+            //Checking if decimal point is valid or an error
             if (!isdigit(stream.peek())) {
                 if (!temp_identifier.empty()) {
                     throw SyntaxError(row, col + temp_identifier.length());
