@@ -201,7 +201,7 @@ ASTNode* ASTree::parse_assignment() {
     if (get_current_token().type == TokenType::OPERATOR && get_current_token().text == "=") {
         int temp_row            = get_current_token().row;
         int temp_col            = get_current_token().col;
-        token temp_token = get_current_token();
+        token temp_token        = get_current_token();
         consume_token();
 
         if (dynamic_cast<IdentifierNode*>(node) == nullptr) {
