@@ -5,6 +5,23 @@
 #include <exception>
 #include "lex.h" //for token definition
 
+class SyntaxError : public std::exception {
+public:
+    int row;
+    int col;
+    std::string message;
+    
+    SyntaxError(int r, int c){
+        row = r;
+        col = c;
+        message = "Syntax error on line " + std::to_string(row) + " column " + std::to_string(col) + ".";
+    }
+
+    const char* what() const noexcept override {
+        return message.c_str();
+    }
+};
+
 class ParseError : public std::exception {
 public:
     int row;

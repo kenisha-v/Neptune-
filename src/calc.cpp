@@ -190,6 +190,7 @@ ASTNode* ASTree::parse_assignment() {
         consume_token();
 
         if (dynamic_cast<IdentifierNode*>(node) == nullptr) {
+            delete node;
             throw ParseError(temp_row, temp_col, temp_token);//
         }
 
@@ -249,6 +250,7 @@ ASTNode* ASTree::parse_factor() {
         consume_token();
         ASTNode* node = parse_expression();
         if (get_current_token().type != TokenType::RIGHT_PAREN) {
+            delete node;
             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
         }
         consume_token();
@@ -262,6 +264,7 @@ ASTNode* ASTree::parse_factor() {
         consume_token();
         return node;
     } else {
+        delete node;
         throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
         return nullptr; //will probably be needing to add the case of a unmatched right paren
     }
