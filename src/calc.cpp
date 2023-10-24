@@ -152,7 +152,6 @@ public:
 
 class ASTree {
     std::vector<token> tokens;
-    std::vector<ASTNode*> allNodes;
     size_t current_token_index = 0;
     ASTNode* head;
     std::unordered_map<std::string, double>* var_map;
@@ -170,18 +169,7 @@ public:
     
     ASTree(const std::vector<token>& Tokens, std::unordered_map<std::string, double>* map){
         tokens=Tokens;
-        try {
-            head = parse_expression();
-        } catch (const ParseError& e) {
-            for (ASTNode*& curr_ptr: allNodes) {
-                if (curr_ptr != nullptr) {
-                    delete curr_ptr;
-                    curr_ptr = nullptr;
-                }
-            }
-            throw e;
-        }
-
+        head = parse_expression();
         var_map = map;}
     double evaluate()                           { return head->evaluate(var_map); }
     void print()                                { std::cout << head->print() << std::endl;}
@@ -189,14 +177,11 @@ public:
 };
 
 ASTNode* ASTree::parse_expression() {
-    ASTNode* temp_ptr = parse_assignment();
-    allNodes.push_back(temp_ptr);
-    return temp_ptr;
+    return parse_assignment();
 }
 
 ASTNode* ASTree::parse_assignment() {
     ASTNode* node = parse_addition_subtraction();
-    allNodes.push_back(node);
 
     if (get_current_token().type == TokenType::OPERATOR && get_current_token().text == "=") {
         int temp_row            = get_current_token().row;
@@ -205,13 +190,12 @@ ASTNode* ASTree::parse_assignment() {
         consume_token();
 
         if (dynamic_cast<IdentifierNode*>(node) == nullptr) {
+            delete node;
             throw ParseError(temp_row, temp_col, temp_token);//
         }
 
         ASTNode* value = parse_assignment();
-        ASTNode* temp_ptr = new AssignmentNode(temp_row, temp_col, static_cast<IdentifierNode*>(node), value);
-        allNodes.push_back(temp_ptr);
-        return temp_ptr;
+        return new AssignmentNode(temp_row, temp_col, static_cast<IdentifierNode*>(node), value);
     }
 
     return node;
@@ -219,7 +203,6 @@ ASTNode* ASTree::parse_assignment() {
 
 ASTNode* ASTree::parse_addition_subtraction() {
     ASTNode* node = parse_multiplication_division();
-    allNodes.push_back(node);
 
     while (get_current_token().type == TokenType::OPERATOR && (get_current_token().text == "+" || get_current_token().text == "-")) {
         if (get_current_token().text == "+") {
@@ -228,14 +211,12 @@ ASTNode* ASTree::parse_addition_subtraction() {
             std::string temp_text   = get_current_token().text;
             consume_token();
             node = new AdditionNode(temp_row, temp_col, node, parse_multiplication_division());
-            allNodes.push_back(node);
         } else if (get_current_token().text == "-") {
             int temp_row            = get_current_token().row;
             int temp_col            = get_current_token().col;
             std::string temp_text   = get_current_token().text;
             consume_token();
             node = new SubtractionNode(temp_row, temp_col, node, parse_multiplication_division());
-            allNodes.push_back(node);
         }
     }
 
@@ -244,7 +225,6 @@ ASTNode* ASTree::parse_addition_subtraction() {
 
 ASTNode* ASTree::parse_multiplication_division() {
     ASTNode* node = parse_factor();
-    allNodes.push_back(node);
 
     while (get_current_token().type == TokenType::OPERATOR && (get_current_token().text == "*" || get_current_token().text == "/")) {
         if (get_current_token().text == "*") {
@@ -253,14 +233,12 @@ ASTNode* ASTree::parse_multiplication_division() {
             std::string temp_text   = get_current_token().text;
             consume_token();
             node = new MultiplicationNode(temp_row, temp_col, node, parse_factor());
-            allNodes.push_back(node);
         } else if (get_current_token().text == "/") {
             int temp_row            = get_current_token().row;
             int temp_col            = get_current_token().col;
             std::string temp_text   = get_current_token().text;
             consume_token();
             node = new DivisionNode(temp_row, temp_col, node, parse_factor());
-            allNodes.push_back(node);
         }
     }
 
@@ -271,20 +249,18 @@ ASTNode* ASTree::parse_factor() {
     if (get_current_token().type == TokenType::LEFT_PAREN) {
         consume_token();
         ASTNode* node = parse_expression();
-        allNodes.push_back(node);
         if (get_current_token().type != TokenType::RIGHT_PAREN) {
+            delete node;
             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
         }
         consume_token();
         return node;
     } else if (get_current_token().type == TokenType::NUMBER) {
         ASTNode* node = new NumberNode(get_current_token().row, get_current_token().col, get_current_token().text);
-        allNodes.push_back(node);
         consume_token();
         return node;
     } else if (get_current_token().type == TokenType::VARIABLES) {
         ASTNode* node = new IdentifierNode(get_current_token().row, get_current_token().col, get_current_token().text);
-        allNodes.push_back(node);
         consume_token();
         return node;
     } else {
