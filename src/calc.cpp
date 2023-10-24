@@ -170,7 +170,7 @@ public:
         try {
             head = parse_expression();
         }  catch (const ParseError& e){
-            delete head;
+            //delete head;
             throw e;
         }
         var_map = map;
