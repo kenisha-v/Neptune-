@@ -8,7 +8,6 @@
 #include "lib/errors.h"
 
 //base class for AST nodes
-
 class ASTNode {
 protected:
     int line;
@@ -297,7 +296,7 @@ ASTNode* ASTree::parse_factor() {
             return node;
         } else {
             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
-            return nullptr; //will probably be needing for the case of a unmatched right paren
+            return nullptr; //will be needing for the case of a unmatched right paren
         }
     } catch (const ParseError& e){
         throw e;
@@ -312,7 +311,6 @@ int main() {
     ASTree* curr_tree = nullptr;
 
     while (true){
-//        ASTree* curr_tree = nullptr;
         try {
             std::getline(std::cin, input);
             if (std::cin.eof()) {
@@ -320,30 +318,19 @@ int main() {
             }
             backup = Variable_Values;
             std::vector<token> input_tokens = tokenize(input);
-//            delete curr_tree;
             curr_tree = new ASTree(input_tokens, &Variable_Values);
             curr_tree->print();
             std::cout << curr_tree->evaluate() << std::endl;
         } catch (const SyntaxError& e) {
             std::cout << e.what() << std::endl;
-//            continue;
         } catch (const ParseError& e) {
             Variable_Values = backup; //not needed here, but just to be safe.
             std::cout << e.what() << std::endl;
-//            delete curr_tree;
-//            curr_tree = nullptr;
-//            continue;
         } catch (const EvaluationError& e) {
             Variable_Values = backup;
             std::cout << e.what() << std::endl;
-//            delete curr_tree;
-//            curr_tree = nullptr;
-//            continue;
         }
-        
         delete curr_tree;
         curr_tree = nullptr;
     }
-
-//    delete curr_tree;
 }
