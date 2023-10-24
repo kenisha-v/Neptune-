@@ -151,7 +151,7 @@ public:
 class ASTree {
     std::vector<token> tokens;
     size_t current_token_index = 0;
-    ASTNode* head;
+    ASTNode* head = nullptr;
     std::unordered_map<std::string, double>* var_map;
 
     token get_current_token()   {return tokens[current_token_index];}
@@ -169,8 +169,11 @@ public:
         tokens=Tokens;
         try {
             head = parse_expression();
+            if (get_current_token().type != TokenType::END){
+                throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+            }
         }  catch (const ParseError& e){
-            //delete head;
+            delete head;
             throw e;
         }
         var_map = map;
@@ -181,16 +184,9 @@ public:
 };
 
 ASTNode* ASTree::parse_expression() {
-    ASTNode* node = nullptr;
     try{
-        node = parse_assignment();
-        if (get_current_token().type != TokenType::END){
-            throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
-        }
-        
-        return node;
+        return parse_assignment();
     } catch (const ParseError& e){
-        delete node;
         throw e;
     }
 }
@@ -209,7 +205,6 @@ ASTNode* ASTree::parse_assignment() {
             consume_token();
             
             if (dynamic_cast<IdentifierNode*>(node) == nullptr) {
-                delete node;
                 throw ParseError(temp_row, temp_col, temp_token);//
             }
             
