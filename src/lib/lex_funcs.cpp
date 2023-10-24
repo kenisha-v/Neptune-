@@ -1,4 +1,5 @@
 #include "lex.h"
+#include "errors.h"
 using namespace std;
 
 //returns the type of a token, helps while making an AST.
