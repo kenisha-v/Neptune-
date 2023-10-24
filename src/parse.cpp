@@ -277,6 +277,7 @@ int main(){
     char ch;
     std::vector<std::string> lines;
     std::vector<char> para;
+    bool tree = false;
 
     /*
     change main so that each ast constructor gets an S-expression 
@@ -285,6 +286,12 @@ int main(){
     */
 
    while (std::cin.get(ch)) {
+    if (tree == true && ch == '\n') {
+        lines.push_back(input);
+        input = "";
+        tree = false;
+        continue;
+    }
     if (ch == '(') {
         if (!input.empty() && para.empty()) {
             lines.push_back(input);
@@ -296,8 +303,7 @@ int main(){
         para.pop_back();
         if (para.size() == 0) {
             input += ch;
-            lines.push_back(input);
-            input = "";
+            tree = true;
             continue;
         }
     }
@@ -318,26 +324,14 @@ int main(){
             ast.updateVariables(symbolTable);
             ast.printAST(ast.head);
             std::cout << "\n" << ast.evaluate(ast.head) << std::endl;
-            double dub = ast.evaluate(ast.head);
-            if (std::abs(dub - 0.0681818) < 1e-6) {
-                printTokens(tokenize(lines[i]));
-            }
             symbolTable = ast.getVariables();
         } catch(const SyntaxError& e) {
             std::cout << e.what() << std::endl;
             return 1;
         } catch(const ParseError& e){
             std::cout << e.what() << std::endl;
-            std::string yaaaa = e.what();
-            if(yaaaa == "Unexpected token at line 2 column 1: ("){
-                std::cout << "1. \n";
-                printTokens(tokenize(lines[i]));
-            }
-            if(yaaaa == "Unexpected token at line 1 column 1: )"){
-                std::cout << "2. \n";
-                printTokens(tokenize(lines[i]));
-            }
             return 2;
+            break;
         } catch(const EvaluationError& e){
             std::cout << e.what() << std::endl;
             return 3;
