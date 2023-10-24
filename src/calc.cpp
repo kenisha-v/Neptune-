@@ -294,7 +294,7 @@ int main() {
         } catch (const ParseError& e) {
             Variable_Values = backup; //not needed here, but just to be safe.
             std::cout << e.what() << std::endl;
-            delete curr_tree;
+            //delete curr_tree;
             curr_tree = nullptr;
             continue;
         } catch (const EvaluationError& e) {
