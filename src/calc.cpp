@@ -42,8 +42,6 @@ public:
     }
 };
 
-
-//add the feature of variable already added in map.
 class IdentifierNode : public ASTNode {
 public:
     std::string name;
@@ -169,103 +167,138 @@ public:
     
     ASTree(const std::vector<token>& Tokens, std::unordered_map<std::string, double>* map){
         tokens=Tokens;
-        head = parse_expression();
-        var_map = map;}
+        try {
+            head = parse_expression();
+        }  catch (const ParseError& e){
+            delete head;
+            throw e;
+        }
+        var_map = map;
+    }
     double evaluate()                           { return head->evaluate(var_map); }
     void print()                                { std::cout << head->print() << std::endl;}
     ~ASTree()                                   { delete head; }
 };
 
 ASTNode* ASTree::parse_expression() {
-    return parse_assignment();
+    try{
+        return parse_assignment();
+    } catch (const ParseError& e){
+        throw e;
+    }
 }
 
 ASTNode* ASTree::parse_assignment() {
-    ASTNode* node = parse_addition_subtraction();
-
-    if (get_current_token().type == TokenType::OPERATOR && get_current_token().text == "=") {
-        int temp_row            = get_current_token().row;
-        int temp_col            = get_current_token().col;
-        token temp_token        = get_current_token();
-        consume_token();
-
-        if (dynamic_cast<IdentifierNode*>(node) == nullptr) {
-            delete node;
-            throw ParseError(temp_row, temp_col, temp_token);//
+    ASTNode* node = nullptr;
+    ASTNode* value = nullptr;
+    
+    try{
+        node = parse_addition_subtraction();
+        
+        if (get_current_token().type == TokenType::OPERATOR && get_current_token().text == "=") {
+            int temp_row            = get_current_token().row;
+            int temp_col            = get_current_token().col;
+            token temp_token        = get_current_token();
+            consume_token();
+            
+            if (dynamic_cast<IdentifierNode*>(node) == nullptr) {
+                delete node;
+                throw ParseError(temp_row, temp_col, temp_token);//
+            }
+            
+            value = parse_assignment();
+            return new AssignmentNode(temp_row, temp_col, static_cast<IdentifierNode*>(node), value);
         }
-
-        ASTNode* value = parse_assignment();
-        return new AssignmentNode(temp_row, temp_col, static_cast<IdentifierNode*>(node), value);
+        
+        return node;
+    } catch (const ParseError& e){
+        delete node;
+        delete value;
+        throw e;
     }
-
-    return node;
 }
 
 ASTNode* ASTree::parse_addition_subtraction() {
-    ASTNode* node = parse_multiplication_division();
-
-    while (get_current_token().type == TokenType::OPERATOR && (get_current_token().text == "+" || get_current_token().text == "-")) {
-        if (get_current_token().text == "+") {
-            int temp_row            = get_current_token().row;
-            int temp_col            = get_current_token().col;
-            std::string temp_text   = get_current_token().text;
-            consume_token();
-            node = new AdditionNode(temp_row, temp_col, node, parse_multiplication_division());
-        } else if (get_current_token().text == "-") {
-            int temp_row            = get_current_token().row;
-            int temp_col            = get_current_token().col;
-            std::string temp_text   = get_current_token().text;
-            consume_token();
-            node = new SubtractionNode(temp_row, temp_col, node, parse_multiplication_division());
+    ASTNode* node = nullptr;
+    try {
+        ASTNode* node = parse_multiplication_division();
+        
+        while (get_current_token().type == TokenType::OPERATOR && (get_current_token().text == "+" || get_current_token().text == "-")) {
+            if (get_current_token().text == "+") {
+                int temp_row            = get_current_token().row;
+                int temp_col            = get_current_token().col;
+                std::string temp_text   = get_current_token().text;
+                consume_token();
+                node = new AdditionNode(temp_row, temp_col, node, parse_multiplication_division());
+            } else if (get_current_token().text == "-") {
+                int temp_row            = get_current_token().row;
+                int temp_col            = get_current_token().col;
+                std::string temp_text   = get_current_token().text;
+                consume_token();
+                node = new SubtractionNode(temp_row, temp_col, node, parse_multiplication_division());
+            }
         }
+        
+        return node;
+    }  catch (const ParseError& e){
+        delete node;
+        throw e;
     }
-
-    return node;
 }
 
 ASTNode* ASTree::parse_multiplication_division() {
-    ASTNode* node = parse_factor();
-
-    while (get_current_token().type == TokenType::OPERATOR && (get_current_token().text == "*" || get_current_token().text == "/")) {
-        if (get_current_token().text == "*") {
-            int temp_row            = get_current_token().row;
-            int temp_col            = get_current_token().col;
-            std::string temp_text   = get_current_token().text;
-            consume_token();
-            node = new MultiplicationNode(temp_row, temp_col, node, parse_factor());
-        } else if (get_current_token().text == "/") {
-            int temp_row            = get_current_token().row;
-            int temp_col            = get_current_token().col;
-            std::string temp_text   = get_current_token().text;
-            consume_token();
-            node = new DivisionNode(temp_row, temp_col, node, parse_factor());
+    ASTNode* node = nullptr;
+    try{
+        node = parse_factor();
+        
+        while (get_current_token().type == TokenType::OPERATOR && (get_current_token().text == "*" || get_current_token().text == "/")) {
+            if (get_current_token().text == "*") {
+                int temp_row            = get_current_token().row;
+                int temp_col            = get_current_token().col;
+                std::string temp_text   = get_current_token().text;
+                consume_token();
+                node = new MultiplicationNode(temp_row, temp_col, node, parse_factor());
+            } else if (get_current_token().text == "/") {
+                int temp_row            = get_current_token().row;
+                int temp_col            = get_current_token().col;
+                std::string temp_text   = get_current_token().text;
+                consume_token();
+                node = new DivisionNode(temp_row, temp_col, node, parse_factor());
+            }
         }
+        
+        return node;
+    } catch (const ParseError& e){
+        delete node;
+        throw e;
     }
-
-    return node;
 }
 
 ASTNode* ASTree::parse_factor() {
-    if (get_current_token().type == TokenType::LEFT_PAREN) {
-        consume_token();
-        ASTNode* node = parse_expression();
-        if (get_current_token().type != TokenType::RIGHT_PAREN) {
-            delete node;
+    try{
+        if (get_current_token().type == TokenType::LEFT_PAREN) {
+            consume_token();
+            ASTNode* node = parse_expression();
+            if (get_current_token().type != TokenType::RIGHT_PAREN) {
+                delete node;
+                throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+            }
+            consume_token();
+            return node;
+        } else if (get_current_token().type == TokenType::NUMBER) {
+            ASTNode* node = new NumberNode(get_current_token().row, get_current_token().col, get_current_token().text);
+            consume_token();
+            return node;
+        } else if (get_current_token().type == TokenType::VARIABLES) {
+            ASTNode* node = new IdentifierNode(get_current_token().row, get_current_token().col, get_current_token().text);
+            consume_token();
+            return node;
+        } else {
             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+            return nullptr; //will probably be needing for the case of a unmatched right paren
         }
-        consume_token();
-        return node;
-    } else if (get_current_token().type == TokenType::NUMBER) {
-        ASTNode* node = new NumberNode(get_current_token().row, get_current_token().col, get_current_token().text);
-        consume_token();
-        return node;
-    } else if (get_current_token().type == TokenType::VARIABLES) {
-        ASTNode* node = new IdentifierNode(get_current_token().row, get_current_token().col, get_current_token().text);
-        consume_token();
-        return node;
-    } else {
-        throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
-        return nullptr; //will probably be needing to add the case of a unmatched right paren
+    } catch (const ParseError& e){
+        throw e;
     }
 }
 
@@ -277,6 +310,7 @@ int main() {
     ASTree* curr_tree = nullptr;
 
     while (true){
+//        ASTree* curr_tree = nullptr;
         try {
             std::getline(std::cin, input);
             if (std::cin.eof()) {
@@ -284,27 +318,30 @@ int main() {
             }
             backup = Variable_Values;
             std::vector<token> input_tokens = tokenize(input);
-            delete curr_tree;
+//            delete curr_tree;
             curr_tree = new ASTree(input_tokens, &Variable_Values);
             curr_tree->print();
             std::cout << curr_tree->evaluate() << std::endl;
         } catch (const SyntaxError& e) {
             std::cout << e.what() << std::endl;
-            continue;
+//            continue;
         } catch (const ParseError& e) {
             Variable_Values = backup; //not needed here, but just to be safe.
             std::cout << e.what() << std::endl;
-            //delete curr_tree;
-            curr_tree = nullptr;
-            continue;
+//            delete curr_tree;
+//            curr_tree = nullptr;
+//            continue;
         } catch (const EvaluationError& e) {
             Variable_Values = backup;
             std::cout << e.what() << std::endl;
-            delete curr_tree;
-            curr_tree = nullptr;
-            continue;
+//            delete curr_tree;
+//            curr_tree = nullptr;
+//            continue;
         }
+        
+        delete curr_tree;
+        curr_tree = nullptr;
     }
 
-    delete curr_tree;
+//    delete curr_tree;
 }
