@@ -175,7 +175,7 @@ public:
         } catch (const ParseError& e) {
             for (ASTNode*& curr_ptr: allNodes) {
                 if (curr_ptr != nullptr) {
-                    delete curr_ptr;
+                    // delete curr_ptr;
                     curr_ptr = nullptr;
                 }
             }
