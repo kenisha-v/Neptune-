@@ -33,6 +33,6 @@ std::vector<token> tokenize(const std::string& input);
 
 
 // This function will "THROW SyntaxError" on encountering invalid characters.
-    // Requesting Parser team to try-catch SytaxError while calling tokenize, and elemintate parser execution if error is already caught during lexer.
+// Requesting Parser team to try-catch SytaxError while calling tokenize, and elemintate parser execution if error is already caught during lexer.
 
 #endif // LEX_H
