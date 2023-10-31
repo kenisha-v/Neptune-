@@ -50,10 +50,26 @@ std::vector<token> tokenize(const std::string& input) {
     while (stream.get(in_char)) {
 
         if (isC_oper){
-            all_tokens.push_back(getToken(row, col, c_oper, TokenType::NUMBER));
-            col += c_oper.length();
-            c_oper = "";
-            isC_oper = false;
+            if (c_oper == "=" && in_char != '=') {
+                all_tokens.push_back(getToken(row, col, string(1, in_char), getType('=')));
+                col++;
+                c_oper = "";
+                isC_oper = false;
+            }
+            else if (in_char != '=') {
+                all_tokens.push_back(getToken(row, col, c_oper, TokenType::C_OPERATOR));
+                col++;
+                c_oper = "";
+                isC_oper = false;
+            }
+            else if (in_char == '=') {
+                c_oper += in_char;
+                all_tokens.push_back(getToken(row, col, c_oper, TokenType::C_OPERATOR));
+                col += c_oper.length();
+                c_oper = "";
+                isC_oper = false;
+                continue;
+            }
         }
         if (in_char == '\n') {
             if (!temp_str_num.empty()){
@@ -159,22 +175,10 @@ std::vector<token> tokenize(const std::string& input) {
                 temp_identifier = "";
                 isIdentifier = false;
             }
-            // Now working with the operators
-            if (in_char == '=' && stream.peek() != '=') {
-                all_tokens.push_back(getToken(row, col, string(1, in_char), getType(in_char)));
-                col++;
-            }
-            else {
-                if (std::find(std::begin(c_op), std::end(c_op), in_char) != std::end(c_op) && stream.peek() != '=') {
-                    all_tokens.push_back(getToken(row, col, string(1, in_char), TokenType::C_OPERATOR));
-                    col++;
-                }
-                else {
-                    c_oper += in_char;
-                    isC_oper = true;
-                    continue;
-                }
-            }
+            // Now working with the  conditional operators
+            c_oper += in_char;
+            isC_oper = true;
+            continue;
         }
         else {
             col += temp_str_num.length();
