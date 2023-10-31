@@ -16,7 +16,7 @@ protected:
     int line;
     int column;
 
-public: 
+public:
     ASTNode(int l, int c);
     virtual ~ASTNode();
 
