@@ -22,7 +22,8 @@ enum class TokenType {
     L_OPERATOR,
     STATEMENT,
     L_CURLY,
-    R_CURLY
+    R_CURLY,
+    BOOLEAN
 };
 
 struct token {

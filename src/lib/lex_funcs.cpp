@@ -33,7 +33,7 @@ token getToken(int r, int c, string t, TokenType p) {
 std::vector<token> tokenize(const std::string& input) {
     vector<token> all_tokens;
     std::istringstream stream(input);
-    char ar_op[11] = {'+', '-', '*', '/', '(', ')', ' ', '\t', '%', '{','}'};
+    char ar_op[14] = {'+', '-', '*', '/', '(', ')', ' ', '\t', '%', '{','}', '|', '^', '&'};
     char c_op[4] = {'=', '>', '<', '!'};
     int row = 1;
     int col = 1;
@@ -66,8 +66,9 @@ std::vector<token> tokenize(const std::string& input) {
             else if (!temp_identifier.empty()){
                 if (temp_identifier == "while" || temp_identifier == "if" || temp_identifier == "else" || temp_identifier == "print") {
                     all_tokens.push_back(getToken(row, col, temp_identifier, TokenType::STATEMENT));
-                }
-                else {
+                } else if (temp_identifier == "true" || temp_identifier == "false") {
+                    all_tokens.push_back(getToken(row, col, temp_identifier, TokenType::BOOLEAN));
+                } else {
                     all_tokens.push_back(getToken(row, col, temp_identifier, TokenType::VARIABLES));
                 }
                 col += temp_identifier.length();
@@ -90,8 +91,9 @@ std::vector<token> tokenize(const std::string& input) {
             else if (!temp_identifier.empty()){
                 if (temp_identifier == "while" || temp_identifier == "if" || temp_identifier == "else" || temp_identifier == "print") {
                     all_tokens.push_back(getToken(row, col, temp_identifier, TokenType::STATEMENT));
-                }
-                else {
+                } else if (temp_identifier == "true" || temp_identifier == "false") {
+                    all_tokens.push_back(getToken(row, col, temp_identifier, TokenType::BOOLEAN));
+                } else {
                     all_tokens.push_back(getToken(row, col, temp_identifier, TokenType::VARIABLES));
                 }
                 col += temp_identifier.length();
@@ -148,8 +150,9 @@ std::vector<token> tokenize(const std::string& input) {
             else if (!temp_identifier.empty()){
                 if (temp_identifier == "while" || temp_identifier == "if" || temp_identifier == "else" || temp_identifier == "print") {
                     all_tokens.push_back(getToken(row, col, temp_identifier, TokenType::STATEMENT));
-                }
-                else {
+                } else if (temp_identifier == "true" || temp_identifier == "false") {
+                    all_tokens.push_back(getToken(row, col, temp_identifier, TokenType::BOOLEAN));
+                } else {
                     all_tokens.push_back(getToken(row, col, temp_identifier, TokenType::VARIABLES));
                 }
                 col += temp_identifier.length();
@@ -185,8 +188,9 @@ std::vector<token> tokenize(const std::string& input) {
     else if (!temp_identifier.empty()){
         if (temp_identifier == "while" || temp_identifier == "if" || temp_identifier == "else" || temp_identifier == "print") {
             all_tokens.push_back(getToken(row, col, temp_identifier, TokenType::STATEMENT));
-        }
-        else {
+        } else if (temp_identifier == "true" || temp_identifier == "false") {
+            all_tokens.push_back(getToken(row, col, temp_identifier, TokenType::BOOLEAN));
+        } else {
             all_tokens.push_back(getToken(row, col, temp_identifier, TokenType::VARIABLES));
         }
         col += temp_identifier.length();
