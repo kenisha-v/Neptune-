@@ -51,7 +51,7 @@ std::vector<token> tokenize(const std::string& input) {
 
         if (isC_oper){
             if (c_oper == "=" && in_char != '=') {
-                all_tokens.push_back(getToken(row, col, string(1, in_char), getType('=')));
+                all_tokens.push_back(getToken(row, col, c_oper, getType('=')));
                 col++;
                 c_oper = "";
                 isC_oper = false;
