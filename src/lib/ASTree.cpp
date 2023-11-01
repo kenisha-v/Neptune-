@@ -420,7 +420,7 @@ ASTNode* ASTree::parse_assignment() {
 ASTNode* ASTree::parse_addition_subtraction() {
     ASTNode* node = nullptr;
     try {
-        node = parse_multiplication_division();
+        node = parse_multiplication_division_modulo();
         
         while (get_current_token().type == TokenType::OPERATOR && (get_current_token().text == "+" || get_current_token().text == "-")) {
             if (get_current_token().text == "+") {
@@ -428,13 +428,13 @@ ASTNode* ASTree::parse_addition_subtraction() {
                 int temp_col            = get_current_token().col;
                 std::string temp_text   = get_current_token().text;
                 consume_token();
-                node = new AdditionNode(temp_row, temp_col, node, parse_multiplication_division());
+                node = new AdditionNode(temp_row, temp_col, node, parse_multiplication_division_modulo());
             } else if (get_current_token().text == "-") {
                 int temp_row            = get_current_token().row;
                 int temp_col            = get_current_token().col;
                 std::string temp_text   = get_current_token().text;
                 consume_token();
-                node = new SubtractionNode(temp_row, temp_col, node, parse_multiplication_division());
+                node = new SubtractionNode(temp_row, temp_col, node, parse_multiplication_division_modulo());
             }
         }
         
@@ -445,12 +445,12 @@ ASTNode* ASTree::parse_addition_subtraction() {
     }
 }
 
-ASTNode* ASTree::parse_multiplication_division() {
+ASTNode* ASTree::parse_multiplication_division_modulo() {
     ASTNode* node = nullptr;
     try{
         node = parse_factor();
         
-        while (get_current_token().type == TokenType::OPERATOR && (get_current_token().text == "*" || get_current_token().text == "/")) {
+        while (get_current_token().type == TokenType::OPERATOR && (get_current_token().text == "*" || get_current_token().text == "/" || get_current_token().text == "%")) {
             if (get_current_token().text == "*") {
                 int temp_row            = get_current_token().row;
                 int temp_col            = get_current_token().col;
@@ -463,6 +463,12 @@ ASTNode* ASTree::parse_multiplication_division() {
                 std::string temp_text   = get_current_token().text;
                 consume_token();
                 node = new DivisionNode(temp_row, temp_col, node, parse_factor());
+            } else if (get_current_token().text == "%") {
+                int temp_row            = get_current_token().row;
+                int temp_col            = get_current_token().col;
+                std::string temp_text   = get_current_token().text;
+                consume_token();
+                node = new ModuloNode(temp_row, temp_col, node, parse_factor());
             }
         }
         

@@ -209,7 +209,7 @@ class ASTree {
     ASTNode* parse_expression();
     ASTNode* parse_assignment();
     ASTNode* parse_addition_subtraction();
-    ASTNode* parse_multiplication_division();
+    ASTNode* parse_multiplication_division_modulo();
     ASTNode* parse_factor();
 
 public:
