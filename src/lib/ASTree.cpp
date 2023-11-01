@@ -5,8 +5,8 @@
 ASTNode::ASTNode(int l, int c) : line(l), column(c) {}
 ASTNode::~ASTNode() = default;
 
-double ASTNode::evaluate(std::unordered_map<std::string, double>*){
-        return 0.0;
+value_bd ASTNode::evaluate(std::unordered_map<std::string, value_bd>*){
+        return value_bd("bool",0.0); //never used
     }
 
 std::string ASTNode::print(){
@@ -18,8 +18,8 @@ std::string ASTNode::print(){
 NumberNode::NumberNode(int line, int column, const std::string& value)
         : ASTNode(line, column), value(value) {}
 
-double NumberNode::evaluate(std::unordered_map<std::string, double>*){
-        return std::stod(value);
+value_bd NumberNode::evaluate(std::unordered_map<std::string, value_bd>*){
+    return value_bd("double",std::stod(value));
     }
 
 std::string NumberNode::print() {
@@ -34,7 +34,7 @@ std::string IdentifierNode::print() {
     return name;
 }
 
-double IdentifierNode::evaluate(std::unordered_map<std::string, double>* var_map){
+value_bd IdentifierNode::evaluate(std::unordered_map<std::string, value_bd>* var_map){
     if ((*var_map).find(name) == (*var_map).end()) {
         throw EvaluationError("unknown identifier " + name);
     }
@@ -50,8 +50,8 @@ AssignmentNode::~AssignmentNode(){
         delete value;
 }
 
-double AssignmentNode::evaluate(std::unordered_map<std::string, double>* var_map){
-        double solved_value_right_node = value->evaluate(var_map);
+value_bd AssignmentNode::evaluate(std::unordered_map<std::string, value_bd>* var_map){
+        value_bd solved_value_right_node = value->evaluate(var_map);
         (*var_map)[id->name] = solved_value_right_node;
         return solved_value_right_node;
 }
@@ -69,9 +69,11 @@ AdditionNode::~AdditionNode(){
         delete right;
     }
 
-double AdditionNode::evaluate(std::unordered_map<std::string, double>* var_map){
-        double ans = (left->evaluate(var_map) + right->evaluate(var_map));
-        return ans;
+value_bd AdditionNode::evaluate(std::unordered_map<std::string, value_bd>* var_map){
+        if(left->evaluate(var_map).type_tag == "bool" || right->evaluate(var_map).type_tag == "bool"){
+            throw EvaluationError("invalid operand type");
+        }
+        return value_bd("double",(left->evaluate(var_map).Double + right->evaluate(var_map).Double));
     }
     
 std::string AdditionNode::print(){
@@ -87,9 +89,11 @@ SubtractionNode::~SubtractionNode(){
         delete right;
     }
 
-double SubtractionNode::evaluate(std::unordered_map<std::string, double>* var_map){
-        double ans = (left->evaluate(var_map) - right->evaluate(var_map));
-        return ans;
+value_bd SubtractionNode::evaluate(std::unordered_map<std::string, value_bd>* var_map){
+        if(left->evaluate(var_map).type_tag == "bool" || right->evaluate(var_map).type_tag == "bool"){
+            throw EvaluationError("invalid operand type");
+        }
+        return value_bd("double",(left->evaluate(var_map).Double - right->evaluate(var_map).Double));
     }
 
 std::string SubtractionNode::print(){
@@ -105,9 +109,11 @@ MultiplicationNode::~MultiplicationNode(){
         delete right;
     }
     
-double MultiplicationNode::evaluate(std::unordered_map<std::string, double>* var_map){
-        double ans = (left->evaluate(var_map) * right->evaluate(var_map));
-        return ans;
+value_bd MultiplicationNode::evaluate(std::unordered_map<std::string, value_bd>* var_map){
+        if(left->evaluate(var_map).type_tag == "bool" || right->evaluate(var_map).type_tag == "bool"){
+            throw EvaluationError("invalid operand type");
+        }
+        return value_bd("double",(left->evaluate(var_map).Double * right->evaluate(var_map).Double));
     }
     
 std::string MultiplicationNode::print(){
@@ -123,13 +129,14 @@ DivisionNode::~DivisionNode(){
         delete right;
     }
     
-double DivisionNode::evaluate(std::unordered_map<std::string, double>* var_map) {
-        double rightValue = right->evaluate(var_map);
-        if (rightValue == 0.0) {
+value_bd DivisionNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+        if(left->evaluate(var_map).type_tag == "bool" || right->evaluate(var_map).type_tag == "bool"){
+            throw EvaluationError("invalid operand type");
+        }
+        if (right->evaluate(var_map).Double == 0.0) {
             throw EvaluationError("division by zero.");
         }
-        double ans = left->evaluate(var_map) / rightValue;
-        return ans;
+        return value_bd("double",(left->evaluate(var_map).Double / right->evaluate(var_map).Double));
     }
     
 std::string DivisionNode::print(){
@@ -138,12 +145,214 @@ std::string DivisionNode::print(){
 
 //----------------------
 
+ModuloNode::ModuloNode(int line, int column, ASTNode* left, ASTNode* right) : ASTNode(line, column), left(left), right(right){}
+    
+ModuloNode::~ModuloNode(){
+        delete left;
+        delete right;
+    }
+    
+value_bd ModuloNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+        if(left->evaluate(var_map).type_tag == "bool" || right->evaluate(var_map).type_tag == "bool"){
+            throw EvaluationError("invalid operand type");
+        }
+        if (right->evaluate(var_map).Double == 0.0) {
+            throw EvaluationError("division by zero.");
+        }
+        double ans = std::fmod(left->evaluate(var_map).Double, right->evaluate(var_map).Double);
+        return value_bd("double", ans);
 
+    }
+    
+std::string ModuloNode::print(){
+        return "(" + left->print() + " % " + right->print() + ")";
+    }
 
+//----------------------
+
+LessNode::LessNode(int line, int column, ASTNode* left, ASTNode* right) : ASTNode(line, column), left(left), right(right){}
+    
+LessNode::~LessNode(){
+        delete left;
+        delete right;
+    }
+    
+value_bd LessNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+        if(left->evaluate(var_map).type_tag == "bool" || right->evaluate(var_map).type_tag == "bool"){
+            throw EvaluationError("invalid operand type");
+        }
+        return value_bd("bool", left->evaluate(var_map).Double < right->evaluate(var_map).Double);
+    }
+    
+std::string LessNode::print(){
+        return "(" + left->print() + " < " + right->print() + ")";
+    }
+
+//----------------------
+
+LessEqualNode::LessEqualNode(int line, int column, ASTNode* left, ASTNode* right) : ASTNode(line, column), left(left), right(right){}
+    
+LessEqualNode::~LessEqualNode(){
+        delete left;
+        delete right;
+    }
+    
+value_bd LessEqualNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+        if(left->evaluate(var_map).type_tag == "bool" || right->evaluate(var_map).type_tag == "bool"){
+            throw EvaluationError("invalid operand type");
+        }
+        return value_bd("bool", left->evaluate(var_map).Double <= right->evaluate(var_map).Double);
+    }
+    
+std::string LessEqualNode::print(){
+        return "(" + left->print() + " <= " + right->print() + ")";
+    }
+
+//----------------------
+
+MoreNode::MoreNode(int line, int column, ASTNode* left, ASTNode* right) : ASTNode(line, column), left(left), right(right){}
+    
+MoreNode::~MoreNode(){
+        delete left;
+        delete right;
+    }
+    
+value_bd MoreNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+        if(left->evaluate(var_map).type_tag == "bool" || right->evaluate(var_map).type_tag == "bool"){
+            throw EvaluationError("invalid operand type");
+        }
+        return value_bd("bool", left->evaluate(var_map).Double > right->evaluate(var_map).Double);
+    }
+    
+std::string MoreNode::print(){
+        return "(" + left->print() + " > " + right->print() + ")";
+    }
+
+//----------------------
+
+MoreEqualNode::MoreEqualNode(int line, int column, ASTNode* left, ASTNode* right) : ASTNode(line, column), left(left), right(right){}
+    
+MoreEqualNode::~MoreEqualNode(){
+        delete left;
+        delete right;
+    }
+    
+value_bd MoreEqualNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+        if(left->evaluate(var_map).type_tag == "bool" || right->evaluate(var_map).type_tag == "bool"){
+            throw EvaluationError("invalid operand type");
+        }
+        return value_bd("bool", left->evaluate(var_map).Double >= right->evaluate(var_map).Double);
+    }
+    
+std::string MoreEqualNode::print(){
+        return "(" + left->print() + " >= " + right->print() + ")";
+    }
+
+//----------------------
+
+EqualNode::EqualNode(int line, int column, ASTNode* left, ASTNode* right) : ASTNode(line, column), left(left), right(right){}
+    
+EqualNode::~EqualNode(){
+        delete left;
+        delete right;
+    }
+    
+value_bd EqualNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+        if(left->evaluate(var_map).type_tag == "bool" || right->evaluate(var_map).type_tag == "bool"){
+            throw EvaluationError("invalid operand type");
+        }
+        return value_bd("bool", left->evaluate(var_map).Double == right->evaluate(var_map).Double);
+    }
+    
+std::string EqualNode::print(){
+        return "(" + left->print() + " == " + right->print() + ")";
+    }
+
+//----------------------
+
+NotEqualNode::NotEqualNode(int line, int column, ASTNode* left, ASTNode* right) : ASTNode(line, column), left(left), right(right){}
+    
+NotEqualNode::~NotEqualNode(){
+        delete left;
+        delete right;
+    }
+    
+value_bd NotEqualNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+        if(left->evaluate(var_map).type_tag == "bool" || right->evaluate(var_map).type_tag == "bool"){
+            throw EvaluationError("invalid operand type");
+        }
+        return value_bd("bool", left->evaluate(var_map).Double != right->evaluate(var_map).Double);
+    }
+    
+std::string NotEqualNode::print(){
+        return "(" + left->print() + " != " + right->print() + ")";
+    }
+
+//----------------------
+
+LandNode::LandNode(int line, int column, ASTNode* left, ASTNode* right) : ASTNode(line, column), left(left), right(right){}
+    
+LandNode::~LandNode(){
+        delete left;
+        delete right;
+    }
+    
+value_bd LandNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+        if(left->evaluate(var_map).type_tag != "bool" || right->evaluate(var_map).type_tag != "bool"){
+            throw EvaluationError("invalid operand type");
+        }
+        return value_bd("bool", left->evaluate(var_map).Bool && right->evaluate(var_map).Bool);
+    }
+    
+std::string LandNode::print(){
+        return "(" + left->print() + " & " + right->print() + ")";
+    }
+
+//----------------------
+
+LxorNode::LxorNode(int line, int column, ASTNode* left, ASTNode* right) : ASTNode(line, column), left(left), right(right){}
+    
+LxorNode::~LxorNode(){
+        delete left;
+        delete right;
+    }
+    
+value_bd LxorNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+        if(left->evaluate(var_map).type_tag != "bool" || right->evaluate(var_map).type_tag != "bool"){
+            throw EvaluationError("invalid operand type");
+        }
+        return value_bd("bool", ((!left->evaluate(var_map).Bool) && right->evaluate(var_map).Bool) || (left->evaluate(var_map).Bool && (!right->evaluate(var_map).Bool)));
+    }
+    
+std::string LxorNode::print(){
+        return "(" + left->print() + " ^ " + right->print() + ")";
+    }
+
+//----------------------
+
+LorNode::LorNode(int line, int column, ASTNode* left, ASTNode* right) : ASTNode(line, column), left(left), right(right){}
+    
+LorNode::~LorNode(){
+        delete left;
+        delete right;
+    }
+    
+value_bd LorNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+        if(left->evaluate(var_map).type_tag != "bool" || right->evaluate(var_map).type_tag != "bool"){
+            throw EvaluationError("invalid operand type");
+        }
+        return value_bd("bool", left->evaluate(var_map).Bool || right->evaluate(var_map).Bool);
+    }
+    
+std::string LorNode::print(){
+        return "(" + left->print() + " | " + right->print() + ")";
+    }
+
+//----------------------
 
 
 //ASTree Public Function Definitions
-ASTree::ASTree(const std::vector<token>& Tokens, std::unordered_map<std::string, double>* map){
+ASTree::ASTree(const std::vector<token>& Tokens, std::unordered_map<std::string, value_bd>* map){
     tokens=Tokens;
     try {
         head = parse_expression();
@@ -161,7 +370,7 @@ ASTree::~ASTree(){
     delete head;
 }
 
-double ASTree::evaluate(){
+value_bd ASTree::evaluate(){
     return head->evaluate(var_map);
 }
 

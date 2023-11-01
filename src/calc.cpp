@@ -2,8 +2,8 @@
 
 int main() {
     std::string input;
-    std::unordered_map<std::string, double> Variable_Values; 
-    std::unordered_map<std::string, double> backup;
+    std::unordered_map<std::string, value_bd> Variable_Values; 
+    std::unordered_map<std::string, value_bd> backup;
     ASTree* curr_tree = nullptr;
 
     while (true){
@@ -16,7 +16,12 @@ int main() {
             std::vector<token> input_tokens = tokenize(input);
             curr_tree = new ASTree(input_tokens, &Variable_Values);
             curr_tree->print();
-            std::cout << curr_tree->evaluate() << std::endl;
+            //check statement for double or bool return type
+            if(curr_tree->evaluate().type_tag == "bool"){
+                std::cout << curr_tree->evaluate().Bool << std::endl;
+            } else{
+                std::cout << curr_tree->evaluate().Double << std::endl;
+            }
         } catch (const SyntaxError& e) {
             std::cout << e.what() << std::endl;
         } catch (const ParseError& e) {
