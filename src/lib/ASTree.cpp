@@ -25,6 +25,24 @@ value_bd NumberNode::evaluate(std::unordered_map<std::string, value_bd>*){
 std::string NumberNode::print() {
         return value;
     }
+//----------------------
+
+BooleanNode::BooleanNode(int line, int column, const std::string& value)
+        : ASTNode(line, column), value(value) {}
+
+value_bd BooleanNode::evaluate(std::unordered_map<std::string, value_bd>*){
+    double double_val = -1;
+    if(value == "false") {
+        double_val = 0;
+    } else if(value == "true") {
+        double_val = 1;
+    }
+    return value_bd("bool", double_val);
+    }
+
+std::string BooleanNode::print() {
+        return value;
+    }
 
 //----------------------
 
@@ -258,10 +276,14 @@ EqualNode::~EqualNode(){
     }
     
 value_bd EqualNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
-        if(left->evaluate(var_map).type_tag == "bool" || right->evaluate(var_map).type_tag == "bool"){
+        if((left->evaluate(var_map).type_tag == "bool" && right->evaluate(var_map).type_tag != "bool") || (left->evaluate(var_map).type_tag != "bool" && right->evaluate(var_map).type_tag == "bool")) {
             throw EvaluationError("invalid operand type");
         }
-        return value_bd("bool", left->evaluate(var_map).Double == right->evaluate(var_map).Double);
+        if(left->evaluate(var_map).type_tag == "bool") {
+            return value_bd("bool", left->evaluate(var_map).Bool == right->evaluate(var_map).Bool);
+        } else {
+            return value_bd("bool", left->evaluate(var_map).Double == right->evaluate(var_map).Double);
+        }
     }
     
 std::string EqualNode::print(){
@@ -278,10 +300,14 @@ NotEqualNode::~NotEqualNode(){
     }
     
 value_bd NotEqualNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
-        if(left->evaluate(var_map).type_tag == "bool" || right->evaluate(var_map).type_tag == "bool"){
+        if((left->evaluate(var_map).type_tag == "bool" && right->evaluate(var_map).type_tag != "bool") || (left->evaluate(var_map).type_tag != "bool" && right->evaluate(var_map).type_tag == "bool")) {
             throw EvaluationError("invalid operand type");
         }
-        return value_bd("bool", left->evaluate(var_map).Double != right->evaluate(var_map).Double);
+        if(left->evaluate(var_map).type_tag == "bool") {
+            return value_bd("bool", left->evaluate(var_map).Bool != right->evaluate(var_map).Bool);
+        } else {
+            return value_bd("bool", left->evaluate(var_map).Double != right->evaluate(var_map).Double);
+        }
     }
     
 std::string NotEqualNode::print(){
@@ -393,7 +419,7 @@ ASTNode* ASTree::parse_assignment() {
     ASTNode* value = nullptr;
     
     try{
-        node = parse_addition_subtraction();
+        node = parse_Lor();
         
         if (get_current_token().type == TokenType::OPERATOR && get_current_token().text == "=") {
             int temp_row            = get_current_token().row;
@@ -413,6 +439,143 @@ ASTNode* ASTree::parse_assignment() {
     } catch (const ParseError& e){
         delete node;
         delete value;
+        throw e;
+    }
+}
+
+ASTNode* ASTree::parse_Lor() {
+    ASTNode* node = nullptr;
+    ASTNode* value = nullptr;
+    
+    try{
+        node = parse_Lxor();
+        
+        if (get_current_token().type == TokenType::L_OPERATOR && get_current_token().text == "|") {
+            int temp_row            = get_current_token().row;
+            int temp_col            = get_current_token().col;
+            token temp_token        = get_current_token();
+            consume_token();
+            node = new LorNode(temp_row, temp_col, node, parse_Lxor());
+        }
+        
+        return node;
+    } catch (const ParseError& e){
+        delete node;
+        delete value;
+        throw e;
+    }
+}
+
+ASTNode* ASTree::parse_Lxor() {
+    ASTNode* node = nullptr;
+    ASTNode* value = nullptr;
+    
+    try{
+        node = parse_Land();
+        
+        if (get_current_token().type == TokenType::L_OPERATOR && get_current_token().text == "^") {
+            int temp_row            = get_current_token().row;
+            int temp_col            = get_current_token().col;
+            token temp_token        = get_current_token();
+            consume_token();
+            node = new LxorNode(temp_row, temp_col, node, parse_Land());
+        }
+        
+        return node;
+    } catch (const ParseError& e){
+        delete node;
+        delete value;
+        throw e;
+    }
+}
+
+ASTNode* ASTree::parse_Land() {
+    ASTNode* node = nullptr;
+    ASTNode* value = nullptr;
+    
+    try{
+        node = parse_equality();
+        
+        if (get_current_token().type == TokenType::L_OPERATOR && get_current_token().text == "&") {
+            int temp_row            = get_current_token().row;
+            int temp_col            = get_current_token().col;
+            token temp_token        = get_current_token();
+            consume_token();
+            node = new LandNode(temp_row, temp_col, node, parse_equality());
+        }
+        
+        return node;
+    } catch (const ParseError& e){
+        delete node;
+        delete value;
+        throw e;
+    }
+}
+
+ASTNode* ASTree::parse_equality() {
+    ASTNode* node = nullptr;
+    try {
+        node = parse_compare();
+
+        while(get_current_token().type == TokenType::C_OPERATOR && (get_current_token().text == "==" || get_current_token().text == "!=")) {
+            if (get_current_token().text == "==") {
+                int temp_row            = get_current_token().row;
+                int temp_col            = get_current_token().col;
+                std::string temp_text   = get_current_token().text;
+                consume_token();
+                node = new EqualNode(temp_row, temp_col, node, parse_compare());
+            } else if (get_current_token().text == "!=") {
+                int temp_row            = get_current_token().row;
+                int temp_col            = get_current_token().col;
+                std::string temp_text   = get_current_token().text;
+                consume_token();
+                node = new NotEqualNode(temp_row, temp_col, node, parse_compare());
+            }
+        }
+
+        return node;
+    }  catch (const ParseError& e){
+        delete node;
+        throw e;
+    }
+}
+
+ASTNode* ASTree::parse_compare() {
+    ASTNode* node = nullptr;
+    try {
+        node = parse_addition_subtraction();
+
+        while(get_current_token().type == TokenType::C_OPERATOR && (get_current_token().text == ">" || get_current_token().text == ">=" || get_current_token().text == "<" || get_current_token().text == "<=")) {
+            if (get_current_token().text == ">") {
+                int temp_row            = get_current_token().row;
+                int temp_col            = get_current_token().col;
+                std::string temp_text   = get_current_token().text;
+                consume_token();
+                node = new MoreNode(temp_row, temp_col, node, parse_addition_subtraction());
+            } else if (get_current_token().text == ">=") {
+                int temp_row            = get_current_token().row;
+                int temp_col            = get_current_token().col;
+                std::string temp_text   = get_current_token().text;
+                consume_token();
+                node = new MoreEqualNode(temp_row, temp_col, node, parse_addition_subtraction());
+            } else if (get_current_token().text == "<") {
+                int temp_row            = get_current_token().row;
+                int temp_col            = get_current_token().col;
+                std::string temp_text   = get_current_token().text;
+                consume_token();
+                node = new LessNode(temp_row, temp_col, node, parse_addition_subtraction());
+            } else if (get_current_token().text == "<=") {
+                int temp_row            = get_current_token().row;
+                int temp_col            = get_current_token().col;
+                std::string temp_text   = get_current_token().text;
+                consume_token();
+                node = new LessEqualNode(temp_row, temp_col, node, parse_addition_subtraction());
+            }
+        }
+
+        return node;
+    }  catch (const ParseError& e){
+        delete node;
         throw e;
     }
 }
@@ -496,6 +659,10 @@ ASTNode* ASTree::parse_factor() {
             return node;
         } else if (get_current_token().type == TokenType::VARIABLES) {
             ASTNode* node = new IdentifierNode(get_current_token().row, get_current_token().col, get_current_token().text);
+            consume_token();
+            return node;
+        } else if (get_current_token().type == TokenType::BOOLEAN) {
+            ASTNode* node = new BooleanNode(get_current_token().row, get_current_token().col, get_current_token().text);
             consume_token();
             return node;
         } else {

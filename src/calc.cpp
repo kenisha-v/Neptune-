@@ -3,7 +3,7 @@
 int main() {
     std::string input;
     std::unordered_map<std::string, value_bd> Variable_Values; 
-    std::unordered_map<std::string, value_bd> backup;
+    std::unordered_map<std::string, value_bd> backup; //incase the parsing fails midway, we dont want to update variables
     ASTree* curr_tree = nullptr;
 
     while (true){
@@ -17,9 +17,13 @@ int main() {
             curr_tree = new ASTree(input_tokens, &Variable_Values);
             curr_tree->print();
             //check statement for double or bool return type
-            if(curr_tree->evaluate().type_tag == "bool"){
-                std::cout << curr_tree->evaluate().Bool << std::endl;
-            } else{
+            if(curr_tree->evaluate().type_tag == "bool") {
+                if(curr_tree->evaluate().Bool) {
+                    std::cout << "true" << std::endl;
+                } else {
+                    std::cout << "false" << std::endl;
+                }
+            } else {
                 std::cout << curr_tree->evaluate().Double << std::endl;
             }
         } catch (const SyntaxError& e) {

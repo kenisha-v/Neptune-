@@ -52,6 +52,14 @@ public:
     std::string print();
 };
 
+class BooleanNode : public ASTNode {
+public:
+    std::string value;
+    explicit BooleanNode(int line, int column, const std::string& value);
+    value_bd evaluate(std::unordered_map<std::string, value_bd>*);
+    std::string print();
+};
+
 class IdentifierNode : public ASTNode {
 public:
     std::string name;
@@ -208,6 +216,11 @@ class ASTree {
     
     ASTNode* parse_expression();
     ASTNode* parse_assignment();
+    ASTNode* parse_Lor();
+    ASTNode* parse_Lxor();
+    ASTNode* parse_Land();
+    ASTNode* parse_equality();
+    ASTNode* parse_compare();
     ASTNode* parse_addition_subtraction();
     ASTNode* parse_multiplication_division_modulo();
     ASTNode* parse_factor();
