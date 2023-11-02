@@ -423,7 +423,7 @@ ASTNode* ASTree::parse_assignment() {
     
     try{
         node = parse_Lor();
-        
+
         if (get_current_token().type == TokenType::OPERATOR && get_current_token().text == "=") {
             int temp_row            = get_current_token().row;
             int temp_col            = get_current_token().col;
@@ -445,7 +445,12 @@ ASTNode* ASTree::parse_assignment() {
     } catch (const ParseError& e){
         delete node;
         delete value;
-        throw e;
+
+        while (get_current_token().type != TokenType::END){
+            consume_token();
+        }
+
+        throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
     }
 }
 

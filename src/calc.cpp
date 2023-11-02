@@ -31,6 +31,10 @@ int main() {
         } catch (const ParseError& e) {
             Variable_Values = backup; //not needed here, but just to be safe.
             std::cout << e.what() << std::endl;
+            std::string temp = e.what();
+            if(temp == "Unexpected token at line 1 column 15: |" || temp == "Unexpected token at line 1 column 21: |"){
+                cout << "testtttt :" << input << endl;
+            }
         } catch (const EvaluationError& e) {
             Variable_Values = backup;
             std::cout << e.what() << std::endl;
@@ -38,4 +42,4 @@ int main() {
         delete curr_tree;
         curr_tree = nullptr;
     }
-}
+} 
