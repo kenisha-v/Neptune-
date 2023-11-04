@@ -442,15 +442,10 @@ ASTNode* ASTree::parse_assignment() {
         }
         
         return node;
-    } catch (const ParseError& e){
+    } catch (const ParseError& e){ //fix here for END vala
         delete node;
         delete value;
-
-        while (get_current_token().type != TokenType::END){
-            consume_token();
-        }
-
-        throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+        throw e;
     }
 }
 
