@@ -9,7 +9,6 @@ int main() {
     while (true){
         try {
             std::getline(std::cin, input);
-            std::cout << input << '\n' ;
             if (std::cin.eof()) {
                 break;
             }
