@@ -14,6 +14,11 @@ int main() {
             }
             backup = Variable_Values;
             std::vector<token> input_tokens = tokenize(input);
+            
+            for(const token& token : input_tokens) {
+                std::cout << std::setw(4) << std::right << token.row << "   " << std::setw(2) << std::right << token.col << "  " << token.text << std::endl;
+            }
+            
             curr_tree = new ASTree(input_tokens, &Variable_Values);
             curr_tree->print();
             //check statement for double or bool return type
@@ -31,10 +36,10 @@ int main() {
         } catch (const ParseError& e) {
             Variable_Values = backup; //not needed here, but just to be safe.
             std::cout << e.what() << std::endl;
-            std::string temp = e.what();
-            if(temp == "Unexpected token at line 1 column 15: |" || temp == "Unexpected token at line 1 column 21: |"){
-                cout << "testtttt :" << input << endl;
-            }
+//            std::string temp = e.what();
+//            if(temp == "Unexpected token at line 1 column 15: |" || temp == "Unexpected token at line 1 column 21: |"){
+//                cout << "testtttt :" << input << endl;
+//            }
         } catch (const EvaluationError& e) {
             Variable_Values = backup;
             std::cout << e.what() << std::endl;

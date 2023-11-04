@@ -435,14 +435,14 @@ ASTNode* ASTree::parse_assignment() {
             }
             
             value = parse_assignment();
-            if (dynamic_cast<IdentifierNode*>(value) != nullptr) {
-                throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
-            }
+//            if (dynamic_cast<IdentifierNode*>(value) != nullptr) {
+//                throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+//            }
             return new AssignmentNode(temp_row, temp_col, static_cast<IdentifierNode*>(node), value);
         }
         
         return node;
-    } catch (const ParseError& e){ //fix here for END vala
+    } catch (const ParseError& e){
         delete node;
         delete value;
 
@@ -673,6 +673,7 @@ ASTNode* ASTree::parse_factor() {
             consume_token();
             return node;
         } else {
+            std::cout<< "Reached Else Case in factor... throwing error... \n";
             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
             return nullptr; //will be needing for the case of a unmatched right paren
         }
