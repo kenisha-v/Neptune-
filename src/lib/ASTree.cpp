@@ -673,7 +673,6 @@ ASTNode* ASTree::parse_factor() {
             consume_token();
             return node;
         } else {
-            std::cout<< "Reached Else Case in factor... throwing error... \n";
             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
             return nullptr; //will be needing for the case of a unmatched right paren
         }
