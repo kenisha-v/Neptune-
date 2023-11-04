@@ -50,6 +50,9 @@ std::vector<token> tokenize(const std::string& input) {
     while (stream.get(in_char)) {
 
         if (isC_oper){
+            if (c_oper == "!" && in_char != '=') {
+                throw SyntaxError(row, col);
+            }
             if (c_oper == "=" && in_char != '=') {
                 all_tokens.push_back(getToken(row, col, c_oper, getType('=')));
                 col++;
@@ -200,6 +203,24 @@ std::vector<token> tokenize(const std::string& input) {
         col += temp_identifier.length();
         temp_identifier = "";
         isIdentifier = false;
+    }
+
+    if (isC_oper){
+        if (c_oper == "!") {
+            throw SyntaxError(row, col);
+        }
+        if (c_oper == "=") {
+            all_tokens.push_back(getToken(row, col, c_oper, getType('=')));
+            col++;
+            c_oper = "";
+            isC_oper = false;
+        }
+        else {
+            all_tokens.push_back(getToken(row, col, c_oper, TokenType::C_OPERATOR));
+            col += c_oper.length();
+            c_oper = "";
+            isC_oper = false;
+        }
     }
     
     all_tokens.push_back(getToken(row, col, "END", TokenType::END));
