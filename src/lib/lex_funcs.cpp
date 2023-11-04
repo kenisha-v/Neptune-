@@ -50,6 +50,7 @@ std::vector<token> tokenize(const std::string& input) {
     while (stream.get(in_char)) {
 
         if (isC_oper){
+
             if (c_oper == "!" && in_char != '=') {
                 throw SyntaxError(row, col);
             }
