@@ -6,12 +6,8 @@ int main() {
     std::unordered_map<std::string, value_bd> backup; //incase the parsing fails midway, we dont want to update variables
     ASTree* curr_tree = nullptr;
 
-    while (true){
+    while (std::getline(std::cin, input)){
         try {
-            std::getline(std::cin, input);
-            if (std::cin.eof()) {
-                break;
-            }
             backup = Variable_Values;
             std::vector<token> input_tokens = tokenize(input);
             curr_tree = new ASTree(input_tokens, &Variable_Values);
