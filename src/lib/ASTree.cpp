@@ -446,7 +446,7 @@ ASTNode* ASTree::parse_assignment() {
         delete node;
         delete value;
 
-        while (get_current_token().type != TokenType::END){
+        while (get_current_token().type != TokenType::END){ //fix this for end col issue
             consume_token();
         }
 
