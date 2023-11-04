@@ -442,7 +442,7 @@ ASTNode* ASTree::parse_assignment() {
         }
         
         return node;
-    } catch (const ParseError& e){
+    } catch (const ParseError& e){ //fix here for END vala
         delete node;
         delete value;
 
@@ -461,7 +461,7 @@ ASTNode* ASTree::parse_Lor() {
     try{
         node = parse_Lxor();
         
-        if (get_current_token().type == TokenType::L_OPERATOR && get_current_token().text == "|") {
+        while (get_current_token().type == TokenType::L_OPERATOR && get_current_token().text == "|") {
             int temp_row            = get_current_token().row;
             int temp_col            = get_current_token().col;
             token temp_token        = get_current_token();
@@ -484,7 +484,7 @@ ASTNode* ASTree::parse_Lxor() {
     try{
         node = parse_Land();
         
-        if (get_current_token().type == TokenType::L_OPERATOR && get_current_token().text == "^") {
+        while (get_current_token().type == TokenType::L_OPERATOR && get_current_token().text == "^") {
             int temp_row            = get_current_token().row;
             int temp_col            = get_current_token().col;
             token temp_token        = get_current_token();
@@ -507,7 +507,7 @@ ASTNode* ASTree::parse_Land() {
     try{
         node = parse_equality();
         
-        if (get_current_token().type == TokenType::L_OPERATOR && get_current_token().text == "&") {
+        while (get_current_token().type == TokenType::L_OPERATOR && get_current_token().text == "&") {
             int temp_row            = get_current_token().row;
             int temp_col            = get_current_token().col;
             token temp_token        = get_current_token();
