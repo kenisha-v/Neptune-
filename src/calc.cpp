@@ -34,4 +34,4 @@ int main() {
         delete curr_tree;
         curr_tree = nullptr;
     }
-} 
+} //update exit codes
