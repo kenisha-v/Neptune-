@@ -159,6 +159,9 @@ SNode* STree::parse_block() {
         consume_token(); //eats up left curly
         int open_braces = 0;
         while (open_braces>=0){
+            if(get_current_token().type == TokenType::END) {
+                throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+            }
             if (get_current_token().type == TokenType::L_CURLY){
                 open_braces++;
             } else if (get_current_token().type == TokenType::R_CURLY){
@@ -180,8 +183,9 @@ SNode* STree::parse_block() {
                 consume_token(); //eats up left curly
                 int open_braces = 0;
                 while (open_braces>=0){
-                    // false_block_tokens.push_back(get_current_token());
-                    // consume_token();
+                    if(get_current_token().type == TokenType::END) {
+                        throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+                    }
                     if (get_current_token().type == TokenType::L_CURLY){
                         open_braces++;
                     } else if (get_current_token().type == TokenType::R_CURLY){
@@ -202,6 +206,9 @@ SNode* STree::parse_block() {
                 consume_token();
                 bool encountered = false;
                 while (true) {
+                    if (get_current_token().type == TokenType::END) {
+                        throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+                    }
                     if (encountered) {
                         if (get_current_token().text != "else") {
                             break;
@@ -286,9 +293,6 @@ SNode* STree::parse_block() {
         int temp_row = get_current_token().row;
         int temp_col = get_current_token().col;
         while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) {
-            if(get_current_token().type != TokenType::END) {
-                //throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
-            }
             temp_row = get_current_token().row;
             temp_col = get_current_token().col;
             expression_tokens.push_back(get_current_token());
