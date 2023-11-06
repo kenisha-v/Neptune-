@@ -9,7 +9,7 @@ std::vector<token> find_condition(std::vector<token> input_tokens) {
             cond.push_back(input_tokens[input_tokens.size()-1]);
             break;
         }
-        else if (input_tokens[i].text != "while" && input_tokens[i].text != "if" && input_tokens[i].text != "print") {
+        else if (input_tokens[i].text != "while" && input_tokens[i].text != "if" && input_tokens[i].text != "print" && input_tokens[i].text != "else") {
             cond.push_back(input_tokens[i]);
         }
     }
@@ -26,6 +26,8 @@ int main() {
     size_t indent = 0;
     std::string output;
     int line = 0;
+    bool if_else = false;
+    bool if_else_closed = false;
  
 
     while (std::getline(std::cin, input)){
@@ -35,6 +37,18 @@ int main() {
             if (input_tokens.size() <=1) {
                 ++line;
                 continue;
+            }
+            if (if_else_closed && input_tokens.at(0).text != "else") {
+                indent -= 4;
+                for (size_t i = 0; i < indent; ++i) {
+                    output += " ";
+                }
+                output += "}\n";
+                if_else = false;
+                if_else_closed = false;
+            }
+            else {
+                if_else_closed = false;
             }
             if (input_tokens.at(0).text == "while") {
                 for (size_t i = 0; i < indent; ++i) {
@@ -63,6 +77,18 @@ int main() {
                 output += "else ";
                 output += "{\n";
                 indent += 4;
+                if (input_tokens.at(1).text == "if") {
+                    for (size_t i = 0; i < indent; ++i) {
+                        output += " ";
+                    }
+                    output += "if ";
+                    std::vector<token> if_cond = find_condition(input_tokens);
+                    curr_tree = new ASTree(if_cond, &Variable_Values);
+                    output += curr_tree->print_no_endl();
+                    output += " {\n";
+                    indent += 4;
+                    if_else = true;
+                }
             } else if (input_tokens.at(0).text == "print") {
                 for (size_t i = 0; i < indent; ++i) {
                     output += " ";
@@ -91,6 +117,17 @@ int main() {
                     output += " ";
                 }
                 output += "}\n";
+                if (if_else) {
+                    if_else_closed = true;
+                }
+                // if (if_else) {
+                //     indent -= 4;
+                //     for (size_t i = 0; i < indent; ++i) {
+                //         output += " ";
+                //     }
+                //     output += "}\n";
+                //     if_else = false;
+                // }
             } else {
                 curr_tree = new ASTree(input_tokens, &Variable_Values);
                 for (size_t i = 0; i < indent; ++i) {
