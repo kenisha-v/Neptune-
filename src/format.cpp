@@ -26,7 +26,7 @@ int main() {
     size_t indent = 0;
     std::string output;
     int line = 0;
-    bool got_error = false;
+ 
 
     while (std::getline(std::cin, input)){
         try {
@@ -65,12 +65,18 @@ int main() {
                 indent += 4;
             } else if (input_tokens.at(0).text == "print") {
                 output += "print ";
-                 for (size_t i = 1; i < input_tokens.size()-1; ++i) {
-                    output += input_tokens[i].text;
-                    if (i != input_tokens.size()-2) {
-                        output += " ";
+                if (input_tokens.size()<=2) {
+                    for (size_t i = 1; i < input_tokens.size()-1; ++i) {
+                        output += input_tokens[i].text;
+                        if (i != input_tokens.size()-2) {
+                            output += " ";
+                        }
                     }
-                 }
+                    output += "\n";
+                }
+                else {
+                    output += curr_tree->print_no_endl() + "\n";
+                }
             } else if (input_tokens.at(0).text == "}") {
                 indent -= 4;
                 for (size_t i = 0; i < indent; ++i) {
@@ -100,17 +106,18 @@ int main() {
         } catch (const SyntaxError& e) {
             std::string message = "Syntax error on line " + std::to_string(e.get_row()+line) + " column " + std::to_string(e.get_col()) + ".";
             std::cout << message << std::endl;
-            got_error = true;
+            return 1;
+            
         } catch (const ParseError& e) {
             Variable_Values = backup; //not needed here, but just to be safe. 
             std::string message = "Unexpected token at line " + std::to_string(e.get_row()+line) + " column " + std::to_string(e.get_col()) + ": " + e.get_error_token().text;
             std::cout << message << std::endl;
-            got_error = true;
+            return 2;
         }
         delete curr_tree;
         curr_tree = nullptr;
     }
-    if (!got_error) {
-        std::cout << output ;
-    }
+    
+    std::cout << output ;
+    
 } 
