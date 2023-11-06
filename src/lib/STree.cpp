@@ -163,6 +163,7 @@ SNode* STree::parse_block() {
             int open_braces = 0;
             while (open_braces>=0){
                 if(get_current_token().type == TokenType::END) {
+                    delete exp;
                     throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
                 }
                 if (get_current_token().type == TokenType::L_CURLY){
@@ -177,7 +178,11 @@ SNode* STree::parse_block() {
             }
             consume_token(); //eats up closing right curly
             true_block_tokens.push_back(end_token);
-            true_run = new STree(true_block_tokens, var_map);
+            try {
+                true_run = new STree(true_block_tokens, var_map);
+            } catch (const ParseError& e) {
+                delete exp;
+            }
 
             if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "else") {
                 consume_token(); //eats up else
@@ -186,6 +191,8 @@ SNode* STree::parse_block() {
                     int open_braces = 0;
                     while (open_braces>=0){
                         if(get_current_token().type == TokenType::END) {
+                            delete exp;
+                            delete true_run;
                             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
                         }
                         if (get_current_token().type == TokenType::L_CURLY){
@@ -199,7 +206,12 @@ SNode* STree::parse_block() {
                         }   
                     }
                     false_block_tokens.push_back(end_token);
-                    false_run = new STree(false_block_tokens, var_map);
+                    try {
+                        false_run = new STree(false_block_tokens, var_map);
+                    } catch (const ParseError& e) {
+                        delete exp;
+                        delete true_run;
+                    }
                     consume_token(); //eats up closing right curly
                 } else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "if") { //else if block
                     std::vector<token> else_if;
@@ -208,6 +220,8 @@ SNode* STree::parse_block() {
                     bool encountered = false;
                     while (true) {
                         if (get_current_token().type == TokenType::END) {
+                            delete exp;
+                            delete true_run;
                             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
                         }
                         if (encountered) {
@@ -227,8 +241,15 @@ SNode* STree::parse_block() {
                         }
                     }
                     else_if.push_back(end_token);
-                    false_run = new STree(else_if, var_map);
+                    try {
+                        false_run = new STree(else_if, var_map);
+                    } catch (const ParseError& e) {
+                        delete exp;
+                        delete true_run;
+                    }
                 } else {
+                    delete exp;
+                    delete true_run;
                     throw ParseError(get_current_token().row, get_current_token().col, get_current_token()); //else followed by weird shit
                 }
             }
@@ -265,6 +286,7 @@ SNode* STree::parse_block() {
             int open_braces = 0;
             while (open_braces>=0){
                 if(get_current_token().type == TokenType::END) {
+                    delete exp;
                     throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
                 }
                 if (get_current_token().type == TokenType::L_CURLY){
@@ -278,7 +300,11 @@ SNode* STree::parse_block() {
                 }   
             }
             block_tokens.push_back(end_token);
-            run = new STree(block_tokens, var_map);
+            try {
+                run = new STree(block_tokens, var_map);
+            } catch (const ParseError& e) {
+                delete exp;
+            }
             consume_token(); //eats up closing right curly
             return new WhileNode(exp, parse_block(), run);
         // } catch (const ParseError& e) {
