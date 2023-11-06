@@ -26,7 +26,7 @@ int main() {
             std::cout << e.what() << std::endl;
             return 1;
         } catch (const ParseError& e) {
-            Variable_Values = backup; //not needed here, but just to be safe.
+            Variable_Values = backup; //not needed here, but just to be safe. 
             std::cout << e.what() << std::endl;
             return 2;
         } catch (const EvaluationError& e) {
