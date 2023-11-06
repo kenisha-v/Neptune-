@@ -64,6 +64,9 @@ int main() {
                 output += " {\n";
                 indent += 4;
             } else if (input_tokens.at(0).text == "print") {
+                for (size_t i = 0; i < indent; ++i) {
+                    output += " ";
+                }
                 output += "print ";
                 if (input_tokens.size()<=3) {
                     for (size_t i = 1; i < input_tokens.size()-1; ++i) {
@@ -75,6 +78,7 @@ int main() {
                     output += "\n";
                 }
                 else {
+                    
                     std::vector<token> print_cond = find_condition(input_tokens);
                     curr_tree = new ASTree(print_cond, &Variable_Values);
                     output += curr_tree->print_no_endl() + "\n";
