@@ -61,7 +61,7 @@ int main() {
                     output += " ";
                 }
                 output += "else ";
-                output += " {\n";
+                output += "{\n";
                 indent += 4;
             } else if (input_tokens.at(0).text == "print") {
                 for (size_t i = 0; i < indent; ++i) {
