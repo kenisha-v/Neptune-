@@ -78,7 +78,9 @@ int main() {
                     output += "\n";
                 }
                 else {
-                    
+                        for (size_t i = 0; i < indent; ++i) {
+                        output += " ";
+                    }
                     std::vector<token> print_cond = find_condition(input_tokens);
                     curr_tree = new ASTree(print_cond, &Variable_Values);
                     output += curr_tree->print_no_endl() + "\n";
