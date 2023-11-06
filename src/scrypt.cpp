@@ -9,9 +9,24 @@ int main() {
     while (std::cin.get(ch)) {
         input += ch;
     }
-    std::vector<token> tokens = tokenize(input);
-    my_tree = new STree(tokens, &var_map);
-    my_tree->evaluate();
+
+    try{
+        std::vector<token> tokens = tokenize(input);
+        my_tree = new STree(tokens, &var_map);
+        my_tree->evaluate();
+    } catch (const SyntaxError& e) {
+        std::cout << e.what() << std::endl;
+        return 1;
+    } catch (const ParseError& e) {
+        std::cout << e.what() << std::endl;
+        return 2;
+    } catch (const EvaluationError& e) {
+        std::cout << e.what() << std::endl;
+        return 3;
+    }
+
+    
+    
     
     return 0;
 }
