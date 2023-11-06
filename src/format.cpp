@@ -9,7 +9,7 @@ std::vector<token> find_condition(std::vector<token> input_tokens) {
             cond.push_back(input_tokens[input_tokens.size()-1]);
             break;
         }
-        else if (input_tokens[i].text != "while" && input_tokens[i].text != "if") {
+        else if (input_tokens[i].text != "while" && input_tokens[i].text != "if" && input_tokens[i].text != "print") {
             cond.push_back(input_tokens[i]);
         }
     }
@@ -75,6 +75,8 @@ int main() {
                     output += "\n";
                 }
                 else {
+                    std::vector<token> print_cond = find_condition(input_tokens);
+                    curr_tree = new ASTree(print_cond, &Variable_Values);
                     output += curr_tree->print_no_endl() + "\n";
                 }
             } else if (input_tokens.at(0).text == "}") {
