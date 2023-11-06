@@ -25,8 +25,7 @@ void ExpressionNode::evaluate(std::unordered_map<std::string, value_bd>* var_map
     }
 }
 ExpressionNode::~ExpressionNode() {
-    delete expression;
-    delete next;
+    
 }
 
 //-----------------
@@ -53,8 +52,6 @@ void WhileNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
     }
 }
 WhileNode::~WhileNode() {
-    delete expression;
-    delete next;
     delete trueBranch;
 }
 
@@ -82,8 +79,7 @@ void PrintNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
     }
 }
 PrintNode::~PrintNode() {
-    delete expression;
-    delete next;
+    
 }
 
 //-----------------
@@ -109,8 +105,6 @@ void IfNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
     }
 }
 IfNode::~IfNode() {
-    delete expression;
-    delete next;
     delete trueBranch;
     delete falseBranch;
 }
@@ -145,7 +139,7 @@ SNode* STree::parse_block() {
         ASTree* exp = nullptr;
         STree* true_run = nullptr;
         STree* false_run = nullptr;
-        try {
+        // try {
             int temp_row = get_current_token().row;
             int temp_col = get_current_token().col;
             consume_token(); //eats up if
@@ -239,16 +233,16 @@ SNode* STree::parse_block() {
                 }
             }
             return new IfNode(exp, parse_block(), true_run, false_run);
-        } catch (const ParseError& e) {
-            delete exp;
-            delete true_run;
-            delete false_run;
-            throw e;
-        }
+        // } catch (const ParseError& e) {
+        //     delete exp;
+        //     delete true_run;
+        //     delete false_run;
+        //     throw e;
+        // }
     } else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "while") {
         ASTree* exp = nullptr;
         STree* run = nullptr;
-        try {
+        // try {
             int temp_row = get_current_token().row;
             int temp_col = get_current_token().col;
             consume_token(); //eats up while
@@ -287,14 +281,14 @@ SNode* STree::parse_block() {
             run = new STree(block_tokens, var_map);
             consume_token(); //eats up closing right curly
             return new WhileNode(exp, parse_block(), run);
-        } catch (const ParseError& e) {
-            delete exp;
-            delete run;
-            throw e;
-        }
+        // } catch (const ParseError& e) {
+        //     delete exp;
+        //     delete run;
+        //     throw e;
+        // }
     } else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "print") {
         ASTree* exp = nullptr;
-        try {
+        // try {
             int temp_row = get_current_token().row;
             int temp_col = get_current_token().col;
             consume_token(); //eats up print
@@ -310,13 +304,13 @@ SNode* STree::parse_block() {
             expression_tokens.push_back(end_token);
             exp = new ASTree(expression_tokens, var_map);
             return new PrintNode(exp, parse_block());
-        } catch (const ParseError& e) {
-            delete exp;
-            throw e;
-        }
+        // } catch (const ParseError& e) {
+        //     delete exp;
+        //     throw e;
+        // }
     } else {
         ASTree* exp = nullptr;
-        try {
+        // try {
             std::vector<token> expression_tokens;
             int temp_row = get_current_token().row;
             int temp_col = get_current_token().col;
@@ -331,9 +325,9 @@ SNode* STree::parse_block() {
             expression_tokens.push_back(end_token);
             exp = new ASTree(expression_tokens, var_map);
             return new ExpressionNode(exp, parse_block());
-        } catch (const ParseError& e) {
-            delete exp;
-            throw e;
-        }
+        // } catch (const ParseError& e) {
+        //     delete exp;
+        //     throw e;
+        // }
     }
 }
