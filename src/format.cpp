@@ -65,7 +65,7 @@ int main() {
                 indent += 4;
             } else if (input_tokens.at(0).text == "print") {
                 output += "print ";
-                if (input_tokens.size()<=2) {
+                if (input_tokens.size()<=3) {
                     for (size_t i = 1; i < input_tokens.size()-1; ++i) {
                         output += input_tokens[i].text;
                         if (i != input_tokens.size()-2) {
