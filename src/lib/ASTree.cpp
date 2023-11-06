@@ -407,6 +407,14 @@ void ASTree::print(){
     std::cout << head->print() << std::endl;
 }
 
+std::string ASTree::print_no_endl(){
+    //std::cout << head->print();
+    std::string input;
+    input += head->print();
+    //std::cout << input;
+    return input;
+}
+
 
 //PARSING FUNCTION DEFINITIONS
 ASTNode* ASTree::parse_expression() {

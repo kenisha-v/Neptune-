@@ -230,6 +230,7 @@ public:
     ASTree(const std::vector<token>& Tokens, std::unordered_map<std::string, value_bd>* map);
     value_bd evaluate();
     void print();
+    std::string print_no_endl();
     ~ASTree();
 };
 
