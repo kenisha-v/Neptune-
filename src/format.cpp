@@ -76,7 +76,6 @@ int main() {
                         }
                     }
                     output += "\n";
-                    indent += 4;
                 }
                 else {
                     for (size_t i = 0; i < indent; ++i) {
