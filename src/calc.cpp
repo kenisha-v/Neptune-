@@ -24,15 +24,12 @@ int main() {
             }
         } catch (const SyntaxError& e) {
             std::cout << e.what() << std::endl;
-            return 1;
         } catch (const ParseError& e) {
             Variable_Values = backup; //not needed here, but just to be safe. 
             std::cout << e.what() << std::endl;
-            return 2;
         } catch (const EvaluationError& e) {
             Variable_Values = backup;
             std::cout << e.what() << std::endl;
-            return 3;
         }
         delete curr_tree;
         curr_tree = nullptr;
