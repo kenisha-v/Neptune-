@@ -162,7 +162,15 @@ int main() {
         delete curr_tree;
         curr_tree = nullptr;
     }
-    
+    if (if_else_closed) {
+        indent -= 4;
+        for (size_t i = 0; i < indent; ++i) {
+            output += " ";
+        }
+        output += "}\n";
+        if_else = false;
+        if_else_closed = false;
+    }
     std::cout << output ;
     
 } 
