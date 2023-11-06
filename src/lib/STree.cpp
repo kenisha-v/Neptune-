@@ -293,7 +293,7 @@ SNode* STree::parse_block() {
             throw e;
         }
     } else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "print") {
-        ASTree* exp;
+        ASTree* exp = nullptr;
         try {
             int temp_row = get_current_token().row;
             int temp_col = get_current_token().col;
@@ -315,7 +315,7 @@ SNode* STree::parse_block() {
             throw e;
         }
     } else {
-        ASTree* exp;
+        ASTree* exp = nullptr;
         try {
             std::vector<token> expression_tokens;
             int temp_row = get_current_token().row;
