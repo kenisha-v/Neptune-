@@ -215,38 +215,59 @@ SNode* STree::parse_block() {
                     consume_token(); //eats up closing right curly
                 } else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "if") { //else if block
                     std::vector<token> else_if;
-                    else_if.push_back(get_current_token()); //add if to tokens
-                    consume_token();
-                    bool block_end = false;
+                    //bool block_end = false;
                     int brace_count = 0;
-                    while (true) {
-                        if (!block_end && get_current_token().type == TokenType::END) {
-                            delete exp;
-                            delete true_run;
+                    // else_if.push_back(get_current_token()); //add if to tokens
+                    // consume_token();
+                    while (get_current_token().type != TokenType::L_CURLY) {
+                        if(get_current_token().type == TokenType::END) {
                             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
                         }
-                        if (block_end && brace_count == 0) {
-                            if (get_current_token().text != "else") {
-                                break;
-                            }
-                            block_end = false;
+                        else_if.push_back(get_current_token());
+                        consume_token();
+                    }
+                    else_if.push_back(get_current_token()); //add { to tokens
+                    consume_token();
+                    while (brace_count >= 0 || get_current_token().text == "else") {
+                        else_if.push_back(get_current_token());
+                        consume_token();
+                        if(get_current_token().type == TokenType::L_CURLY){
+                            brace_count++;
                         }
-                        if (get_current_token().text == "}") {
-                            else_if.push_back(get_current_token());
-                            consume_token();
-                            --brace_count;
-                            if (brace_count <= 0) {
-                                block_end = true;
-                            }
-                        }
-                        else {
-                            if (get_current_token().text == "{") {
-                                brace_count++;
-                            }
+                        if(get_current_token().type == TokenType::R_CURLY){
+                            brace_count--;
                             else_if.push_back(get_current_token());
                             consume_token();
                         }
                     }
+                    // while (true) {
+                    //     if (!block_end && get_current_token().type == TokenType::END) {
+                    //         delete exp;
+                    //         delete true_run;
+                    //         throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+                    //     }
+                    //     if (block_end && brace_count == 0) {
+                    //         if (get_current_token().text != "else") {
+                    //             break;
+                    //         }
+                    //         block_end = false;
+                    //     }
+                    //     if (get_current_token().text == "}") {
+                    //         else_if.push_back(get_current_token());
+                    //         consume_token();
+                    //         --brace_count;
+                    //         if (brace_count <= 0) {
+                    //             block_end = true;
+                    //         }
+                    //     }
+                    //     else {
+                    //         if (get_current_token().text == "{") {
+                    //             brace_count++;
+                    //         }
+                    //         else_if.push_back(get_current_token());
+                    //         consume_token();
+                    //     }
+                    // }
                     else_if.push_back(end_token);
                     try {
                         false_run = new STree(else_if, var_map);
