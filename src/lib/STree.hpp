@@ -11,32 +11,40 @@ protected:
     SNode* next;
 
 public:
+    virtual std::string type() { return "Snode";}
     SNode(ASTree* exp, SNode* next);
     virtual ~SNode();
     virtual void evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    virtual void print(int tab) {(void)tab;}
 };
 
 class ExpressionNode : public SNode {
 public:
+    std::string type() {return "exp";}
     explicit ExpressionNode(ASTree* exp, SNode* next);
     ~ExpressionNode();
     void evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    void print(int tab);
 };
 
 class WhileNode : public SNode {
 protected:
     STree* trueBranch;
 public:
+    std::string type() {return "while";}
     explicit WhileNode(ASTree* exp, SNode* next, STree* t);
     ~WhileNode();
     void evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    void print(int tab);
 };
 
 class PrintNode : public SNode {
 public:
+    std::string type() {return "print";}
     explicit PrintNode(ASTree* exp, SNode* next);
     ~PrintNode();
     void evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    void print(int tab);
 };
 
 class IfNode : public SNode {
@@ -44,9 +52,11 @@ protected:
     STree* trueBranch;
     STree* falseBranch;
 public:
+    std::string type() {return "if";}
     explicit IfNode(ASTree* exp, SNode* next, STree* t, STree* f);
     ~IfNode();
     void evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    void print(int tab);
 };
 
 class STree {
@@ -64,7 +74,9 @@ class STree {
 
 public:
     STree(std::vector<token> tokens, std::unordered_map<std::string, value_bd>* var_map);
+    SNode* get_head();
     void evaluate();
+    void print(int tab);
     ~STree();
 
 };
