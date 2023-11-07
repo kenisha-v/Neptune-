@@ -217,29 +217,31 @@ SNode* STree::parse_block() {
                     std::vector<token> else_if;
                     else_if.push_back(get_current_token()); //add if to tokens
                     consume_token();
-                    bool encountered = false;
-                    int counter = 0;
+                    bool block_end = false;
+                    int brace_count = 0;
                     while (true) {
-                        if ( get_current_token().type == TokenType::END) {
+                        if (!block_end && get_current_token().type == TokenType::END) {
                             delete exp;
                             delete true_run;
                             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
                         }
-                        if (encountered && counter == 0) {
+                        if (block_end && brace_count == 0) {
                             if (get_current_token().text != "else") {
                                 break;
                             }
-                            encountered = false;
+                            block_end = false;
                         }
                         if (get_current_token().text == "}") {
                             else_if.push_back(get_current_token());
                             consume_token();
-                            encountered = true;
-                            --counter;
+                            --brace_count;
+                            if (brace_count <= 0) {
+                                block_end = true;
+                            }
                         }
                         else {
                             if (get_current_token().text == "{") {
-                                counter++;
+                                brace_count++;
                             }
                             else_if.push_back(get_current_token());
                             consume_token();
