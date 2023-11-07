@@ -215,15 +215,15 @@ SNode* STree::parse_block() {
                     consume_token(); //eats up closing right curly
                 } else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "if") { //else if block
                     std::vector<token> else_if;
-                    else_if.push_back(get_current_token());
+                    else_if.push_back(get_current_token()); //add if to tokens
                     consume_token();
                     bool encountered = false;
                     while (true) {
-                        // if (get_current_token().type == TokenType::END) {
-                        //     delete exp;
-                        //     delete true_run;
-                        //     throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
-                        // }
+                        if (!encountered && get_current_token().type == TokenType::END) {
+                            delete exp;
+                            delete true_run;
+                            throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+                        }
                         if (encountered) {
                             if (get_current_token().text != "else") {
                                 break;
