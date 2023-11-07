@@ -220,7 +220,7 @@ SNode* STree::parse_block() {
                     bool encountered = false;
                     int counter = 0;
                     while (true) {
-                        if (!encountered && get_current_token().type == TokenType::END) {
+                        if ( get_current_token().type == TokenType::END) {
                             delete exp;
                             delete true_run;
                             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
