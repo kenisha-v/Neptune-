@@ -153,19 +153,14 @@ void IfNode::print(int tab) {
             std::cout << " ";
         }
         std::cout << "else ";
-        if (falseBranch->get_head()->type() != "if") {
-            std::cout << "{" << std::endl;
-            tab += 4;
-            falseBranch->print(tab);
-            tab -= 4;
-            for (int i = 0; i < tab; ++i) {
-                std::cout << " ";
-            }
-            std::cout << "}" << std::endl;
+        std::cout << "{" << std::endl;
+        tab += 4;
+        falseBranch->print(tab);
+        tab -= 4;
+        for (int i = 0; i < tab; ++i) {
+            std::cout << " ";
         }
-        else {
-            falseBranch->print(tab);
-        }
+        std::cout << "}" << std::endl;
     }
     if(next != nullptr) {
         next->print(tab);
