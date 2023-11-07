@@ -16,6 +16,7 @@ int main() {
         my_tree = new STree(tokens, &var_map);
         my_tree->evaluate();
     } catch (const SyntaxError& e) {
+        delete my_tree;
         error = e.what();
         std::cout << e.what() << std::endl;
         return 1;
