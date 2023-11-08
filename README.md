@@ -179,3 +179,65 @@ It serves as an easier version of the calculator for the normal public as not ev
 *errors.h*: It acts as a unified file for all errors, for readability.
 Includes: SyntaxError, ParseError, EvaluationError.
 
+---
+
+## Statments Documentation
+
+### Introduction
+
+This documentation is for the format part of the project in which it can read in its entire input and build ans AST tree and then print it.
+
+### Files
+
+
+1. Stree.hpp includes:
+
+    -`SNode`: The base class for a Symbol Tree node. It has an AST expression and a pointer to the next node. It allows the node to be evaluated and printed.
+
+    - `ExpressionNode`: This class is derived from `SNode` and represents an expression node, as well as implementing particular evaluation and printing logic.
+
+    - `WhileNode`: A specialized `SNode` representing a `while` loop construct. It contains logic for evaluating the loop and a branch to execute while the condition is true.
+
+    - `PrintNode`: Represents a `print` statement within the tree. 
+
+    - `IfNode`:  Represents a `if` statement node with true and false branches.
+
+    - `STree`: This is the main class that represents the Tree. It keeps track of a list of nodes (`SNode` objects), parses token blocks into the tree structure, and offers methods for evaluating and printing the tree.
+
+
+
+2. Stree.cpp includes:
+    - **Base Node (`SNode`)**: Constructs a node with an AST pointer and a following node. The destructor guarantees that all associated memory is freed. 
+
+    - **Expression Node (`ExpressionNode`)**: Extends `SNode` to support expression evaluation. It invokes the 'evaluate' method on its AST and iterates to the next accessible node.
+
+    - **While Node (`WhileNode`)**: A while loop construct is represented by this node. It examines its condition and body, which are captured as an AST and a Symbol Tree, until the condition is false.
+
+    - **Print Node (`PrintNode`)**:  Handles print statements by evaluating expressions and reporting the results. It can evaluate boolean and double values with particular output formatting.
+
+    - **If Node (`IfNode`)**: Manages conditional structures, deciding between two branches of execution based on the evaluation of its conditional expression.
+
+    - **Symbol Tree (`STree`)**: Orchestrates the overall structure, providing the functionality to parse a block of tokens into a tree of nodes and to evaluate the entire tree. It includes a destructor that cleans up the tree to prevent memory leaks.
+ 
+
+
+3.  format.cpp includes:
+
+    - A main function: The program reads an entire file character by character into a string.
+    -  It tokenizes the input string into a sequence of tokens.
+    -  STree is then built using the tokens.
+    -  The Stree is then printed keeping the indentation in mind.
+
+4. scrypt.cpp includes:
+
+    -The program reads input from the standard input stream (stdin) one character at a time until the end-of-file (EOF) is reached.
+    - A sequence of tokens is then created.
+    - These tokens are subsequently parsed to construct a Symbol Tree (STree), which represents the structured form of the input expressions.
+    - The STree is then evaluated, and the result of this evaluation is printed to the standard output.
+
+### Conclusion
+ The program read in its entire input, build an AST of the program, and then print it. Then it evalutes the tree. Now the tree also supports statements like `if`, `while` and `print`
+
+*errors.h*: It acts as a unified file for all errors, for readability.
+Includes: SyntaxError, ParseError, EvaluationError.
+
