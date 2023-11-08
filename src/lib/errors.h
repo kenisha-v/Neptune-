@@ -20,6 +20,13 @@ public:
     const char* what() const noexcept override {
         return message.c_str();
     }
+
+    int get_row() const noexcept {
+        return row;
+    }
+    int get_col() const noexcept {
+        return col;
+    }
 };
 
 class ParseError : public std::exception {
@@ -38,6 +45,16 @@ public:
 
     const char* what() const noexcept override {
         return message.c_str();
+    }
+
+    int get_row() const noexcept {
+        return row;
+    }
+    int get_col() const noexcept {
+        return col;
+    }
+    token get_error_token() const noexcept {
+        return error_token;
     }
 };
 
