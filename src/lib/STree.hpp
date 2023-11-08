@@ -11,7 +11,7 @@ protected:
     SNode* next;
 
 public:
-    virtual std::string type() { return "Snode";}
+    virtual std::string type() { return "Snode";} //used in print to determine the type of the node
     SNode(ASTree* exp, SNode* next);
     virtual ~SNode();
     virtual void evaluate(std::unordered_map<std::string, value_bd>* var_map);
@@ -67,9 +67,6 @@ class STree {
 
     token get_current_token()   {return block[current_token_index];}
     void consume_token()        {current_token_index++;}
-    //get_current_line() return vector of tokens
-    //if first token is a statement call appropriate statement node constructor
-    //else send new vector to ASTree
     SNode* parse_block();
 
 public:

@@ -6,8 +6,8 @@ int main() {
     std::string error;
     char ch;
     std::unordered_map<std::string, value_bd> var_map;
-    int tab_level = 0;
-
+    int tab_level = 0; //keep track of tabs (used in print for nodes of STree)
+    //take entire file as input
     while (std::cin.get(ch)) {
         input += ch;
     }

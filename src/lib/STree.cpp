@@ -201,19 +201,28 @@ STree::~STree(){
 }
 
 SNode* STree::parse_block() {
+
+
+
+    //BASE CASE
     if(get_current_token().type == TokenType::END){
         return nullptr;
     }
+
+
+
+    //IF STATEMENT 
     if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "if") {
         ASTree* exp = nullptr;
         STree* true_run = nullptr;
         STree* false_run = nullptr;
         int temp_row = get_current_token().row;
         int temp_col = get_current_token().col;
-        consume_token(); //eats up if
+        consume_token(); //consume if
         std::vector<token> expression_tokens;
         std::vector<token> true_block_tokens;
         std::vector<token> false_block_tokens;
+        //store the expression condition to give to ASTree
         while (get_current_token().type != TokenType::L_CURLY) {
             if(get_current_token().type == TokenType::END) {
                 throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
@@ -227,9 +236,12 @@ SNode* STree::parse_block() {
         token end_token{temp_row,temp_col+1,"END",TokenType::END};
         expression_tokens.push_back(end_token);
         exp = new ASTree(expression_tokens, var_map);
-        consume_token(); //eats up left curly
-        int open_braces = 0;
+        consume_token(); //consume left curly
+        int open_braces = 0; //keep track of curly braces
+        //take all tokens inside the braces to create a new tree using recursion
         while (open_braces>=0){
+            temp_row = get_current_token().row;
+            temp_col = get_current_token().col;
             if(get_current_token().type == TokenType::END) {
                 delete exp;
                 throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
@@ -244,19 +256,21 @@ SNode* STree::parse_block() {
                 consume_token();
             }   
         }
-        consume_token(); //eats up closing right curly
+        consume_token(); //consume closing right curly
         true_block_tokens.push_back(end_token);
         try {
             true_run = new STree(true_block_tokens, var_map);
         } catch (const ParseError& e) {
             delete exp;
         }
-
+        //statement if is followed by an else
         if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "else") {
-            consume_token(); //eats up else
-            if(get_current_token().type == TokenType::L_CURLY) { //else block
-                consume_token(); //eats up left curly
-                int open_braces = 0;
+            consume_token(); //consume else
+            //start of else block
+            if(get_current_token().type == TokenType::L_CURLY) {
+                consume_token(); //consume left curly
+                int open_braces = 0; //keep track of curly braces
+                //take all tokens inside the braces to create a new tree using recursion
                 while (open_braces>=0){
                     if(get_current_token().type == TokenType::END) {
                         delete exp;
@@ -280,13 +294,15 @@ SNode* STree::parse_block() {
                     delete exp;
                     delete true_run;
                 }
-                consume_token(); //eats up closing right curly
-            } else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "if") { //else if block
-                std::vector<token> else_if;
+                consume_token(); //consume closing right curly
+            }
+            //start of else if block 
+            else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "if") {
                 bool block_end = false;
-                int brace_count = 0;
-                else_if.push_back(get_current_token()); //add if to tokens
+                int brace_count = 0; //keep track of curly braces
+                false_block_tokens.push_back(get_current_token()); //add if to tokens
                 consume_token();
+                //add the entirety of the else if till the end of the last connected else to create another tree using recursion
                 while (true) {
                     if (!block_end && get_current_token().type == TokenType::END) {
                         delete exp;
@@ -300,7 +316,7 @@ SNode* STree::parse_block() {
                         block_end = false;
                     }
                     if (get_current_token().text == "}") {
-                        else_if.push_back(get_current_token());
+                        false_block_tokens.push_back(get_current_token());
                         consume_token();
                         --brace_count;
                         if (brace_count <= 0) {
@@ -311,32 +327,40 @@ SNode* STree::parse_block() {
                         if (get_current_token().text == "{") {
                             brace_count++;
                         }
-                        else_if.push_back(get_current_token());
+                        false_block_tokens.push_back(get_current_token());
                         consume_token();
                     }
                 }
-                else_if.push_back(end_token);
+                false_block_tokens.push_back(end_token);
                 try {
-                    false_run = new STree(else_if, var_map);
+                    false_run = new STree(false_block_tokens, var_map);
                 } catch (const ParseError& e) {
                     delete exp;
                     delete true_run;
                 }
-            } else {
+            } 
+            //in case if is followed by else but not a curly brace of another if statement
+            else {
                 delete exp;
                 delete true_run;
-                throw ParseError(get_current_token().row, get_current_token().col, get_current_token()); //else followed by weird shit
+                throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
             }
         }
         return new IfNode(exp, parse_block(), true_run, false_run);
-    } else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "while") {
+    } 
+
+
+
+    //WHILE STATEMENT
+    else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "while") {
         ASTree* exp = nullptr;
         STree* run = nullptr;
         int temp_row = get_current_token().row;
         int temp_col = get_current_token().col;
-        consume_token(); //eats up while
+        consume_token(); //consume while
         std::vector<token> expression_tokens;
         std::vector<token> block_tokens;
+        //store the expression condition to give to ASTree
         while (get_current_token().type != TokenType::L_CURLY) {
             if(get_current_token().type == TokenType::END) {
                 throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
@@ -350,8 +374,9 @@ SNode* STree::parse_block() {
         token end_token{temp_row,temp_col+1,"END",TokenType::END};
         expression_tokens.push_back(end_token);
         exp = new ASTree(expression_tokens, var_map);
-        consume_token(); //eats up left curly
-        int open_braces = 0;
+        consume_token(); //consume left curly
+        int open_braces = 0; //keep track of curly braces
+        //take all tokens inside the braces to create a new tree using recursion
         while (open_braces>=0){
             if(get_current_token().type == TokenType::END) {
                 delete exp;
@@ -373,15 +398,21 @@ SNode* STree::parse_block() {
         } catch (const ParseError& e) {
             delete exp;
         }
-        consume_token(); //eats up closing right curly
+        consume_token(); //consume closing right curly
         return new WhileNode(exp, parse_block(), run);
-    } else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "print") {
+    } 
+
+
+
+    //PRINT STATEMENT
+    else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "print") {
         ASTree* exp = nullptr;
         int temp_row = get_current_token().row;
         int temp_col = get_current_token().col;
-        consume_token(); //eats up print
+        consume_token(); //consume print
         std::vector<token> expression_tokens;
-        while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) { //check for seg fault
+        //store the expression condition to give to ASTree
+        while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) {
             temp_row = get_current_token().row;
             temp_col = get_current_token().col;
             expression_tokens.push_back(get_current_token());
@@ -392,11 +423,17 @@ SNode* STree::parse_block() {
         expression_tokens.push_back(end_token);
         exp = new ASTree(expression_tokens, var_map);
         return new PrintNode(exp, parse_block());
-    } else {
+    } 
+    
+
+
+    //EXPRESSION STATEMENT
+    else {
         ASTree* exp = nullptr;
         std::vector<token> expression_tokens;
         int temp_row = get_current_token().row;
         int temp_col = get_current_token().col;
+        //store entire line to give to ASTree
         while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) {
             temp_row = get_current_token().row;
             temp_col = get_current_token().col;

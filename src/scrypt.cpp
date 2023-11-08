@@ -5,7 +5,7 @@ int main() {
     std::string error;
     char ch;
     std::unordered_map<std::string, value_bd> var_map;
-
+    //take the entire file as input
     while (std::cin.get(ch)) {
         input += ch;
     }
@@ -18,7 +18,6 @@ int main() {
         std::cout << e.what() << std::endl;
         return 1;
     } catch (const ParseError& e) {
-        error = e.what();
         std::cout << e.what() << std::endl;
         return 2;
     } catch (const EvaluationError& e) {
