@@ -184,7 +184,7 @@ std::vector<token> tokenize(const std::string& input) {
             isC_oper = true;
             continue;
         }
-        else if (in_char == ','){
+        else if (in_char == ',' || in_char == ';' || in_char == '[' || in_char == ']'){
             if (!temp_str_num.empty()) {
                 all_tokens.push_back(getToken(row, col, temp_str_num, TokenType::NUMBER));
                 col += temp_str_num.length();
@@ -204,31 +204,18 @@ std::vector<token> tokenize(const std::string& input) {
                 temp_identifier = "";
                 isIdentifier = false;
             }
-            all_tokens.push_back(getToken(row, col, string(1, in_char), TokenType::COMMA));
-            ++col;
-                
-        }
-        else if (in_char == ';'){
-            if (!temp_str_num.empty()) {
-                all_tokens.push_back(getToken(row, col, temp_str_num, TokenType::NUMBER));
-                col += temp_str_num.length();
-                temp_str_num = "";
-                hasDecimal = false;
+            if (in_char == ',') {
+                all_tokens.push_back(getToken(row, col, string(1, in_char), TokenType::COMMA));
             }
-            //If there's an identifier still in temp_identifier, processing it
-            else if (!temp_identifier.empty()){
-                if (temp_identifier == "while" || temp_identifier == "if" || temp_identifier == "else" || temp_identifier == "print") {
-                    all_tokens.push_back(getToken(row, col, temp_identifier, TokenType::STATEMENT));
-                } else if (temp_identifier == "true" || temp_identifier == "false") {
-                    all_tokens.push_back(getToken(row, col, temp_identifier, TokenType::BOOLEAN));
-                } else {
-                    all_tokens.push_back(getToken(row, col, temp_identifier, TokenType::VARIABLES));
-                }
-                col += temp_identifier.length();
-                temp_identifier = "";
-                isIdentifier = false;
+            else if (in_char == ';') {
+                all_tokens.push_back(getToken(row, col, string(1, in_char), TokenType::SEMI_COLON));
             }
-            all_tokens.push_back(getToken(row, col, string(1, in_char), TokenType::SEMI_COLON));
+            else if (in_char == '[') {
+                all_tokens.push_back(getToken(row, col, string(1, in_char), TokenType::L_SQUARE));
+            }
+            else if (in_char == ']') {
+                all_tokens.push_back(getToken(row, col, string(1, in_char), TokenType::R_SQUARE));
+            }
             ++col;
                 
         }

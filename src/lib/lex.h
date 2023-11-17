@@ -25,7 +25,9 @@ enum class TokenType {
     R_CURLY,
     BOOLEAN,
     COMMA,
-    SEMI_COLON
+    SEMI_COLON,
+    L_SQUARE,
+    R_SQUARE
 };
 
 struct token {
