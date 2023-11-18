@@ -81,6 +81,9 @@ value_bd AssignmentNode::evaluate(std::unordered_map<std::string, value_bd>* var
 }
 
 std::string AssignmentNode::print(){
+        if (id == nullptr) {
+            throw EvaluationError("unknown assignee");
+        }
         return "(" + id->print() + " = " + value->print() + ")";
 }
 
@@ -441,17 +444,7 @@ ASTNode* ASTree::parse_assignment() {
             token temp_token        = get_current_token();
             consume_token();
             
-            // if (dynamic_cast<IdentifierNode*>(node) == nullptr) {
-            //     //throw ParseError(temp_row, temp_col, temp_token);//
-            //     std::cout << node->print();
-            // }
-            
-            // std::cout << node->print();
             value = parse_assignment();
-//            if (dynamic_cast<IdentifierNode*>(value) != nullptr) {
-//                throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
-//            }
-            //return new AssignmentNode(temp_row, temp_col, static_cast<IdentifierNode*>(node), value);
             return new AssignmentNode(temp_row, temp_col, dynamic_cast<IdentifierNode*>(node), value);
         }
         
