@@ -286,8 +286,8 @@ EqualNode::~EqualNode(){
     }
     
 value_bd EqualNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
-        if((left->evaluate(var_map).type_tag == "bool" && right->evaluate(var_map).type_tag != "bool") || (left->evaluate(var_map).type_tag != "bool" && right->evaluate(var_map).type_tag == "bool")) {
-            throw EvaluationError("invalid operand type.");
+        if(left->evaluate(var_map).type_tag != right->evaluate(var_map).type_tag) {
+            return value_bd("bool", false);
         }
         if(left->evaluate(var_map).type_tag == "bool") {
             return value_bd("bool", left->evaluate(var_map).Bool == right->evaluate(var_map).Bool);
@@ -310,8 +310,8 @@ NotEqualNode::~NotEqualNode(){
     }
     
 value_bd NotEqualNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
-        if((left->evaluate(var_map).type_tag == "bool" && right->evaluate(var_map).type_tag != "bool") || (left->evaluate(var_map).type_tag != "bool" && right->evaluate(var_map).type_tag == "bool")) {
-            throw EvaluationError("invalid operand type.");
+        if(left->evaluate(var_map).type_tag != right->evaluate(var_map).type_tag) {
+            return value_bd("bool", true);
         }
         if(left->evaluate(var_map).type_tag == "bool") {
             return value_bd("bool", left->evaluate(var_map).Bool != right->evaluate(var_map).Bool);
