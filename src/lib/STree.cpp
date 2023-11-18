@@ -415,7 +415,7 @@ SNode* STree::parse_block() {
         //store the expression condition to give to ASTree
         while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) {
             if (get_current_token().text == ";") {
-                std::cout << "print statement last node is ; \n" ;
+                //std::cout << "print statement last node is ; \n" ;
                 semi_colon = true;
                 consume_token();
                 break;
@@ -447,7 +447,7 @@ SNode* STree::parse_block() {
         //store entire line to give to ASTree
         while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) {
             if (get_current_token().text == ";") {
-                std::cout << "expression statement last node is ; \n" ;
+                //std::cout << "expression statement last node is ; \n" ;
                 semi_colon = true;
                 consume_token();
                 break;
