@@ -69,10 +69,11 @@ AssignmentNode::AssignmentNode(int line, int column, ASTNode* id, ASTNode* value
 AssignmentNode::~AssignmentNode(){
         delete id;
         delete value;
+        delete id_node;
 }
 
 value_bd AssignmentNode::evaluate(std::unordered_map<std::string, value_bd>* var_map){
-        IdentifierNode* id_node = dynamic_cast<IdentifierNode*>(id);
+        id_node = dynamic_cast<IdentifierNode*>(id);
         if (id_node == nullptr) {
             throw EvaluationError("invalid assignee.");
         }
