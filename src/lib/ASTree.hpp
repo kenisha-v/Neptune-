@@ -70,9 +70,9 @@ public:
 
 class AssignmentNode : public ASTNode {
 public:
-    IdentifierNode* id;
+    ASTNode* id;
     ASTNode* value;
-    AssignmentNode(int line, int column, IdentifierNode* id, ASTNode* value);
+    AssignmentNode(int line, int column, ASTNode* id, ASTNode* value);
     ~AssignmentNode();
     value_bd evaluate(std::unordered_map<std::string, value_bd>* var_map);
     std::string print();
