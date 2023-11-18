@@ -27,7 +27,7 @@ void ExpressionNode::print(int tab) {
     for (int i = 0; i < tab; ++i) {
         std::cout << " ";
     }
-    expression->print_no_endl();
+    std::cout << expression->print_no_endl();
     std::cout << ";\n";
     if(next != nullptr) {
         next->print(tab);
@@ -105,7 +105,7 @@ void PrintNode::print(int tab) {
         std::cout << " ";
     }
     std::cout << "print ";
-    expression->print_no_endl();
+    std::cout << expression->print_no_endl();
     std::cout << ";\n";
     if(next != nullptr) {
         next->print(tab);
