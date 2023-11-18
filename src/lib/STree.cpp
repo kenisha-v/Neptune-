@@ -29,6 +29,7 @@ void ExpressionNode::print(int tab) {
     }
     std::cout << expression->print_no_endl();
     std::cout << ";\n";
+    
     if(next != nullptr) {
         next->print(tab);
     }
