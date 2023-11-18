@@ -73,7 +73,7 @@ AssignmentNode::~AssignmentNode(){
 
 value_bd AssignmentNode::evaluate(std::unordered_map<std::string, value_bd>* var_map){
         if (id == nullptr) {
-            throw EvaluationError("unknown assignee");
+            throw EvaluationError("invalid assignee.");
         }
         value_bd solved_value_right_node = value->evaluate(var_map);
         (*var_map)[id->name] = solved_value_right_node;
@@ -82,7 +82,7 @@ value_bd AssignmentNode::evaluate(std::unordered_map<std::string, value_bd>* var
 
 std::string AssignmentNode::print(){
         if (id == nullptr) {
-            throw EvaluationError("unknown assignee");
+            throw EvaluationError("invalid assignee.");
         }
         return "(" + id->print() + " = " + value->print() + ")";
 }
