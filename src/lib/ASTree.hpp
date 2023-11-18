@@ -72,7 +72,6 @@ class AssignmentNode : public ASTNode {
 public:
     ASTNode* id;
     ASTNode* value;
-    IdentifierNode* id_node;
     AssignmentNode(int line, int column, ASTNode* id, ASTNode* value);
     ~AssignmentNode();
     value_bd evaluate(std::unordered_map<std::string, value_bd>* var_map);
