@@ -15,8 +15,9 @@ struct value_bd{
     std::string type_tag;
     bool Bool;
     double Double;
+    std::vector<token> array;
 
-    value_bd() : type_tag(""), Bool(false), Double(0.0) {}
+    value_bd() : type_tag(""), Bool(false), Double(0.0), array({}) {}
     value_bd(std::string tag, double value): type_tag(tag){
         if (tag == "bool"){
             if (value==0){
@@ -200,6 +201,19 @@ public:
     ASTNode *left, *right;
     LorNode(int line, int column, ASTNode* left, ASTNode* right);
     ~LorNode();
+    value_bd evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    std::string print();
+};
+
+class ArrayNode : public ASTNode {
+public:
+    ASTNode *left, *right;
+    ASTNode* node;
+    std::vector<token> array;
+    int position;
+    ArrayNode(int line, int column, std::vector<token> array);
+    ArrayNode(int line, int column, ASTNode* node, int position);
+    ~ArrayNode();
     value_bd evaluate(std::unordered_map<std::string, value_bd>* var_map);
     std::string print();
 };

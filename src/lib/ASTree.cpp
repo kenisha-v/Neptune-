@@ -386,6 +386,32 @@ std::string LorNode::print(){
 
 //----------------------
 
+ArrayNode::ArrayNode(int line, int column, std::vector<token> array) : ASTNode(line, column){
+    for (size_t i = 0; i < array.size(); ++i) {
+        this->array.push_back(array[i]);
+    }
+}
+
+ArrayNode::ArrayNode(int line, int column, ASTNode* node, int position) : ASTNode(line, column), node(node), position(position) {}
+    
+ArrayNode::~ArrayNode(){
+        delete left;
+        delete right;
+    }
+    
+value_bd ArrayNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+        // if(left->evaluate(var_map).type_tag != "bool" || right->evaluate(var_map).type_tag != "bool"){
+        //     throw EvaluationError("invalid operand type.");
+        // }
+        // return value_bd("bool", left->evaluate(var_map).Bool || right->evaluate(var_map).Bool);
+    }
+    
+std::string ArrayNode::print(){
+        // return "(" + left->print() + " | " + right->print() + ")";
+    }
+
+//----------------------
+
 
 //ASTree Public Function Definitions
 ASTree::ASTree(const std::vector<token>& Tokens, std::unordered_map<std::string, value_bd>* map){
@@ -447,6 +473,17 @@ ASTNode* ASTree::parse_assignment() {
             
             value = parse_assignment();
             return new AssignmentNode(temp_row, temp_col, node, value);
+        } else if (get_current_token().type == TokenType::L_SQUARE){
+            int temp_row            = get_current_token().row;
+            int temp_col            = get_current_token().col;
+            consume_token();
+            int pos = std::stod(get_current_token().text);
+            consume_token();
+            if (get_current_token().type != TokenType::R_SQUARE) {
+                throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+            }
+            consume_token();
+            return new ArrayNode(temp_row, temp_col, node, pos);
         }
         
         return node;
@@ -679,6 +716,30 @@ ASTNode* ASTree::parse_factor() {
         } else if (get_current_token().type == TokenType::BOOLEAN) {
             ASTNode* node = new BooleanNode(get_current_token().row, get_current_token().col, get_current_token().text);
             consume_token();
+            return node;
+        } else if (get_current_token().type == TokenType::L_SQUARE) {
+            std::vector<token> array;
+            int square_paren = 1;
+            consume_token();
+            while (square_paren >= 1) {
+                if (get_current_token().type == TokenType::END) {
+                    throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+                }
+                if (get_current_token().type != TokenType::COMMA) {
+                    array.push_back(get_current_token());
+                    consume_token();
+                    if (get_current_token().type == TokenType::R_SQUARE) {
+                        square_paren--;
+                        consume_token();
+                    } else if (get_current_token().type == TokenType::L_SQUARE) {
+                        square_paren++;
+                        consume_token();
+                    }
+                } else {
+                    consume_token();
+                }
+            }
+            ASTNode* node = new ArrayNode(get_current_token().row, get_current_token().col, array);
             return node;
         } else {
             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
