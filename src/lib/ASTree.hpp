@@ -15,9 +15,9 @@ struct value_bd{
     std::string type_tag;
     bool Bool;
     double Double;
-    std::vector<token> array;
+    std::vector<value_bd>* array;
 
-    value_bd() : type_tag(""), Bool(false), Double(0.0), array({}) {}
+    value_bd() : type_tag(""), Bool(false), Double(0.0), array(new std::vector<value_bd>) {}
     value_bd(std::string tag, double value): type_tag(tag){
         if (tag == "bool"){
             if (value==0){
@@ -29,6 +29,7 @@ struct value_bd{
             Double = value;
         }
     }
+    value_bd(std::string tag, std::vector<value_bd>* array): type_tag(tag), array(array){}
 };
 
 // Base class for AST nodes
@@ -209,9 +210,9 @@ class ArrayNode : public ASTNode {
 public:
     ASTNode *left, *right;
     ASTNode* node;
-    std::vector<token> array;
+    std::vector<value_bd>* array;
     int position;
-    ArrayNode(int line, int column, std::vector<token> array);
+    ArrayNode(int line, int column, std::vector<value_bd>* array);
     ArrayNode(int line, int column, ASTNode* node, int position);
     ~ArrayNode();
     value_bd evaluate(std::unordered_map<std::string, value_bd>* var_map);

@@ -13,15 +13,15 @@ int main() {
             curr_tree = new ASTree(input_tokens, &Variable_Values);
             curr_tree->print();
             //check statement for double or bool return type
-            if(curr_tree->evaluate().type_tag == "bool") {
-                if(curr_tree->evaluate().Bool) {
-                    std::cout << "true" << std::endl;
-                } else {
-                    std::cout << "false" << std::endl;
-                }
-            } else {
-                std::cout << curr_tree->evaluate().Double << std::endl;
-            }
+            // if(curr_tree->evaluate().type_tag == "bool") {
+            //     if(curr_tree->evaluate().Bool) {
+            //         std::cout << "true" << std::endl;
+            //     } else {
+            //         std::cout << "false" << std::endl;
+            //     }
+            // } else {
+            //     std::cout << curr_tree->evaluate().Double << std::endl;
+            // }
         } catch (const SyntaxError& e) {
             std::cout << e.what() << std::endl;
         } catch (const ParseError& e) {
