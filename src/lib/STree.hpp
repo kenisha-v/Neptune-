@@ -59,18 +59,32 @@ public:
     void print(int tab);
 };
 
+class FuncNode : public SNode {
+protected:
+    std::vector<value_bd> inputs;
+    STree* code;
+public:
+    std::string type() {return "def";}
+    explicit FuncNode(ASTree* exp, SNode* next, STree* t, STree* f);
+    ~FuncNode();
+    void evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    void print(int tab);
+};
+
 class STree {
     SNode* head = nullptr;
     std::vector<token> block;
     size_t current_token_index = 0;
     std::unordered_map<std::string, value_bd>* var_map;
+    std::unordered_map<std::string, value_bd>* func_map;
+
 
     token get_current_token()   {return block[current_token_index];}
     void consume_token()        {current_token_index++;}
     SNode* parse_block();
 
 public:
-    STree(std::vector<token> tokens, std::unordered_map<std::string, value_bd>* var_map);
+    STree(std::vector<token> tokens, std::unordered_map<std::string, value_bd>* var_map, std::unordered_map<std::string, value_bd>* func_map);
     SNode* get_head();
     void evaluate();
     void print(int tab);
