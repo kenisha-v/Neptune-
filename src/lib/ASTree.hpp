@@ -211,8 +211,9 @@ public:
     ASTNode *left, *right;
     ASTNode* node;
     std::vector<value_bd>* array;
+    std::vector<std::vector<token>>* array_ele;
     int position;
-    ArrayNode(int line, int column, std::vector<value_bd>* array);
+    ArrayNode(int line, int column, std::vector<value_bd>* array, std::vector<std::vector<token>>* array_ele);
     ArrayNode(int line, int column, ASTNode* node, int position);
     ~ArrayNode();
     value_bd evaluate(std::unordered_map<std::string, value_bd>* var_map);
