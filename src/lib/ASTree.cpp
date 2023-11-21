@@ -418,115 +418,115 @@ value_bd ArrayNode::evaluate(std::unordered_map<std::string, value_bd>* var_map)
     
 std::string ArrayNode::print(){
         std::string array_str;
-        array_str+="[";
-        for (size_t i = 0; i< array_ele->size()-1; ++i ) {
-            if ((*array_ele)[i][0].type == TokenType::L_SQUARE) {
-                for (size_t j = 0; j< (*array_ele)[i].size(); ++j ) {
-                    if ((*array_ele)[i][j].type == TokenType::COMMA) {
-                        array_str+= (*array_ele)[i][j].text;
-                        array_str+= " ";
-                    } else if ((*array_ele)[i][j].type != TokenType::END) {
-                        array_str+= (*array_ele)[i][j].text;
-                    }
-                }
-            } else {
-                if ((*array)[i].type_tag == "bool") {
-                    if ((*array)[array->size()-1].Bool) {
-                        array_str+="true";
-                    } else {
-                        array_str+= "false";
-                    }
-                } else if ((*array)[i].type_tag == "double"){
-                    std::ostringstream os;
-                    os << (*array)[i].Double;
-                    array_str+= os.str();
-                }
-            }
-            array_str+=", ";
-        }
-        if ((*array_ele)[array_ele->size()-1][0].type == TokenType::L_SQUARE) {
-            for (size_t j = 0; j< (*array_ele)[array_ele->size()-1].size(); ++j ) {
-                if ((*array_ele)[array_ele->size()-1][j].type == TokenType::COMMA) {
-                    array_str+= (*array_ele)[array_ele->size()-1][j].text;
-                    array_str+= " ";
-                } else if ((*array_ele)[array_ele->size()-1][j].type != TokenType::END) {
-                    array_str+= (*array_ele)[array_ele->size()-1][j].text;
-                }
-            }
-        } else {
-            if ((*array)[array_ele->size()-1].type_tag == "bool") {
-                if ((*array)[array->size()-1].Bool) {
-                    array_str+="true";
-                } else {
-                    array_str+= "false";
-                }
-            } else if ((*array)[array_ele->size()-1].type_tag == "double"){
-                std::ostringstream os;
-                os << (*array)[array_ele->size()-1].Double;
-                array_str+= os.str();
-            }
-        }
-        array_str+="]";
-        // array_str += "[";
-        // std::cout << array->size() << "\n";
-        // std::vector<value_bd>* n_array = new std::vector<value_bd>(*array);
-        // for (size_t i = 0; i< array->size()-1; ++i ) {
-        //     if ((*array)[i].type_tag == "bool") {
-        //         // std::cout << std::to_string((*array)[i].Bool) << "\n";
-        //         // array_str+=std::to_string((*array)[i].Bool);
-        //         if ((*array)[array->size()-1].Bool) {
-        //             array_str+="true";
-        //         } else {
-        //             array_str+="false";
+        // array_str+="[";
+        // for (size_t i = 0; i< array_ele->size()-1; ++i ) {
+        //     if ((*array_ele)[i][0].type == TokenType::L_SQUARE) {
+        //         for (size_t j = 0; j< (*array_ele)[i].size(); ++j ) {
+        //             if ((*array_ele)[i][j].type == TokenType::COMMA) {
+        //                 array_str+= (*array_ele)[i][j].text;
+        //                 array_str+= " ";
+        //             } else if ((*array_ele)[i][j].type != TokenType::END) {
+        //                 array_str+= (*array_ele)[i][j].text;
+        //             }
         //         }
-        //         n_array->erase(n_array->begin());
-        //     } else if ((*array)[i].type_tag == "double"){
-        //         std::ostringstream os;
-        //         os << (*array)[i].Double;
-        //         array_str+=os.str();
-        //         n_array->erase(n_array->begin());
         //     } else {
-        //         std::cout << "array " << (*array)[i].type_tag << "\n";
-        //         std::cout << "array " << (*(*array)[i].array).size() << "\n";
-        //         value_bd firstElement = (*n_array)[0];
-        //         std::cout << (*firstElement.array).size() <<"\n";
-        //         ASTree* tree_eval = new ASTree(array_ele[i], var_map);
-        //         // ArrayNode* tree_print = new ArrayNode(0,0,(*array)[i].array);
-        //         // array_str+="[";
-        //         // array_str+=tree_print->print();
-        //         // delete tree_print;
-        //         // array_str+="]";
+        //         if ((*array)[i].type_tag == "bool") {
+        //             if ((*array)[array->size()-1].Bool) {
+        //                 array_str+="true";
+        //             } else {
+        //                 array_str+= "false";
+        //             }
+        //         } else if ((*array)[i].type_tag == "double"){
+        //             std::ostringstream os;
+        //             os << (*array)[i].Double;
+        //             array_str+= os.str();
+        //         }
         //     }
         //     array_str+=", ";
         // }
-        // if ((*array)[array->size()-1].type_tag == "bool") {
-        //     // array_str+=std::to_string((*array)[array->size()-1].Bool);
-        //     if ((*array)[array->size()-1].Bool) {
-        //         array_str+="true";
-        //     } else {
-        //         array_str+="false";
+        // if ((*array_ele)[array_ele->size()-1][0].type == TokenType::L_SQUARE) {
+        //     for (size_t j = 0; j< (*array_ele)[array_ele->size()-1].size(); ++j ) {
+        //         if ((*array_ele)[array_ele->size()-1][j].type == TokenType::COMMA) {
+        //             array_str+= (*array_ele)[array_ele->size()-1][j].text;
+        //             array_str+= " ";
+        //         } else if ((*array_ele)[array_ele->size()-1][j].type != TokenType::END) {
+        //             array_str+= (*array_ele)[array_ele->size()-1][j].text;
+        //         }
         //     }
-        //     n_array->erase(n_array->begin());
-        // } else if ((*array)[array->size()-1].type_tag == "double"){
-        //     std::ostringstream os;
-        //     os << (*array)[array->size()-1].Double;
-        //     array_str+=os.str();
-        //     n_array->erase(n_array->begin());
-        //     // array_str+=std::to_string((*array)[array->size()-1].Double);
         // } else {
-        //     std::cout << "array " << (*array)[array->size()-1].type_tag << "\n";
-        //     //std::cout << "array " << (*(*array)[array->size()-1].array)[4].size() << "\n";
-        //     value_bd firstElement = (*n_array)[0];
-        //     std::cout << "bleh" << (*firstElement.array).size() <<"\n";
-        //     std::cout << "bleh" << firstElement.type_tag <<"\n";
-        //     // ArrayNode* tree_print = new ArrayNode(0,0,(*array)[array->size()-1].array);
-        //     // array_str+="[";
-        //     // tree_print->print();
-        //     // array_str+="";
-        //     // delete tree_print;
-        //     // array_str+="]";
+        //     if ((*array)[array_ele->size()-1].type_tag == "bool") {
+        //         if ((*array)[array->size()-1].Bool) {
+        //             array_str+="true";
+        //         } else {
+        //             array_str+= "false";
+        //         }
+        //     } else if ((*array)[array_ele->size()-1].type_tag == "double"){
+        //         std::ostringstream os;
+        //         os << (*array)[array_ele->size()-1].Double;
+        //         array_str+= os.str();
+        //     }
         // }
-        // array_str += "]";
+        // array_str+="]";
+
+        array_str += "[";
+        std::cout << array->size() << "\n";
+        for (size_t i = 0; i< array->size()-1; ++i ) {
+            if ((*array)[i].type_tag == "bool") {
+                // std::cout << std::to_string((*array)[i].Bool) << "\n";
+                // array_str+=std::to_string((*array)[i].Bool);
+                if ((*array)[array->size()-1].Bool) {
+                    array_str+="true";
+                } else {
+                    array_str+="false";
+                }
+            } else if ((*array)[i].type_tag == "double"){
+                std::ostringstream os;
+                os << (*array)[i].Double;
+                array_str+=os.str();
+            } else if ((*array)[i].type_tag == "array_ele"){
+                std::cout << "array ele " << (*array)[i].type_tag << "\n";
+                // value_bd eval = (*array)[i];
+                // if (eval.type_tag == "array_ele") {
+                //     // std::cout << "it does enter\n";
+                //     eval = *(new value_bd("array",eval.array_ele));
+                //     std::cout << (*eval.array).size() << "\n";
+                // }
+                ArrayNode* array_ele_node = new ArrayNode(0, 0, (*array)[i].array_ele, array_ele);
+                array_str += array_ele_node->print();
+                // ASTree* tree_eval = new ASTree(array_ele[i], var_map);
+                // ArrayNode* tree_print = new ArrayNode(0,0,(*array)[i].array);
+                // array_str+="[";
+                // array_str+=tree_print->print();
+                // delete tree_print;
+                // array_str+="]";
+            } else {
+                std::cout << "array " << (*array)[i].type_tag << "\n";
+            }
+            array_str+=", ";
+        }
+        if ((*array)[array->size()-1].type_tag == "bool") {
+            // array_str+=std::to_string((*array)[array->size()-1].Bool);
+            if ((*array)[array->size()-1].Bool) {
+                array_str+="true";
+            } else {
+                array_str+="false";
+            }
+        } else if ((*array)[array->size()-1].type_tag == "double"){
+            std::ostringstream os;
+            os << (*array)[array->size()-1].Double;
+            array_str+=os.str();
+            // array_str+=std::to_string((*array)[array->size()-1].Double);
+        } else {
+            std::cout << "array " << (*array)[array->size()-1].type_tag << "\n";
+            //std::cout << "array " << (*(*array)[array->size()-1].array)[4].size() << "\n";
+            // ArrayNode* tree_print = new ArrayNode(0,0,(*array)[array->size()-1].array);
+            // array_str+="[";
+            // tree_print->print();
+            // array_str+="";
+            // delete tree_print;
+            // array_str+="]";
+        }
+        array_str += "]";
         return array_str;
     }
 
@@ -880,7 +880,13 @@ ASTNode* ASTree::parse_factor() {
                 if ((get_current_token().type == TokenType::COMMA && !nested_array) || square_paren == 0) {
                     elements.push_back(getToken(get_current_token().row, get_current_token().col, "END", TokenType::END));
                     ASTree* tree_eval = new ASTree(elements, var_map);
-                    array->push_back(tree_eval->evaluate());
+                    value_bd eval = tree_eval->evaluate();
+                    if (eval.type_tag == "array") {
+                        // std::cout << "it does enter\n";
+                        eval = *(new value_bd(eval.array));
+                        // std::cout << eval.type_tag << "\n";
+                    }
+                    array->push_back(eval);
                     array_ele->push_back(elements);
                     elements = {};
                     if (square_paren != 0) {

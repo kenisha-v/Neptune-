@@ -15,6 +15,7 @@ struct value_bd{
     std::string type_tag;
     bool Bool;
     double Double;
+    std::vector<value_bd>* array_ele;
     std::vector<value_bd>* array;
 
     value_bd() : type_tag(""), Bool(false), Double(0.0), array(new std::vector<value_bd>) {}
@@ -30,6 +31,12 @@ struct value_bd{
         }
     }
     value_bd(std::string tag, std::vector<value_bd>* array): type_tag(tag), array(array){}
+    value_bd(std::vector<value_bd>* array): type_tag("array_ele"), array_ele(array){}
+    // value_bd value_bd_ele(value_bd array){
+    //     type_tag = "array_ele";
+    //     array_ele = &array;
+    //     return *array_ele;
+    // }
 };
 
 // Base class for AST nodes
