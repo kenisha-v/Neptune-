@@ -15,6 +15,7 @@ struct value_bd{
     std::string type_tag;
     bool Bool;
     double Double;
+    FuncNode* Function_Node;
 
     value_bd() : type_tag(""), Bool(false), Double(0.0) {}
     value_bd(std::string tag, double value): type_tag(tag){
@@ -28,6 +29,8 @@ struct value_bd{
             Double = value;
         }
     }
+    value_bd(FuncNode* func_ptr): type_tag("function"), Function_Node(func_ptr){}
+    
 };
 
 // Base class for AST nodes

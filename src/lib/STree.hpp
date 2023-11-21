@@ -4,6 +4,7 @@
 #include "ASTree.hpp"
 
 class STree;
+class FuncNode; 
 
 class SNode {
 protected:
@@ -14,7 +15,7 @@ public:
     virtual std::string type() { return "Snode";} //used in print to determine the type of the node
     SNode(ASTree* exp, SNode* next);
     virtual ~SNode();
-    virtual void evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    virtual void evaluate(std::unordered_map<std::string, value_bd>* var_map, std::unordered_map<std::string, FuncNode*>* func_map);
     virtual void print(int tab) {(void)tab;}
 };
 
@@ -23,7 +24,7 @@ public:
     std::string type() {return "exp";}
     explicit ExpressionNode(ASTree* exp, SNode* next);
     ~ExpressionNode();
-    void evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    void evaluate(std::unordered_map<std::string, value_bd>* var_map, std::unordered_map<std::string, FuncNode*>* func_map);
     void print(int tab);
 };
 
@@ -34,7 +35,7 @@ public:
     std::string type() {return "while";}
     explicit WhileNode(ASTree* exp, SNode* next, STree* t);
     ~WhileNode();
-    void evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    void evaluate(std::unordered_map<std::string, value_bd>* var_map, std::unordered_map<std::string, FuncNode*>* func_map);
     void print(int tab);
 };
 
@@ -43,7 +44,7 @@ public:
     std::string type() {return "print";}
     explicit PrintNode(ASTree* exp, SNode* next);
     ~PrintNode();
-    void evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    void evaluate(std::unordered_map<std::string, value_bd>* var_map, std::unordered_map<std::string, FuncNode*>* func_map);
     void print(int tab);
 };
 
@@ -55,19 +56,21 @@ public:
     std::string type() {return "if";}
     explicit IfNode(ASTree* exp, SNode* next, STree* t, STree* f);
     ~IfNode();
-    void evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    void evaluate(std::unordered_map<std::string, value_bd>* var_map, std::unordered_map<std::string, FuncNode*>* func_map);
     void print(int tab);
 };
 
 class FuncNode : public SNode {
 protected:
-    std::vector<value_bd> inputs;
-    STree* code;
+    std::unordered_map<std::string, value_bd>* local_var_map;
+    std::unordered_map<std::string, FuncNode*>* local_func_map;
+    std::vector<std::string> parameters;
 public:
+    STree* code;
     std::string type() {return "def";}
-    explicit FuncNode(ASTree* exp, SNode* next, STree* t, STree* f);
+    explicit FuncNode(std::unordered_map<std::string, value_bd>* local_v, std::unordered_map<std::string,FuncNode*>* local_f, SNode* next, STree* code);
     ~FuncNode();
-    void evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    void evaluate(std::unordered_map<std::string, value_bd>* var_map, std::unordered_map<std::string, FuncNode*>* func_map);
     void print(int tab);
 };
 
@@ -76,7 +79,7 @@ class STree {
     std::vector<token> block;
     size_t current_token_index = 0;
     std::unordered_map<std::string, value_bd>* var_map;
-    std::unordered_map<std::string, value_bd>* func_map;
+    std::unordered_map<std::string, FuncNode*>* func_map;
 
 
     token get_current_token()   {return block[current_token_index];}
@@ -84,7 +87,7 @@ class STree {
     SNode* parse_block();
 
 public:
-    STree(std::vector<token> tokens, std::unordered_map<std::string, value_bd>* var_map, std::unordered_map<std::string, value_bd>* func_map);
+    STree(std::vector<token> tokens, std::unordered_map<std::string, value_bd>* var_map);
     SNode* get_head();
     void evaluate();
     void print(int tab);
