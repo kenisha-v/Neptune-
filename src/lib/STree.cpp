@@ -223,6 +223,7 @@ void FuncNode::print(int tab) {
 }
 FuncNode::~FuncNode() {
     delete code;
+    delete local_var_map;
 }
 
 //-----------------
