@@ -228,6 +228,37 @@ FuncNode::~FuncNode() {
 
 //-----------------
 
+ReturnNode::ReturnNode(ASTree* exp, SNode* next): SNode(exp,next){}
+
+void ReturnNode::evaluate(std::unordered_map<std::string, value_bd>* var_map){
+    expression->evaluate();
+    (void)var_map;
+    //does not call next, as we dont need to evaluate after return.
+    }
+
+// value_bd ReturnNode::call(std::unordered_map<std::string, value_bd>* var_map){
+//     expression->evaluate();
+//     //does not call next, as we dont need to evaluate after return.
+//     }
+
+void ReturnNode::print(int tab){
+    for (int i = 0; i < tab; ++i) {
+        std::cout << " ";
+    }
+    std::cout << "return ";
+    std::cout << expression->print_no_endl();
+    std::cout << ";\n";
+    if(next != nullptr) {
+        next->print(tab);
+    }
+}
+
+ReturnNode::~ReturnNode(){
+    
+}
+
+//-----------------
+
 STree::STree(std::vector<token> tokens, std::unordered_map<std::string, value_bd>* var_map) {
     block = tokens;
     this->var_map = var_map;
@@ -494,7 +525,6 @@ SNode* STree::parse_block() {
     //FUNCTION STATEMENT
     else if(get_current_token().text == "def" && block[current_token_index+1].text != "=") { //def is a keyword
         STree* code = nullptr;
-        ASTree* returns = nullptr;
         std::vector<std::string> params;
         std::vector<token> block_tokens;
         std::vector<token> return_tokens;
@@ -544,9 +574,37 @@ SNode* STree::parse_block() {
 
 
 
-    // else if (get_current_token().text == "return") {
+    //RETURN STATEMENT
+    else if (get_current_token().text == "return") {
+        ASTree* exp = nullptr;
+        int temp_row = get_current_token().row;
+        int temp_col = get_current_token().col;
+        consume_token(); //consume return
+        std::vector<token> return_value;
+        bool semi_colon = false;
+        while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) {
+            if (get_current_token().text == ";") {
+                semi_colon = true;
+                consume_token();
+                break;
+            }
+            temp_row = get_current_token().row;
+            temp_col = get_current_token().col;
+            return_value.push_back(get_current_token());
+            consume_token();
+        }
 
-    // }
+        if (semi_colon == false) {
+            throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+        }
+
+        //Add end token to end of each expression that is being sent to ASTree
+        token end_token{temp_row,temp_col+1,"END",TokenType::END};
+        return_value.push_back(end_token);
+
+        exp = new ASTree(return_value, var_map);
+        return new ReturnNode(exp, parse_block());
+    }
 
 
     //EXPRESSION STATEMENT
@@ -581,6 +639,11 @@ SNode* STree::parse_block() {
         return new ExpressionNode(exp, parse_block());
     }
 }
+
+//FILE ENDS HERE
+
+
+
     // else {
     //     std::cout << "in else" << std::endl;
     //     ASTree* exp = nullptr;

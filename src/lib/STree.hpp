@@ -81,6 +81,7 @@ public:
     explicit ReturnNode(ASTree* exp, SNode* next);
     ~ReturnNode();
     void evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    // value_bd call(std::unordered_map<std::string, value_bd>* var_map);
     void print(int tab);
 };
 

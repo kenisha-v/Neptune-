@@ -3,3 +3,4 @@ src/*.out
 ../.vscode/
 .vscode/
 src/*.txt
+src/format
