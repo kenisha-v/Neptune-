@@ -7,17 +7,22 @@
 
 struct function_call{
     std::string name;
-    std::vector<ASTree> arguments;
+    std::vector<ASTree*> arguments;
     function_call(){}
-    function_call(std::string n, std::vector<ASTree> arg): name(n), arguments(arg){}
+    function_call(std::string n, std::vector<ASTree*> arg): name(n), arguments(arg){}
+    ~function_call(){
+        for (auto i: arguments){
+            delete i;
+        }
+    }
 
     void print(){
         std::cout << name << "(";
         for(size_t i=0; i<arguments.size(); i++){
             if(i==arguments.size()-1){
-                std::cout << arguments[i].print_no_endl();
+                std::cout << arguments.at(i)->print_no_endl();
             }else{
-                std::cout << arguments[i].print_no_endl() << ", ";
+                std::cout << arguments.at(i)->print_no_endl() << ", ";
             }
         }
         std::cout << ")";

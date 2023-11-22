@@ -499,13 +499,12 @@ SNode* STree::parse_block() {
     //PRINT STATEMENT
     else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "print") {
         EXP* exp = nullptr;
+        std::vector<ASTree*> arg;
         int temp_row = get_current_token().row;
         int temp_col = get_current_token().col;
         bool semi_colon = false;
         consume_token(); //consume print
-
         if(get_current_token().type == TokenType::VARIABLES && block[current_token_index+1].type == TokenType::LEFT_PAREN) { //function
-            std::vector<ASTree> arguement;
             std::string name = get_current_token().text;
             consume_token(); consume_token(); //consume func_name and left paren
             std::vector<token> expression_tokens;
@@ -515,10 +514,11 @@ SNode* STree::parse_block() {
                         throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
                     }
                     token end_token{temp_row,temp_col+1,"END",TokenType::END};
-                    expression_tokens.push_back(end_token);  
-                    ASTree single_argument = ASTree(expression_tokens, var_map);
-                    arguement.push_back(single_argument);
+                    expression_tokens.push_back(end_token);
+                    ASTree* single_argument = new ASTree(expression_tokens, var_map);
+                    arg.push_back(single_argument);
                     expression_tokens.clear();
+                    consume_token();
                 }   else {
                     expression_tokens.push_back(get_current_token());
                     consume_token();
@@ -528,19 +528,16 @@ SNode* STree::parse_block() {
             if (expression_tokens.size()!=0){
                 token end_token{temp_row,temp_col+1,"END",TokenType::END};
                 expression_tokens.push_back(end_token);  
-                ASTree single_argument = ASTree(expression_tokens, var_map);
-                arguement.push_back(single_argument);
+                ASTree* single_argument = new ASTree(expression_tokens, var_map);
+                arg.push_back(single_argument);
                 expression_tokens.clear();
             }
-
             consume_token(); // consuming right paren
             if (get_current_token().text == ";") {
                 semi_colon = true;
                 consume_token();
-                
             }
-
-            exp = new EXP(function_call(name, arguement));
+            exp = new EXP(function_call(name, arg));
         } else { //expression
             std::vector<token> expression_tokens;
             //store the expression condition to give to ASTree
@@ -686,7 +683,7 @@ SNode* STree::parse_block() {
             }
             if(get_current_token().type == TokenType::VARIABLES && block[current_token_index+1].type == TokenType::LEFT_PAREN) {
                 //this checks if current expression line has a function. if it does dont send the line to ASTree, instead create your own FuncCall node
-                std::vector<ASTree> arguement;
+                std::vector<ASTree*> arguement;
                 std::string name = get_current_token().text;
                 consume_token(); consume_token(); //consume func_name and left paren
                 std::vector<token> expression_tokens;
@@ -697,7 +694,7 @@ SNode* STree::parse_block() {
                         }
                         token end_token{temp_row,temp_col+1,"END",TokenType::END};
                         expression_tokens.push_back(end_token);  
-                        ASTree single_argument = ASTree(expression_tokens, var_map);
+                        ASTree* single_argument = new ASTree(expression_tokens, var_map);
                         arguement.push_back(single_argument);
                         expression_tokens.clear();
                     }   else {

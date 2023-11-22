@@ -392,6 +392,7 @@ ASTree::ASTree(const std::vector<token>& Tokens, std::unordered_map<std::string,
     tokens=Tokens;
     try {
         head = parse_expression();
+        std::cout << dynamic_cast<IdentifierNode*>(head)->name << std::endl;;
         if (get_current_token().type != TokenType::END){
             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
         }
@@ -400,6 +401,7 @@ ASTree::ASTree(const std::vector<token>& Tokens, std::unordered_map<std::string,
         throw e;
     }
     var_map = map;
+    std::cout << "exiting ASTree constructor" << std::endl;
 }
 
 ASTree::~ASTree(){
@@ -674,6 +676,7 @@ ASTNode* ASTree::parse_factor() {
             return node;
         } else if (get_current_token().type == TokenType::VARIABLES) {
             ASTNode* node = new IdentifierNode(get_current_token().row, get_current_token().col, get_current_token().text);
+            std::cout << "identifier node created now returning" << std::endl;
             consume_token();
             return node;
         } else if (get_current_token().type == TokenType::BOOLEAN) {

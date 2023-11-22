@@ -4,3 +4,5 @@ src/*.out
 .vscode/
 src/*.txt
 src/format
+src/lexer
+src/calc
