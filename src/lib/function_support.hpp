@@ -31,6 +31,7 @@ public:
     function_call   function;
     EXP(ASTree* e):        type("expression"), expression(e){}
     EXP(function_call f):   type("function")  , function(f){}
+    ~EXP() {delete expression;}
 };
 
 #endif
