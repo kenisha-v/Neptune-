@@ -212,8 +212,11 @@ void FuncNode::print(int tab) {
     if (code){
         code->print(tab);
     }
-    std::cout << "}" << std::endl;
     tab -= 4;
+    for (int i = 0; i < tab; ++i) {
+        std::cout << " ";
+    }
+    std::cout << "}" << std::endl;
     if(next != nullptr) {
         next->print(tab);
     }
