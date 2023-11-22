@@ -176,8 +176,9 @@ IfNode::~IfNode() {
 
 //-----------------
 
-FuncNode::FuncNode(std::unordered_map<std::string, value_bd>* local_v, SNode* next, STree* code, std::vector<std::string> p): 
+FuncNode::FuncNode(std::unordered_map<std::string, value_bd>* local_v, SNode* next, STree* code, std::vector<std::string> p, std::string name): 
     SNode(nullptr, next),
+    f_name(name),
     local_var_map(local_v),
     parameters(p),
     code(code) {}
@@ -188,20 +189,38 @@ void FuncNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
         next->evaluate(var_map);
     }
 }
-value_bd FuncNode::call(std::vector<token> arguments){
-    if(arguments.size() != this->parameters.size()) {
-        throw EvaluationError("Runtime error: ");
-    }
-    for (size_t i=0; i < parameters.size(); ++i){
-        (*local_var_map)[parameters[i]] = value_bd("double", std::stod(arguments[i].text));
-    }
-    this->code->evaluate();
-    return value_bd();
-    
-    
-}
+// void FuncNode::call(std::vector<token> arguments){
+//     (void)arguments;
+//     return; 
+// }
 void FuncNode::print(int tab) {
-    (void)tab;
+    for (int i = 0; i < tab; ++i) {
+        std::cout << " ";
+    }
+    std::cout << "def "; 
+    std::cout << f_name << "(";
+    for(size_t i=0; i<parameters.size(); i++){
+        if(i==parameters.size()-1){
+            std::cout << parameters[i];
+        }else{
+            std::cout << parameters[i] << ", ";
+        }
+    }
+    std::cout << ")";
+    std::cout << " {" << std::endl;
+    tab += 4;
+    code->print(tab);
+    // for (int i = 0; i < tab; ++i) {
+    //     std::cout << " ";
+    // }
+    // if(returns){
+    //     std::cout << "return " << returns->print_no_endl() << ";" << std::endl;
+    // }
+    std::cout << "}" << std::endl;
+    tab -= 4;
+    if(next != nullptr) {
+        next->print(tab);
+    }
 }
 FuncNode::~FuncNode() {
     delete code;
@@ -475,8 +494,10 @@ SNode* STree::parse_block() {
     //FUNCTION STATEMENT
     else if(get_current_token().text == "def" && block[current_token_index+1].text != "=") { //def is a keyword
         STree* code = nullptr;
+        ASTree* returns = nullptr;
         std::vector<std::string> params;
         std::vector<token> block_tokens;
+        std::vector<token> return_tokens;
         std::unordered_map<std::string, value_bd>* local_var_map = new std::unordered_map<std::string, value_bd>; // does this work?
         consume_token(); //consume def
         if (get_current_token().type != TokenType::VARIABLES) {
@@ -517,24 +538,24 @@ SNode* STree::parse_block() {
         block_tokens.push_back(end_token);
         code = new STree(block_tokens, local_var_map); //does this work
         consume_token(); //consume }
-
         
-        (*var_map)[func_name] = nullptr;
-        FuncNode* fnode = new FuncNode(local_var_map, parse_block(), code, params);
-        (*var_map)[func_name] = value_bd(fnode);
-        return fnode;
+        return new FuncNode(local_var_map, parse_block(), code, params, func_name);;
     }
 
 
 
+    // else if (get_current_token().text == "return") {
+
+    // }
+
+
+    //EXPRESSION STATEMENT
     else {
-        std::cout << "in else" << std::endl;
         ASTree* exp = nullptr;
         std::vector<token> expression_tokens;
         int temp_row = get_current_token().row;
         int temp_col = get_current_token().col;
         bool semi_colon = false;
-        bool hasFunc = false;
         //store entire line to give to ASTree
         while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) {
             if (get_current_token().text == ";") {
@@ -542,121 +563,16 @@ SNode* STree::parse_block() {
                 consume_token();
                 break;
             }
-            
-            if((*var_map).find(get_current_token().text) != (*var_map).end()){
-                hasFunc = true;
-                std::cout << "found func" << std::endl;
-                break;
+            if(get_current_token().type == TokenType::VARIABLES && block[current_token_index+1].type == TokenType::LEFT_PAREN) {
+                //this checks if current expression line has a function. if it does dont send the line to ASTree, instead create your own FuncCall node
             }
             temp_row = get_current_token().row;
             temp_col = get_current_token().col;
             expression_tokens.push_back(get_current_token());
             consume_token();
         }
-        
-        if (hasFunc) {
-            std::cout << get_current_token().text << std::endl;
-            int temp_row = get_current_token().row;
-            int temp_col = get_current_token().col;
-            if(get_current_token().type != TokenType::VARIABLES){
-                throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
-            }
-            std::string func_name = get_current_token().text;
-            consume_token();
-
-            if(get_current_token().type != TokenType::LEFT_PAREN){
-                throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
-            }
-            consume_token();
-
-            std::vector<token> parameters;
-            
-            while(get_current_token().type != TokenType::RIGHT_PAREN){
-                if(get_current_token().row != temp_row) {
-                    throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
-                }
-                if(get_current_token().type != TokenType::COMMA){
-                    parameters.push_back(get_current_token());
-                }
-                consume_token();
-            }
-            consume_token(); //right paren
-
-            if (get_current_token().text == ";") {
-                semi_colon = true;
-                consume_token();
-            }
-
-            if (!semi_colon) {
-                throw ParseError(get_current_token().row, get_current_token().col+1, get_current_token());
-            }
-
-            FuncNode* func = (*var_map)[func_name].Function_Node;
-            if (func == nullptr){
-                //throw ParseError(get_current_token().row, get_current_token().col+1, get_current_token());
-            }
-            
-            value_bd result = func->call(parameters);
-
-            //making token out of a value_bd result:
-            token mytoken;
-            if (result.type_tag == "null"){
-                mytoken.row=temp_row;
-                mytoken.col=temp_col;
-                mytoken.text="null";
-                mytoken.type=TokenType::VARIABLES;
-            } else if (result.type_tag == "double"){
-                mytoken.row=temp_row;
-                mytoken.col=temp_col;
-                mytoken.text= to_string(result.Double);
-                mytoken.type=TokenType::NUMBER;
-            } else if (result.type_tag == "bool"){
-                mytoken.row=temp_row;
-                mytoken.col=temp_col;
-                mytoken.type=TokenType::BOOLEAN;
-                if(result.Bool){
-                    mytoken.text = "true";
-                } else {
-                    mytoken.text = "false";
-                }
-                
-            }
-            expression_tokens.push_back(mytoken);
-
-            // make token of result and push back to expressions, continue.
-
-            
-            /* DONE WITH THIS 
-            name = curr_token... + consume token
-            check if curr token now is a "(" + if yes consume that | if no - throw error..
-            string parameters - keep adding and cosuming tokens untill ")"
-            if line changes before ")" - throw error.
-            consume ")"
-            check for semi_colon;
-            
-
-            vector params <expressions (expressions: input type: numbers are a form of expression)> ===== string parameters.split(,):
-            
-            params = (4, 7+0, 8*3)
-            send each expression in params to calc, and get a value, replace that value with the current expression:
-            (if it is just a number, calc will return number)
-            parems = (4,7,24)
-
-            check if length of paren matches with the number of inputs required by the function: name stored in a variable line 1:
-
-            if it matches, update function_local_var_map: with the inputs (probably using index numbers):
-            ex. foo(w,x,y):
-            (w=4), (x=7), (y=24)
-
-            once varmap is updated,
-            call func_code.evaluate() -> this will update local func variables with whatever the function was suposed to do:
-
-            call func_return(which is an astree) with its evaluate -- this gives us a return value bd.
-            make token of that return value bd and add to expression_tokens,
-
-            let the code below continue, 
-            */
-            
+        if (semi_colon == false) {
+            throw ParseError(get_current_token().row, get_current_token().col+1, get_current_token());
         }
         //Add end token to end of each expression that is being sent to ASTree
         token end_token{temp_row,temp_col+1,"END",TokenType::END};
@@ -665,3 +581,141 @@ SNode* STree::parse_block() {
         return new ExpressionNode(exp, parse_block());
     }
 }
+    // else {
+    //     std::cout << "in else" << std::endl;
+    //     ASTree* exp = nullptr;
+    //     std::vector<token> expression_tokens;
+    //     int temp_row = get_current_token().row;
+    //     int temp_col = get_current_token().col;
+    //     bool semi_colon = false;
+    //     bool hasFunc = false;
+    //     //store entire line to give to ASTree
+    //     while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) {
+    //         if (get_current_token().text == ";") {
+    //             semi_colon = true;
+    //             consume_token();
+    //             break;
+    //         }
+            
+    //         if((*var_map).find(get_current_token().text) != (*var_map).end()){
+    //             hasFunc = true;
+    //             std::cout << "found func" << std::endl;
+    //             break;
+    //         }
+    //         temp_row = get_current_token().row;
+    //         temp_col = get_current_token().col;
+    //         expression_tokens.push_back(get_current_token());
+    //         consume_token();
+    //     }
+        
+    //     if (hasFunc) {
+    //         std::cout << get_current_token().text << std::endl;
+    //         int temp_row = get_current_token().row;
+    //         int temp_col = get_current_token().col;
+    //         if(get_current_token().type != TokenType::VARIABLES){
+    //             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+    //         }
+    //         std::string func_name = get_current_token().text;
+    //         consume_token();
+
+    //         if(get_current_token().type != TokenType::LEFT_PAREN){
+    //             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+    //         }
+    //         consume_token();
+
+    //         std::vector<token> parameters;
+            
+    //         while(get_current_token().type != TokenType::RIGHT_PAREN){
+    //             if(get_current_token().row != temp_row) {
+    //                 throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+    //             }
+    //             if(get_current_token().type != TokenType::COMMA){
+    //                 parameters.push_back(get_current_token());
+    //             }
+    //             consume_token();
+    //         }
+    //         consume_token(); //right paren
+
+    //         if (get_current_token().text == ";") {
+    //             semi_colon = true;
+    //             consume_token();
+    //         }
+
+    //         if (!semi_colon) {
+    //             throw ParseError(get_current_token().row, get_current_token().col+1, get_current_token());
+    //         }
+
+    //         FuncNode* func = (*var_map)[func_name].Function_Node;
+    //         if (func == nullptr){
+    //             throw ParseError(get_current_token().row, get_current_token().col+1, get_current_token());
+    //         }
+            
+    //         value_bd result = func->call(parameters);
+
+    //         //making token out of a value_bd result:
+    //         token mytoken;
+    //         if (result.type_tag == "null"){
+    //             mytoken.row=temp_row;
+    //             mytoken.col=temp_col;
+    //             mytoken.text="null";
+    //             mytoken.type=TokenType::VARIABLES;
+    //         } else if (result.type_tag == "double"){
+    //             mytoken.row=temp_row;
+    //             mytoken.col=temp_col;
+    //             mytoken.text= to_string(result.Double);
+    //             mytoken.type=TokenType::NUMBER;
+    //         } else if (result.type_tag == "bool"){
+    //             mytoken.row=temp_row;
+    //             mytoken.col=temp_col;
+    //             mytoken.type=TokenType::BOOLEAN;
+    //             if(result.Bool){
+    //                 mytoken.text = "true";
+    //             } else {
+    //                 mytoken.text = "false";
+    //             }
+                
+    //         }
+    //         expression_tokens.push_back(mytoken);
+
+    //         // make token of result and push back to expressions, continue.
+
+            
+    //         /* DONE WITH THIS 
+    //         name = curr_token... + consume token
+    //         check if curr token now is a "(" + if yes consume that | if no - throw error..
+    //         string parameters - keep adding and cosuming tokens untill ")"
+    //         if line changes before ")" - throw error.
+    //         consume ")"
+    //         check for semi_colon;
+            
+
+    //         vector params <expressions (expressions: input type: numbers are a form of expression)> ===== string parameters.split(,):
+            
+    //         params = (4, 7+0, 8*3)
+    //         send each expression in params to calc, and get a value, replace that value with the current expression:
+    //         (if it is just a number, calc will return number)
+    //         parems = (4,7,24)
+
+    //         check if length of paren matches with the number of inputs required by the function: name stored in a variable line 1:
+
+    //         if it matches, update function_local_var_map: with the inputs (probably using index numbers):
+    //         ex. foo(w,x,y):
+    //         (w=4), (x=7), (y=24)
+
+    //         once varmap is updated,
+    //         call func_code.evaluate() -> this will update local func variables with whatever the function was suposed to do:
+
+    //         call func_return(which is an astree) with its evaluate -- this gives us a return value bd.
+    //         make token of that return value bd and add to expression_tokens,
+
+    //         let the code below continue, 
+    //         */
+            
+    //     }
+    //     //Add end token to end of each expression that is being sent to ASTree
+    //     token end_token{temp_row,temp_col+1,"END",TokenType::END};
+    //     expression_tokens.push_back(end_token);
+    //     exp = new ASTree(expression_tokens, var_map);
+    //     return new ExpressionNode(exp, parse_block());
+    // }
+// }

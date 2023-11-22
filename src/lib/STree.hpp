@@ -62,16 +62,26 @@ public:
 
 class FuncNode : public SNode {
 protected:
+    std::string f_name;
     std::unordered_map<std::string, value_bd>* local_var_map;
 public:
     std::vector<std::string> parameters;
     STree* code;
     std::string type() {return "def";}
-    explicit FuncNode(std::unordered_map<std::string, value_bd>* local_v, SNode* next, STree* code, std::vector<std::string> p);
+    explicit FuncNode(std::unordered_map<std::string, value_bd>* local_v, SNode* next, STree* code, std::vector<std::string> p, std::string name);
     ~FuncNode();
     void evaluate(std::unordered_map<std::string, value_bd>* var_map);
     void print(int tab);
-    value_bd call(std::vector<token> arguments);
+    //void call(std::vector<token> arguments);
+};
+
+class ReturnNode : public SNode {
+public:
+    std::string type() {return "return";}
+    explicit ReturnNode(ASTree* exp, SNode* next);
+    ~ReturnNode();
+    void evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    void print(int tab);
 };
 
 class STree {
