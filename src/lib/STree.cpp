@@ -2,7 +2,7 @@
 
 //-----------------
 
-SNode::SNode(ASTree* exp, SNode* next): expression(exp), next(next) {}
+SNode::SNode(EXP* exp, SNode* next): expression(exp), next(next) {}
 SNode::~SNode() {
     delete expression;
     delete next;
@@ -14,11 +14,11 @@ void SNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
 
 //-----------------
 
-ExpressionNode::ExpressionNode(ASTree* exp, SNode* next): SNode(exp, next) {
+ExpressionNode::ExpressionNode(EXP* exp, SNode* next): SNode(exp, next) {
     
 }
 void ExpressionNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
-    expression->evaluate();
+    expression->expression->evaluate();
     if (next!= nullptr){
         next->evaluate(var_map);
     }
@@ -27,7 +27,7 @@ void ExpressionNode::print(int tab) {
     for (int i = 0; i < tab; ++i) {
         std::cout << " ";
     }
-    std::cout << expression->print_no_endl();
+    std::cout << expression->expression->print_no_endl();
     std::cout << ";\n";
     
     if(next != nullptr) {
@@ -40,13 +40,13 @@ ExpressionNode::~ExpressionNode() {
 
 //-----------------
 
-WhileNode::WhileNode(ASTree* exp, SNode* next, STree* t): SNode(exp, next), trueBranch(t) {
+WhileNode::WhileNode(EXP* exp, SNode* next, STree* t): SNode(exp, next), trueBranch(t) {
     
 }
 void WhileNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
     value_bd exp_eval;
     while (true){
-        exp_eval = expression->evaluate();
+        exp_eval = expression->expression->evaluate();
         if (exp_eval.type_tag != "bool") {
             throw EvaluationError("condition is not a bool.");
         }
@@ -65,7 +65,7 @@ void WhileNode::print(int tab) {
         std::cout << " ";
     }
     std::cout << "while "; 
-    std::cout << expression->print_no_endl(); 
+    std::cout << expression->expression->print_no_endl(); 
     std::cout << " {" << std::endl;
     tab += 4;
     trueBranch->print(tab);
@@ -81,11 +81,11 @@ WhileNode::~WhileNode() {
 
 //-----------------
 
-PrintNode::PrintNode(ASTree* exp, SNode* next): SNode(exp, next) {
+PrintNode::PrintNode(EXP* exp, SNode* next): SNode(exp, next) {
     
 }
 void PrintNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
-    value_bd ans = expression->evaluate();
+    value_bd ans = expression->expression->evaluate();
     if (ans.type_tag == "bool"){
         if (ans.Bool) {
             std::cout << "true" << std::endl;
@@ -106,7 +106,11 @@ void PrintNode::print(int tab) {
         std::cout << " ";
     }
     std::cout << "print ";
-    std::cout << expression->print_no_endl();
+    if(expression->type == "expression"){
+        std::cout << expression->expression->print_no_endl();
+    } else{
+        expression->function.print();
+    }
     std::cout << ";\n";
     if(next != nullptr) {
         next->print(tab);
@@ -118,11 +122,11 @@ PrintNode::~PrintNode() {
 
 //-----------------
 
-IfNode::IfNode(ASTree* exp, SNode* next, STree* t, STree* f): SNode(exp, next), trueBranch(t), falseBranch(f) {
+IfNode::IfNode(EXP* exp, SNode* next, STree* t, STree* f): SNode(exp, next), trueBranch(t), falseBranch(f) {
     
 }
 void IfNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
-    value_bd exp_eval = expression->evaluate();
+    value_bd exp_eval = expression->expression->evaluate();
     if (exp_eval.type_tag != "bool") {
         throw EvaluationError("condition is not a bool.");
     }
@@ -142,7 +146,7 @@ void IfNode::print(int tab) {
         std::cout << " ";
     }
     std::cout << "if ";
-    std::cout << expression->print_no_endl();
+    std::cout << expression->expression->print_no_endl();
     std::cout << " {" <<std::endl;
     tab += 4;
     trueBranch->print(tab);
@@ -228,10 +232,10 @@ FuncNode::~FuncNode() {
 
 //-----------------
 
-ReturnNode::ReturnNode(ASTree* exp, SNode* next): SNode(exp,next){}
+ReturnNode::ReturnNode(EXP* exp, SNode* next): SNode(exp,next){}
 
 void ReturnNode::evaluate(std::unordered_map<std::string, value_bd>* var_map){
-    expression->evaluate();
+    expression->expression->evaluate();
     (void)var_map;
     //does not call next, as we dont need to evaluate after return.
     }
@@ -247,7 +251,7 @@ void ReturnNode::print(int tab){
     }
     std::cout << "return";
     if (expression){
-        std::cout << " " << expression->print_no_endl();
+        std::cout << " " << expression->expression->print_no_endl();
     }
     std::cout << ";\n";
     if(next != nullptr) {
@@ -301,7 +305,7 @@ SNode* STree::parse_block() {
 
     //IF STATEMENT 
     if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "if") {
-        ASTree* exp = nullptr;
+        EXP* exp = nullptr;
         STree* true_run = nullptr;
         STree* false_run = nullptr;
         int temp_row = get_current_token().row;
@@ -323,7 +327,7 @@ SNode* STree::parse_block() {
         //Add end token to end of each expression that is being sent to ASTree
         token end_token{temp_row,temp_col+1,"END",TokenType::END};
         expression_tokens.push_back(end_token);
-        exp = new ASTree(expression_tokens, var_map);
+        exp = new EXP(new ASTree(expression_tokens, var_map));
         consume_token(); //consume left curly
         int open_braces = 0; //keep track of curly braces
         //take all tokens inside the braces to create a new tree using recursion
@@ -441,7 +445,7 @@ SNode* STree::parse_block() {
 
     //WHILE STATEMENT
     else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "while") {
-        ASTree* exp = nullptr;
+        EXP* exp = nullptr;
         STree* run = nullptr;
         int temp_row = get_current_token().row;
         int temp_col = get_current_token().col;
@@ -461,7 +465,7 @@ SNode* STree::parse_block() {
         //Add end token to end of each expression that is being sent to ASTree
         token end_token{temp_row,temp_col+1,"END",TokenType::END};
         expression_tokens.push_back(end_token);
-        exp = new ASTree(expression_tokens, var_map);
+        exp = new EXP(new ASTree(expression_tokens, var_map));
         consume_token(); //consume left curly
         int open_braces = 0; //keep track of curly braces
         //take all tokens inside the braces to create a new tree using recursion
@@ -494,31 +498,71 @@ SNode* STree::parse_block() {
 
     //PRINT STATEMENT
     else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "print") {
-        ASTree* exp = nullptr;
+        EXP* exp = nullptr;
         int temp_row = get_current_token().row;
         int temp_col = get_current_token().col;
-        consume_token(); //consume print
-        std::vector<token> expression_tokens;
         bool semi_colon = false;
-        //store the expression condition to give to ASTree
-        while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) {
+        consume_token(); //consume print
+
+        if(get_current_token().type == TokenType::VARIABLES && block[current_token_index+1].type == TokenType::LEFT_PAREN) { //function
+            std::vector<ASTree> arguement;
+            std::string name = get_current_token().text;
+            consume_token(); consume_token(); //consume func_name and left paren
+            std::vector<token> expression_tokens;
+            while (get_current_token().type != TokenType::RIGHT_PAREN) {
+                if (get_current_token().type == TokenType::COMMA){
+                    if (expression_tokens.size()==0){
+                        throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+                    }
+                    token end_token{temp_row,temp_col+1,"END",TokenType::END};
+                    expression_tokens.push_back(end_token);  
+                    ASTree single_argument = ASTree(expression_tokens, var_map);
+                    arguement.push_back(single_argument);
+                    expression_tokens.clear();
+                }   else {
+                    expression_tokens.push_back(get_current_token());
+                    consume_token();
+                }
+
+            }
+            if (expression_tokens.size()!=0){
+                token end_token{temp_row,temp_col+1,"END",TokenType::END};
+                expression_tokens.push_back(end_token);  
+                ASTree single_argument = ASTree(expression_tokens, var_map);
+                arguement.push_back(single_argument);
+                expression_tokens.clear();
+            }
+
+            consume_token(); // consuming right paren
             if (get_current_token().text == ";") {
                 semi_colon = true;
                 consume_token();
-                break;
+                
             }
-            temp_row = get_current_token().row;
-            temp_col = get_current_token().col;
-            expression_tokens.push_back(get_current_token());
-            consume_token();
+
+            exp = new EXP(function_call(name, arguement));
+        } else { //expression
+            std::vector<token> expression_tokens;
+            //store the expression condition to give to ASTree
+            while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) {
+                if (get_current_token().text == ";") {
+                    semi_colon = true;
+                    consume_token();
+                    break;
+                }
+                temp_row = get_current_token().row;
+                temp_col = get_current_token().col;
+                expression_tokens.push_back(get_current_token());
+                consume_token();
+            }
+            //Add end token to end of each expression that is being sent to ASTree
+            token end_token{temp_row,temp_col+1,"END",TokenType::END};
+            expression_tokens.push_back(end_token);
+            exp = new EXP(new ASTree(expression_tokens, var_map));
         }
-        //Add end token to end of each expression that is being sent to ASTree
-        token end_token{temp_row,temp_col+1,"END",TokenType::END};
         if (semi_colon == false) {
             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
         }
-        expression_tokens.push_back(end_token);
-        exp = new ASTree(expression_tokens, var_map);
         return new PrintNode(exp, parse_block());
     } 
     
@@ -593,7 +637,7 @@ SNode* STree::parse_block() {
 
     //RETURN STATEMENT
     else if (get_current_token().text == "return") {
-        ASTree* exp = nullptr;
+        EXP* exp = nullptr;
         int temp_row = get_current_token().row;
         int temp_col = get_current_token().col;
         consume_token(); //consume return
@@ -619,7 +663,7 @@ SNode* STree::parse_block() {
         if (return_value.size() != 0){
             token end_token{temp_row,temp_col+1,"END",TokenType::END};
             return_value.push_back(end_token);  
-            exp = new ASTree(return_value, var_map);
+            exp = new EXP(new ASTree(return_value, var_map));
         }
         // if an empty list, exp will be passed on as nullptr
         return new ReturnNode(exp, parse_block());
@@ -628,7 +672,7 @@ SNode* STree::parse_block() {
 
     //EXPRESSION STATEMENT
     else {
-        ASTree* exp = nullptr;
+        EXP* exp = nullptr;
         std::vector<token> expression_tokens;
         int temp_row = get_current_token().row;
         int temp_col = get_current_token().col;
@@ -642,6 +686,33 @@ SNode* STree::parse_block() {
             }
             if(get_current_token().type == TokenType::VARIABLES && block[current_token_index+1].type == TokenType::LEFT_PAREN) {
                 //this checks if current expression line has a function. if it does dont send the line to ASTree, instead create your own FuncCall node
+                std::vector<ASTree> arguement;
+                std::string name = get_current_token().text;
+                consume_token(); consume_token(); //consume func_name and left paren
+                std::vector<token> expression_tokens;
+                while (get_current_token().type != TokenType::RIGHT_PAREN) {
+                    if (get_current_token().type == TokenType::COMMA){
+                        if (expression_tokens.size()==0){
+                            throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+                        }
+                        token end_token{temp_row,temp_col+1,"END",TokenType::END};
+                        expression_tokens.push_back(end_token);  
+                        ASTree single_argument = ASTree(expression_tokens, var_map);
+                        arguement.push_back(single_argument);
+                        expression_tokens.clear();
+                    }   else {
+                        expression_tokens.push_back(get_current_token());
+                        consume_token();
+                    }
+
+                }
+                if (expression_tokens.size()!=0){
+                    throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+                }
+
+                consume_token(); // consuming right paren
+
+                exp = new EXP(function_call(name, arguement));
             }
             temp_row = get_current_token().row;
             temp_col = get_current_token().col;
@@ -654,150 +725,8 @@ SNode* STree::parse_block() {
         //Add end token to end of each expression that is being sent to ASTree
         token end_token{temp_row,temp_col+1,"END",TokenType::END};
         expression_tokens.push_back(end_token);
-        exp = new ASTree(expression_tokens, var_map);
+        exp = new EXP(new ASTree(expression_tokens, var_map));
+
         return new ExpressionNode(exp, parse_block());
     }
 }
-
-//FILE ENDS HERE
-
-
-
-    // else {
-    //     std::cout << "in else" << std::endl;
-    //     ASTree* exp = nullptr;
-    //     std::vector<token> expression_tokens;
-    //     int temp_row = get_current_token().row;
-    //     int temp_col = get_current_token().col;
-    //     bool semi_colon = false;
-    //     bool hasFunc = false;
-    //     //store entire line to give to ASTree
-    //     while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) {
-    //         if (get_current_token().text == ";") {
-    //             semi_colon = true;
-    //             consume_token();
-    //             break;
-    //         }
-            
-    //         if((*var_map).find(get_current_token().text) != (*var_map).end()){
-    //             hasFunc = true;
-    //             std::cout << "found func" << std::endl;
-    //             break;
-    //         }
-    //         temp_row = get_current_token().row;
-    //         temp_col = get_current_token().col;
-    //         expression_tokens.push_back(get_current_token());
-    //         consume_token();
-    //     }
-        
-    //     if (hasFunc) {
-    //         std::cout << get_current_token().text << std::endl;
-    //         int temp_row = get_current_token().row;
-    //         int temp_col = get_current_token().col;
-    //         if(get_current_token().type != TokenType::VARIABLES){
-    //             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
-    //         }
-    //         std::string func_name = get_current_token().text;
-    //         consume_token();
-
-    //         if(get_current_token().type != TokenType::LEFT_PAREN){
-    //             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
-    //         }
-    //         consume_token();
-
-    //         std::vector<token> parameters;
-            
-    //         while(get_current_token().type != TokenType::RIGHT_PAREN){
-    //             if(get_current_token().row != temp_row) {
-    //                 throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
-    //             }
-    //             if(get_current_token().type != TokenType::COMMA){
-    //                 parameters.push_back(get_current_token());
-    //             }
-    //             consume_token();
-    //         }
-    //         consume_token(); //right paren
-
-    //         if (get_current_token().text == ";") {
-    //             semi_colon = true;
-    //             consume_token();
-    //         }
-
-    //         if (!semi_colon) {
-    //             throw ParseError(get_current_token().row, get_current_token().col+1, get_current_token());
-    //         }
-
-    //         FuncNode* func = (*var_map)[func_name].Function_Node;
-    //         if (func == nullptr){
-    //             throw ParseError(get_current_token().row, get_current_token().col+1, get_current_token());
-    //         }
-            
-    //         value_bd result = func->call(parameters);
-
-    //         //making token out of a value_bd result:
-    //         token mytoken;
-    //         if (result.type_tag == "null"){
-    //             mytoken.row=temp_row;
-    //             mytoken.col=temp_col;
-    //             mytoken.text="null";
-    //             mytoken.type=TokenType::VARIABLES;
-    //         } else if (result.type_tag == "double"){
-    //             mytoken.row=temp_row;
-    //             mytoken.col=temp_col;
-    //             mytoken.text= to_string(result.Double);
-    //             mytoken.type=TokenType::NUMBER;
-    //         } else if (result.type_tag == "bool"){
-    //             mytoken.row=temp_row;
-    //             mytoken.col=temp_col;
-    //             mytoken.type=TokenType::BOOLEAN;
-    //             if(result.Bool){
-    //                 mytoken.text = "true";
-    //             } else {
-    //                 mytoken.text = "false";
-    //             }
-                
-    //         }
-    //         expression_tokens.push_back(mytoken);
-
-    //         // make token of result and push back to expressions, continue.
-
-            
-    //         /* DONE WITH THIS 
-    //         name = curr_token... + consume token
-    //         check if curr token now is a "(" + if yes consume that | if no - throw error..
-    //         string parameters - keep adding and cosuming tokens untill ")"
-    //         if line changes before ")" - throw error.
-    //         consume ")"
-    //         check for semi_colon;
-            
-
-    //         vector params <expressions (expressions: input type: numbers are a form of expression)> ===== string parameters.split(,):
-            
-    //         params = (4, 7+0, 8*3)
-    //         send each expression in params to calc, and get a value, replace that value with the current expression:
-    //         (if it is just a number, calc will return number)
-    //         parems = (4,7,24)
-
-    //         check if length of paren matches with the number of inputs required by the function: name stored in a variable line 1:
-
-    //         if it matches, update function_local_var_map: with the inputs (probably using index numbers):
-    //         ex. foo(w,x,y):
-    //         (w=4), (x=7), (y=24)
-
-    //         once varmap is updated,
-    //         call func_code.evaluate() -> this will update local func variables with whatever the function was suposed to do:
-
-    //         call func_return(which is an astree) with its evaluate -- this gives us a return value bd.
-    //         make token of that return value bd and add to expression_tokens,
-
-    //         let the code below continue, 
-    //         */
-            
-    //     }
-    //     //Add end token to end of each expression that is being sent to ASTree
-    //     token end_token{temp_row,temp_col+1,"END",TokenType::END};
-    //     expression_tokens.push_back(end_token);
-    //     exp = new ASTree(expression_tokens, var_map);
-    //     return new ExpressionNode(exp, parse_block());
-    // }
-// }

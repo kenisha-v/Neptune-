@@ -2,18 +2,19 @@
 #define STREE_HPP
 
 #include "ASTree.hpp"
+#include "function_support.hpp"
 
 class STree;
 class FuncNode; 
 
 class SNode {
 protected:
-    ASTree* expression;
+    EXP* expression;
     SNode* next;
 
 public:
     virtual std::string type() { return "Snode";} //used in print to determine the type of the node
-    SNode(ASTree* exp, SNode* next);
+    SNode(EXP* exp, SNode* next);
     virtual ~SNode();
     virtual void evaluate(std::unordered_map<std::string, value_bd>* var_map);
     virtual void print(int tab) {(void)tab;}
@@ -22,7 +23,7 @@ public:
 class ExpressionNode : public SNode {
 public:
     std::string type() {return "exp";}
-    explicit ExpressionNode(ASTree* exp, SNode* next);
+    explicit ExpressionNode(EXP* exp, SNode* next);
     ~ExpressionNode();
     void evaluate(std::unordered_map<std::string, value_bd>* var_map);
     void print(int tab);
@@ -33,7 +34,7 @@ protected:
     STree* trueBranch;
 public:
     std::string type() {return "while";}
-    explicit WhileNode(ASTree* exp, SNode* next, STree* t);
+    explicit WhileNode(EXP* exp, SNode* next, STree* t);
     ~WhileNode();
     void evaluate(std::unordered_map<std::string, value_bd>* var_map);
     void print(int tab);
@@ -42,7 +43,7 @@ public:
 class PrintNode : public SNode {
 public:
     std::string type() {return "print";}
-    explicit PrintNode(ASTree* exp, SNode* next);
+    explicit PrintNode(EXP* exp, SNode* next);
     ~PrintNode();
     void evaluate(std::unordered_map<std::string, value_bd>* var_map);
     void print(int tab);
@@ -54,7 +55,7 @@ protected:
     STree* falseBranch;
 public:
     std::string type() {return "if";}
-    explicit IfNode(ASTree* exp, SNode* next, STree* t, STree* f);
+    explicit IfNode(EXP* exp, SNode* next, STree* t, STree* f);
     ~IfNode();
     void evaluate(std::unordered_map<std::string, value_bd>* var_map);
     void print(int tab);
@@ -78,7 +79,7 @@ public:
 class ReturnNode : public SNode {
 public:
     std::string type() {return "return";}
-    explicit ReturnNode(ASTree* exp, SNode* next);
+    explicit ReturnNode(EXP* exp, SNode* next);
     ~ReturnNode();
     void evaluate(std::unordered_map<std::string, value_bd>* var_map);
     // value_bd call(std::unordered_map<std::string, value_bd>* var_map);
