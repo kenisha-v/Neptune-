@@ -80,7 +80,10 @@ value_bd AssignmentNode::evaluate(std::unordered_map<std::string, value_bd>* var
             value_bd solved_value_right_node = value->evaluate(var_map);
             std::vector<value_bd> array_left = (*var_map)[id_n->name].array;
             // id_n->evaluate(var_map) = solved_value_right_node;
-            size_t pos = std::stod(id_n->position);
+            std::ostringstream os;
+                    // os << array[i].Double;
+                    // array_str+=os.str();
+            size_t pos = std::stoi(id_n->position);
             std::vector<value_bd> array_changed;
             for (size_t i = 0; i < array_left.size();++i){
                 if (i==pos) {
