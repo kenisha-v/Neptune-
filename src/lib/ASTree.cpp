@@ -386,149 +386,188 @@ std::string LorNode::print(){
 
 //----------------------
 
-ArrayNode::ArrayNode(int line, int column, std::vector<value_bd>* array, std::vector<std::vector<token>>* array_ele) : ASTNode(line, column){
-    this->array = new std::vector<value_bd>;
-    for (size_t i = 0; i< array->size(); ++i ) {
-        this->array->push_back((*array)[i]);
+ArrayNode::ArrayNode(int line, int column, std::vector<value_bd> array, std::vector<std::string> array_ele) : ASTNode(line, column){
+    this->array = {};
+    for (size_t i = 0; i< array.size(); ++i ) {
+        this->array.push_back(array[i]);
     }
-    this->array_ele = new std::vector<std::vector<token>>;
-    for (size_t i = 0; i< array_ele->size(); ++i ) {
-        this->array_ele->push_back((*array_ele)[i]);
+    this->array_ele = {};
+    for (size_t i = 0; i< array_ele.size(); ++i ) {
+        this->array_ele.push_back(array_ele[i]);
     }
+    this->node = nullptr;
 }
 
-ArrayNode::ArrayNode(int line, int column, ASTNode* node, int position) : ASTNode(line, column), node(node), position(position) {}
+ArrayNode::ArrayNode(int line, int column, ASTNode* node, int position, std::unordered_map<std::string, value_bd>* var_map) : ASTNode(line, column), node(node), position(position), variable_map(var_map) {}
     
+ArrayNode::ArrayNode(int line, int column, std::vector<value_bd> array): ASTNode(line, column){
+    this->array = {};
+    for (size_t i = 0; i< array.size(); ++i ) {
+        this->array.push_back(array[i]);
+    }
+    this->node = nullptr;
+}
+
 ArrayNode::~ArrayNode(){
         delete left;
         delete right;
-        delete this->array;
         delete node;
     }
     
 value_bd ArrayNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
-        // if(left->evaluate(var_map).type_tag != "bool" || right->evaluate(var_map).type_tag != "bool"){
-        //     throw EvaluationError("invalid operand type.");
+        // if (node != nullptr) {
+        //     std::string array_str;
+        //     array_str += "[";
+        //     for (size_t i = 0; i< array.size()-1; ++i ) {
+        //         if (array[i].type_tag == "bool") {
+        //             if (array[array.size()-1].Bool) {
+        //                 array_str+="true";
+        //             } else {
+        //                 array_str+="false";
+        //             }
+        //         } else if (array[i].type_tag == "double"){
+        //             std::ostringstream os;
+        //             os << array[i].Double;
+        //             array_str+=os.str();
+        //         } else if (array[i].type_tag == "array"){
+        //             ArrayNode* array_ele_node = new ArrayNode(0, 0, array[i].array);
+        //             array_str += array_ele_node->print();
+        //         } else {
+        //             ;
+        //         }
+        //         array_str+=", ";
+        //     }
+        //     if (array[array.size()-1].type_tag == "bool") {
+        //         if (array[array.size()-1].Bool) {
+        //             array_str+="true";
+        //         } else {
+        //             array_str+="false";
+        //         }
+        //     } else if (array[array.size()-1].type_tag == "double"){
+        //         std::ostringstream os;
+        //         os << array[array.size()-1].Double;
+        //         array_str+=os.str();
+        //     } else {
+        //         ArrayNode* array_ele_node = new ArrayNode(0, 0, array[array.size()-1].array);
+        //         array_str += array_ele_node->print();
+        //     }
+        //     array_str += "]";
+        //     return value_bd("array",array_str);
         // }
-        if (1==0) {
-            var_map;
+        if (node != nullptr) {
+            value_bd val = (*var_map)[node->print()];
+            return val.array[position];
         }
-        return value_bd("array", array);
+        // std::cout << array.size() << "\n";
+        return value_bd("array", array, array_ele);
     }
     
 std::string ArrayNode::print(){
         std::string array_str;
-        // array_str+="[";
-        // for (size_t i = 0; i< array_ele->size()-1; ++i ) {
-        //     if ((*array_ele)[i][0].type == TokenType::L_SQUARE) {
-        //         for (size_t j = 0; j< (*array_ele)[i].size(); ++j ) {
-        //             if ((*array_ele)[i][j].type == TokenType::COMMA) {
-        //                 array_str+= (*array_ele)[i][j].text;
-        //                 array_str+= " ";
-        //             } else if ((*array_ele)[i][j].type != TokenType::END) {
-        //                 array_str+= (*array_ele)[i][j].text;
-        //             }
+        if (node != nullptr){
+            // value_bd val = evaluate(variable_map);
+            // std::cout << "seg \n";
+            // if(val.array[position].type_tag == "bool") {
+            //     if(val.array[position].Bool) {
+            //         array_str += "true";
+            //     } else {
+            //         array_str += "false";
+            //     }
+            // } else if(val.array[position].type_tag == "double") {
+            //     array_str += val.array[position].Double;
+            // } else {
+            //     array_str += evaluate_print(val.array[position].array);
+            // }
+            return array_str;
+        }
+        array_str+="[";
+        for (size_t i = 0; i< array_ele.size()-1; ++i ) {
+            array_str+= array_ele[i];
+            array_str+=", ";
+        }
+        array_str+= array_ele[array_ele.size()-1];
+        array_str+="]";
+        // array_str += "[";
+        // for (size_t i = 0; i< array.size()-1; ++i ) {
+        //     if (array[i].type_tag == "bool") {
+        //         if (array[array.size()-1].Bool) {
+        //             array_str+="true";
+        //         } else {
+        //             array_str+="false";
         //         }
+        //     } else if (array[i].type_tag == "double"){
+        //         std::ostringstream os;
+        //         os << array[i].Double;
+        //         array_str+=os.str();
+        //     } else if (array[i].type_tag == "array"){
+        //         ArrayNode* array_ele_node = new ArrayNode(0, 0, array[i].array);
+        //         array_str += array_ele_node->print();
         //     } else {
-        //         if ((*array)[i].type_tag == "bool") {
-        //             if ((*array)[array->size()-1].Bool) {
-        //                 array_str+="true";
-        //             } else {
-        //                 array_str+= "false";
-        //             }
-        //         } else if ((*array)[i].type_tag == "double"){
-        //             std::ostringstream os;
-        //             os << (*array)[i].Double;
-        //             array_str+= os.str();
-        //         }
+        //         ;
         //     }
         //     array_str+=", ";
         // }
-        // if ((*array_ele)[array_ele->size()-1][0].type == TokenType::L_SQUARE) {
-        //     for (size_t j = 0; j< (*array_ele)[array_ele->size()-1].size(); ++j ) {
-        //         if ((*array_ele)[array_ele->size()-1][j].type == TokenType::COMMA) {
-        //             array_str+= (*array_ele)[array_ele->size()-1][j].text;
-        //             array_str+= " ";
-        //         } else if ((*array_ele)[array_ele->size()-1][j].type != TokenType::END) {
-        //             array_str+= (*array_ele)[array_ele->size()-1][j].text;
-        //         }
+        // if (array[array.size()-1].type_tag == "bool") {
+        //     if (array[array.size()-1].Bool) {
+        //         array_str+="true";
+        //     } else {
+        //         array_str+="false";
         //     }
+        // } else if (array[array.size()-1].type_tag == "double"){
+        //     std::ostringstream os;
+        //     os << array[array.size()-1].Double;
+        //     array_str+=os.str();
         // } else {
-        //     if ((*array)[array_ele->size()-1].type_tag == "bool") {
-        //         if ((*array)[array->size()-1].Bool) {
-        //             array_str+="true";
-        //         } else {
-        //             array_str+= "false";
-        //         }
-        //     } else if ((*array)[array_ele->size()-1].type_tag == "double"){
-        //         std::ostringstream os;
-        //         os << (*array)[array_ele->size()-1].Double;
-        //         array_str+= os.str();
-        //     }
+        //     ArrayNode* array_ele_node = new ArrayNode(0, 0, array[array.size()-1].array);
+        //     array_str += array_ele_node->print();
         // }
-        // array_str+="]";
-
-        array_str += "[";
-        std::cout << array->size() << "\n";
-        for (size_t i = 0; i< array->size()-1; ++i ) {
-            if ((*array)[i].type_tag == "bool") {
-                // std::cout << std::to_string((*array)[i].Bool) << "\n";
-                // array_str+=std::to_string((*array)[i].Bool);
-                if ((*array)[array->size()-1].Bool) {
-                    array_str+="true";
-                } else {
-                    array_str+="false";
-                }
-            } else if ((*array)[i].type_tag == "double"){
-                std::ostringstream os;
-                os << (*array)[i].Double;
-                array_str+=os.str();
-            } else if ((*array)[i].type_tag == "array_ele"){
-                std::cout << "array ele " << (*array)[i].type_tag << "\n";
-                // value_bd eval = (*array)[i];
-                // if (eval.type_tag == "array_ele") {
-                //     // std::cout << "it does enter\n";
-                //     eval = *(new value_bd("array",eval.array_ele));
-                //     std::cout << (*eval.array).size() << "\n";
-                // }
-                ArrayNode* array_ele_node = new ArrayNode(0, 0, (*array)[i].array_ele, array_ele);
-                array_str += array_ele_node->print();
-                // ASTree* tree_eval = new ASTree(array_ele[i], var_map);
-                // ArrayNode* tree_print = new ArrayNode(0,0,(*array)[i].array);
-                // array_str+="[";
-                // array_str+=tree_print->print();
-                // delete tree_print;
-                // array_str+="]";
-            } else {
-                std::cout << "array " << (*array)[i].type_tag << "\n";
-            }
-            array_str+=", ";
-        }
-        if ((*array)[array->size()-1].type_tag == "bool") {
-            // array_str+=std::to_string((*array)[array->size()-1].Bool);
-            if ((*array)[array->size()-1].Bool) {
-                array_str+="true";
-            } else {
-                array_str+="false";
-            }
-        } else if ((*array)[array->size()-1].type_tag == "double"){
-            std::ostringstream os;
-            os << (*array)[array->size()-1].Double;
-            array_str+=os.str();
-            // array_str+=std::to_string((*array)[array->size()-1].Double);
-        } else {
-            std::cout << "array " << (*array)[array->size()-1].type_tag << "\n";
-            //std::cout << "array " << (*(*array)[array->size()-1].array)[4].size() << "\n";
-            // ArrayNode* tree_print = new ArrayNode(0,0,(*array)[array->size()-1].array);
-            // array_str+="[";
-            // tree_print->print();
-            // array_str+="";
-            // delete tree_print;
-            // array_str+="]";
-        }
-        array_str += "]";
+        // array_str += "]";
         return array_str;
     }
+
+std::string ArrayNode::evaluate_print(std::vector<value_bd> arr) {
+    std::string str;
+    str+="[";
+    for (size_t i = 0; i< arr.size()-1; ++i) {
+        std::ostringstream os;
+        if(arr[i].type_tag == "bool") {
+            os << arr[i].Bool;
+            if (os.str()=="1"){
+                str+="true";
+            } else {
+                str+="false";
+            }
+        } else if(arr[i].type_tag == "double") {
+            os << arr[i].Double;
+            str+=os.str();
+        } else {
+            ArrayNode* arr_ele = new ArrayNode(0,0, arr[i].array);
+            str+=arr_ele->evaluate_print(arr[i].array);
+            delete arr_ele;
+            arr_ele = nullptr;
+        }
+        str+=", ";
+    }
+    std::ostringstream os;
+    if(arr[arr.size()-1].type_tag == "bool") {
+        os << arr[arr.size()-1].Bool;
+        if (os.str()=="1"){
+            str+="true";
+        } else {
+            str+="false";
+        }
+    } else if(arr[arr.size()-1].type_tag == "double") {
+        os << arr[arr.size()-1].Double;
+        str+=os.str();
+    } else {
+        ArrayNode* arr_ele = new ArrayNode(0,0, arr[arr.size()-1].array);
+        str+=arr_ele->evaluate_print(arr[arr.size()-1].array);
+        delete arr_ele;
+        arr_ele = nullptr;
+    }
+    str+="]";
+    return str;
+}
 
 //----------------------
 
@@ -597,20 +636,21 @@ ASTNode* ASTree::parse_assignment() {
             value = parse_assignment();
             // std::cout << "created?\n";
             return new AssignmentNode(temp_row, temp_col, node, value);
-        } else if (get_current_token().type == TokenType::L_SQUARE){
-            std::cout << "enetered else if in parse_assignment\n";
-            int temp_row            = get_current_token().row;
-            int temp_col            = get_current_token().col;
-            token temp_token        = get_current_token();
-            consume_token();
-            int pos = std::stod(get_current_token().text);
-            consume_token();
-            if (get_current_token().type != TokenType::R_SQUARE) {
-                throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
-            }
-            consume_token();
-            return new ArrayNode(temp_row, temp_col, node, pos);
         }
+        // } else if (get_current_token().type == TokenType::L_SQUARE){
+        //     std::cout << "enetered else if in parse_assignment\n";
+        //     int temp_row            = get_current_token().row;
+        //     int temp_col            = get_current_token().col;
+        //     token temp_token        = get_current_token();
+        //     consume_token();
+        //     int pos = std::stod(get_current_token().text);
+        //     consume_token();
+        //     if (get_current_token().type != TokenType::R_SQUARE) {
+        //         throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+        //     }
+        //     consume_token();
+        //     return new ArrayNode(temp_row, temp_col, node, pos);
+        // }
         
         return node;
     } catch (const ParseError& e){
@@ -846,14 +886,28 @@ ASTNode* ASTree::parse_factor() {
         } else if (get_current_token().type == TokenType::VARIABLES) {
             ASTNode* node = new IdentifierNode(get_current_token().row, get_current_token().col, get_current_token().text);
             consume_token();
+            if (get_current_token().type == TokenType::L_SQUARE){
+                // std::cout << "new one - enetered else if in parse_assignment\n";
+                int temp_row            = get_current_token().row;
+                int temp_col            = get_current_token().col;
+                token temp_token        = get_current_token();
+                consume_token();
+                int pos = std::stod(get_current_token().text);
+                consume_token();
+                if (get_current_token().type != TokenType::R_SQUARE) {
+                    throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+                }
+                consume_token();
+                return new ArrayNode(temp_row, temp_col, node, pos, var_map);
+            }
             return node;
         } else if (get_current_token().type == TokenType::BOOLEAN) {
             ASTNode* node = new BooleanNode(get_current_token().row, get_current_token().col, get_current_token().text);
             consume_token();
             return node;
         } else if (get_current_token().type == TokenType::L_SQUARE) {
-            std::vector<value_bd>* array = new std::vector<value_bd>;
-            std::vector<std::vector<token>>* array_ele = new std::vector<std::vector<token>>;
+            std::vector<value_bd> array = {};
+            std::vector<std::string> array_ele = {};
             int square_paren = 1;
             consume_token();
             std::vector<token> elements;
@@ -881,13 +935,8 @@ ASTNode* ASTree::parse_factor() {
                     elements.push_back(getToken(get_current_token().row, get_current_token().col, "END", TokenType::END));
                     ASTree* tree_eval = new ASTree(elements, var_map);
                     value_bd eval = tree_eval->evaluate();
-                    if (eval.type_tag == "array") {
-                        // std::cout << "it does enter\n";
-                        eval = *(new value_bd(eval.array));
-                        // std::cout << eval.type_tag << "\n";
-                    }
-                    array->push_back(eval);
-                    array_ele->push_back(elements);
+                    array.push_back(eval);
+                    array_ele.push_back(tree_eval->print_no_endl());
                     elements = {};
                     if (square_paren != 0) {
                         consume_token();
