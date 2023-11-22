@@ -221,8 +221,9 @@ public:
     std::vector<value_bd> array;
     std::vector<std::string> array_ele;
     std::string position;
+    std::string name;
     ArrayNode(int line, int column, std::vector<value_bd> array, std::vector<std::string> array_ele);
-    ArrayNode(int line, int column, ASTNode* node, std::string position, std::vector<std::string> array_ele);
+    ArrayNode(int line, int column, ASTNode* node, std::string position, std::vector<std::string> array_ele, std::string name);
     ArrayNode(int line, int column, std::vector<value_bd> array);
     ~ArrayNode();
     value_bd evaluate(std::unordered_map<std::string, value_bd>* var_map);

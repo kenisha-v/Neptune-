@@ -72,8 +72,26 @@ AssignmentNode::~AssignmentNode(){
 }
 
 value_bd AssignmentNode::evaluate(std::unordered_map<std::string, value_bd>* var_map){
-        if (dynamic_cast<IdentifierNode*>(id) == nullptr) {
+        if (dynamic_cast<IdentifierNode*>(id) == nullptr && dynamic_cast<ArrayNode*>(id) == nullptr) {
             throw EvaluationError("invalid assignee.");
+        }
+        if (dynamic_cast<IdentifierNode*>(id) == nullptr) {
+            ArrayNode* id_n = static_cast<ArrayNode*>(id);
+            value_bd solved_value_right_node = value->evaluate(var_map);
+            std::vector<value_bd> array_left = (*var_map)[id_n->name].array;
+            // id_n->evaluate(var_map) = solved_value_right_node;
+            size_t pos = std::stod(id_n->position);
+            std::vector<value_bd> array_changed;
+            for (size_t i = 0; i < array_left.size();++i){
+                if (i==pos) {
+                    array_changed.push_back(solved_value_right_node);
+                } else {
+                    array_changed.push_back(array_left[i]);
+                }
+            }
+            value_bd lhs = value_bd("array",array_changed);
+            (*var_map)[id_n->name] = lhs;
+            return solved_value_right_node;
         }
         IdentifierNode* id_n = static_cast<IdentifierNode*>(id);
         value_bd solved_value_right_node = value->evaluate(var_map);
@@ -398,7 +416,7 @@ ArrayNode::ArrayNode(int line, int column, std::vector<value_bd> array, std::vec
     this->node = nullptr;
 }
 
-ArrayNode::ArrayNode(int line, int column, ASTNode* node, std::string position, std::vector<std::string> array_ele) : ASTNode(line, column), node(node), array_ele(array_ele), position(position) {}
+ArrayNode::ArrayNode(int line, int column, ASTNode* node, std::string position, std::vector<std::string> array_ele, std::string name) : ASTNode(line, column), node(node), array_ele(array_ele), position(position), name(name) {}
     
 ArrayNode::ArrayNode(int line, int column, std::vector<value_bd> array): ASTNode(line, column){
     this->array = {};
@@ -891,6 +909,7 @@ ASTNode* ASTree::parse_factor() {
             consume_token();
             return node;
         } else if (get_current_token().type == TokenType::VARIABLES) {
+            std::string name = get_current_token().text;
             ASTNode* node = new IdentifierNode(get_current_token().row, get_current_token().col, get_current_token().text);
             std::vector<std::string> id_n;
             id_n.push_back(node->print());
@@ -918,7 +937,7 @@ ASTNode* ASTree::parse_factor() {
                     throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
                 }
                 consume_token();
-                return new ArrayNode(temp_row, temp_col, node, pos, id_n);
+                return new ArrayNode(temp_row, temp_col, node, pos, id_n, name);
             }
             return node;
         } else if (get_current_token().type == TokenType::BOOLEAN) {
