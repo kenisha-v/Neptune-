@@ -8,7 +8,6 @@
 struct function_call{
     std::string name;
     std::vector<ASTree*> arguments;
-    function_call(){}
     function_call(std::string n, std::vector<ASTree*> arg): name(n), arguments(arg){}
     ~function_call(){
         for (auto i: arguments){
