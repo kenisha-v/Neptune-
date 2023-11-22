@@ -398,7 +398,7 @@ ArrayNode::ArrayNode(int line, int column, std::vector<value_bd> array, std::vec
     this->node = nullptr;
 }
 
-ArrayNode::ArrayNode(int line, int column, ASTNode* node, int position, std::unordered_map<std::string, value_bd>* var_map) : ASTNode(line, column), node(node), position(position), variable_map(var_map) {}
+ArrayNode::ArrayNode(int line, int column, ASTNode* node, int position) : ASTNode(line, column), node(node), position(position) {}
     
 ArrayNode::ArrayNode(int line, int column, std::vector<value_bd> array): ASTNode(line, column){
     this->array = {};
@@ -409,8 +409,6 @@ ArrayNode::ArrayNode(int line, int column, std::vector<value_bd> array): ASTNode
 }
 
 ArrayNode::~ArrayNode(){
-        delete left;
-        delete right;
         delete node;
     }
     
@@ -898,7 +896,7 @@ ASTNode* ASTree::parse_factor() {
                     throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
                 }
                 consume_token();
-                return new ArrayNode(temp_row, temp_col, node, pos, var_map);
+                return new ArrayNode(temp_row, temp_col, node, pos);
             }
             return node;
         } else if (get_current_token().type == TokenType::BOOLEAN) {
