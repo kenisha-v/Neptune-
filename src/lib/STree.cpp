@@ -209,13 +209,9 @@ void FuncNode::print(int tab) {
     std::cout << ")";
     std::cout << " {" << std::endl;
     tab += 4;
-    code->print(tab);
-    // for (int i = 0; i < tab; ++i) {
-    //     std::cout << " ";
-    // }
-    // if(returns){
-    //     std::cout << "return " << returns->print_no_endl() << ";" << std::endl;
-    // }
+    if (code){
+        code->print(tab);
+    }
     std::cout << "}" << std::endl;
     tab -= 4;
     if(next != nullptr) {
@@ -245,8 +241,10 @@ void ReturnNode::print(int tab){
     for (int i = 0; i < tab; ++i) {
         std::cout << " ";
     }
-    std::cout << "return ";
-    std::cout << expression->print_no_endl();
+    std::cout << "return";
+    if (expression){
+        std::cout << " " << expression->print_no_endl();
+    }
     std::cout << ";\n";
     if(next != nullptr) {
         next->print(tab);
@@ -539,10 +537,23 @@ SNode* STree::parse_block() {
             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
         }
         consume_token(); //consume (
+
+        bool curr_comma = true;
         while (get_current_token().type != TokenType::RIGHT_PAREN) {
-            if(get_current_token().type != TokenType::COMMA){
-                params.push_back(get_current_token().text);
-            } 
+            if(curr_comma){
+                if (get_current_token().type == TokenType::VARIABLES){
+                    params.push_back(get_current_token().text);
+                    curr_comma=false;
+                } else {
+                    throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+                }
+            } else {
+                if (get_current_token().type == TokenType::COMMA){
+                    curr_comma = true;
+                } else {
+                    throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+                }
+            }
             consume_token();
         }
         consume_token(); //consume )
@@ -564,9 +575,11 @@ SNode* STree::parse_block() {
                 consume_token();
             }   
         }
-        token end_token{get_current_token().row,get_current_token().col,"END",TokenType::END};
-        block_tokens.push_back(end_token);
-        code = new STree(block_tokens, local_var_map); //does this work
+        if (block_tokens.size() != 0){
+            token end_token{get_current_token().row,get_current_token().col,"END",TokenType::END};
+            block_tokens.push_back(end_token);
+            code = new STree(block_tokens, local_var_map); //does this work
+        }
         consume_token(); //consume }
         
         return new FuncNode(local_var_map, parse_block(), code, params, func_name);;
@@ -599,10 +612,12 @@ SNode* STree::parse_block() {
         }
 
         //Add end token to end of each expression that is being sent to ASTree
-        token end_token{temp_row,temp_col+1,"END",TokenType::END};
-        return_value.push_back(end_token);
-
-        exp = new ASTree(return_value, var_map);
+        if (return_value.size() != 0){
+            token end_token{temp_row,temp_col+1,"END",TokenType::END};
+            return_value.push_back(end_token);  
+            exp = new ASTree(return_value, var_map);
+        }
+        // if an empty list, exp will be passed on as nullptr
         return new ReturnNode(exp, parse_block());
     }
 
