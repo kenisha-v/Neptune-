@@ -20,6 +20,7 @@ struct function_call{
         std::cout << name << "(";
         for(size_t i=0; i<arguments.size(); i++){
             if(i==arguments.size()-1){
+                //std::cout << dynamic_cast<IdentifierNode*>(arguments[0]->head)->name << std::endl;
                 std::cout << arguments.at(i)->print_no_endl();
             }else{
                 std::cout << arguments.at(i)->print_no_endl() << ", ";
@@ -33,10 +34,13 @@ class EXP{
 public:
     std::string type;
     ASTree*        expression;
-    function_call   function;
+    function_call*   function;
     EXP(ASTree* e):        type("expression"), expression(e){}
-    EXP(function_call f):   type("function")  , function(f){}
-    ~EXP() {delete expression;}
+    EXP(function_call* f):   type("function")  , function(f){}
+    ~EXP() {
+        delete expression;
+        delete function;
+    }
 };
 
 #endif

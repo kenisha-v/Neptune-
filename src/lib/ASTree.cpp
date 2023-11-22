@@ -392,7 +392,6 @@ ASTree::ASTree(const std::vector<token>& Tokens, std::unordered_map<std::string,
     tokens=Tokens;
     try {
         head = parse_expression();
-        std::cout << dynamic_cast<IdentifierNode*>(head)->name << std::endl;;
         if (get_current_token().type != TokenType::END){
             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
         }

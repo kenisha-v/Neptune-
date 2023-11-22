@@ -109,7 +109,7 @@ void PrintNode::print(int tab) {
     if(expression->type == "expression"){
         std::cout << expression->expression->print_no_endl();
     } else{
-        expression->function.print();
+        expression->function->print();
     }
     std::cout << ";\n";
     if(next != nullptr) {
@@ -499,12 +499,12 @@ SNode* STree::parse_block() {
     //PRINT STATEMENT
     else if(get_current_token().type == TokenType::STATEMENT && get_current_token().text == "print") {
         EXP* exp = nullptr;
-        std::vector<ASTree*> arg;
         int temp_row = get_current_token().row;
         int temp_col = get_current_token().col;
         bool semi_colon = false;
         consume_token(); //consume print
         if(get_current_token().type == TokenType::VARIABLES && block[current_token_index+1].type == TokenType::LEFT_PAREN) { //function
+            std::vector<ASTree*> arg;
             std::string name = get_current_token().text;
             consume_token(); consume_token(); //consume func_name and left paren
             std::vector<token> expression_tokens;
@@ -527,7 +527,7 @@ SNode* STree::parse_block() {
             }
             if (expression_tokens.size()!=0){
                 token end_token{temp_row,temp_col+1,"END",TokenType::END};
-                expression_tokens.push_back(end_token);  
+                expression_tokens.push_back(end_token);
                 ASTree* single_argument = new ASTree(expression_tokens, var_map);
                 arg.push_back(single_argument);
                 expression_tokens.clear();
@@ -537,7 +537,7 @@ SNode* STree::parse_block() {
                 semi_colon = true;
                 consume_token();
             }
-            exp = new EXP(function_call(name, arg));
+            exp = new EXP(new function_call(name, arg));
         } else { //expression
             std::vector<token> expression_tokens;
             //store the expression condition to give to ASTree
@@ -709,7 +709,7 @@ SNode* STree::parse_block() {
 
                 consume_token(); // consuming right paren
 
-                exp = new EXP(function_call(name, arguement));
+                exp = new EXP(new function_call(name, arguement));
             }
             temp_row = get_current_token().row;
             temp_col = get_current_token().col;
