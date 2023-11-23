@@ -621,6 +621,9 @@ ASTree::ASTree(const std::vector<token>& Tokens, std::unordered_map<std::string,
         throw e;
     }
     var_map = map;
+    if (var_map == nullptr) {
+        var_map = new std::unordered_map<std::string, value_bd>;
+    }
 }
 
 ASTree::~ASTree(){
