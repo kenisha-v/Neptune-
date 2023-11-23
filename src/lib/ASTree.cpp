@@ -418,9 +418,10 @@ ArrayNode::ArrayNode(int line, int column, std::vector<value_bd> array, std::vec
         this->array_ele.push_back(array_ele[i]);
     }
     this->node = nullptr;
+    this->func = false;
 }
 
-ArrayNode::ArrayNode(int line, int column, ASTNode* node, value_bd position, std::vector<std::string> array_ele, std::string name) : ASTNode(line, column), node(node), array_ele(array_ele), position(position), name(name) {}
+ArrayNode::ArrayNode(int line, int column, ASTNode* node, value_bd position, std::vector<std::string> array_ele, std::string name) : ASTNode(line, column), node(node), array_ele(array_ele), position(position), name(name), func(false) {}
     
 ArrayNode::ArrayNode(int line, int column, std::vector<value_bd> array): ASTNode(line, column){
     this->array = {};
@@ -428,13 +429,19 @@ ArrayNode::ArrayNode(int line, int column, std::vector<value_bd> array): ASTNode
         this->array.push_back(array[i]);
     }
     this->node = nullptr;
+    this->func = false;
 }
+
+ArrayNode::ArrayNode(int line, int column, bool func, value_bd func_output ,std::vector<std::string> array_ele) : ASTNode(line, column), array_ele(array_ele), func_output(func_output), func(func) {}
 
 ArrayNode::~ArrayNode(){
         delete node;
     }
     
 value_bd ArrayNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+        if (func == true) {
+            return func_output;
+        }
         if (node != nullptr) {
             value_bd val = (*var_map)[node->print()];
             if (node->print()[0] == '[') {
@@ -453,6 +460,12 @@ value_bd ArrayNode::evaluate(std::unordered_map<std::string, value_bd>* var_map)
     
 std::string ArrayNode::print(){
         std::string array_str;
+        if (func) {
+            for (size_t i = 0; i< array_ele.size(); ++i ) {
+                array_str+= array_ele[i];
+            }
+            return array_str;
+        }
         if (node != nullptr){
             for (size_t i = 0; i< array_ele.size(); ++i ) {
                 array_str+= array_ele[i];
@@ -560,6 +573,15 @@ std::string ASTree::print_no_endl(){
     return input;
 }
 
+value_bd len(value_bd output) {
+    int size_array;
+    if (output.type_tag == "array") {
+        size_array = output.array.size();
+    } else {
+        size_array = 1;
+    }
+    return value_bd("double", size_array);
+}
 
 //PARSING FUNCTION DEFINITIONS
 ASTNode* ASTree::parse_expression() {
@@ -624,6 +646,43 @@ ASTNode* ASTree::parse_assignment() {
                 delete expression_tree;
                 return new ArrayNode(temp_row, temp_col, nod, pos, id_s, name);
             }
+        } else if (get_current_token().type == TokenType::LEFT_PAREN) {
+            std::vector<std::string> array_ele;
+            array_ele.push_back(node->print());
+            array_ele.push_back("(");
+            std::vector<token> funcs;
+            consume_token();
+            value_bd output;
+            while (true) {
+                if (get_current_token().type == TokenType::END) {
+                    throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+                }
+                if (get_current_token().type == TokenType::RIGHT_PAREN) {
+                    break;
+                }
+                else {
+                    funcs.push_back(get_current_token());
+                }
+                consume_token();
+            }
+            if (funcs.size()==1) {
+                output = (*var_map)[funcs[0].text];
+                array_ele.push_back(funcs[0].text);
+            } else {
+                funcs.push_back(getToken(get_current_token().row, get_current_token().col, "END", TokenType::END));
+                ASTree* nodes = new ASTree(funcs, var_map);
+                output = nodes->evaluate();
+                array_ele.push_back(nodes->print_no_endl());
+                delete nodes;
+            }
+            array_ele.push_back(get_current_token().text);
+            if (node->print() == "len") {
+                    output = len(output);
+            }
+            int temp_row            = get_current_token().row;
+            int temp_col            = get_current_token().col;
+            consume_token();
+            return new ArrayNode(temp_row, temp_col, true, output, array_ele);
         }
         
         return node;
