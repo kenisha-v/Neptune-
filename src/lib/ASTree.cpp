@@ -97,6 +97,7 @@ value_bd AssignmentNode::evaluate(std::unordered_map<std::string, value_bd>* var
             (*var_map)[id_n->name] = lhs;
             return solved_value_right_node;
         }
+
         IdentifierNode* id_n = static_cast<IdentifierNode*>(id);
         value_bd solved_value_right_node = value->evaluate(var_map);
         (*var_map)[id_n->name] = solved_value_right_node;
@@ -104,6 +105,9 @@ value_bd AssignmentNode::evaluate(std::unordered_map<std::string, value_bd>* var
 }
 
 std::string AssignmentNode::print(){
+        // if (id == nullptr) {
+        //     throw EvaluationError("invalid assignee.");
+        // }
         return "(" + id->print() + " = " + value->print() + ")";
 }
 
@@ -310,6 +314,7 @@ value_bd EqualNode::evaluate(std::unordered_map<std::string, value_bd>* var_map)
         }
         if (left->evaluate(var_map).type_tag == "array" || right->evaluate(var_map).type_tag == "array") {
             return value_bd("bool", false);
+
         }
         if(left->evaluate(var_map).type_tag == "bool") {
             return value_bd("bool", left->evaluate(var_map).Bool == right->evaluate(var_map).Bool);

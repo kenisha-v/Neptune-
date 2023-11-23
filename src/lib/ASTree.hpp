@@ -10,33 +10,8 @@
 
 #include "lex.h" //token, TokenType defined here
 #include "errors.h"//error classes defined here
+#include "value_bd.hpp"
 
-struct value_bd{
-    std::string type_tag;
-    bool Bool;
-    double Double;
-    std::string Null;
-    std::vector<std::string> array_ele;
-    std::vector<value_bd> array;
-
-    value_bd() : type_tag(""), Bool(false), Double(0.0) {
-        array = {};
-    }
-    value_bd(std::string tag, double value): type_tag(tag){
-        if (tag == "bool"){
-            if (value==0){
-                Bool = false;
-            } else {
-                Bool = true;
-            }
-        } else {
-            Double = value;
-        }
-    }
-    value_bd(std::string tag, std::string null): type_tag(tag), Null(null){}
-    value_bd(std::string tag, std::vector<value_bd> array): type_tag(tag), array(array){}
-    value_bd(std::string tag, std::vector<value_bd> array, std::vector<std::string> array_str): type_tag(tag), array_ele(array_str), array(array){}
-};
 
 // Base class for AST nodes
 class ASTNode {

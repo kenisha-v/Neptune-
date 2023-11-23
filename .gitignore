@@ -3,3 +3,8 @@ src/*.out
 ../.vscode/
 .vscode/
 src/*.txt
+src/format
+src/lexer
+src/calc
+src/scrypt
+src/scrypt.dSYM/
