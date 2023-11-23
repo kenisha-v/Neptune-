@@ -481,7 +481,7 @@ value_bd ArrayNode::evaluate(std::unordered_map<std::string, value_bd>* var_map)
                 val = node->evaluate(var_map);
             }
             if (position.type_tag!="double") {
-                throw EvaluationError("expression not valid");
+                throw EvaluationError("index is not a number.");
             }
             // for (size_t i = 0; i< position.size();++i) {
             //     if (!isdigit(position[i])) {
@@ -1007,6 +1007,12 @@ ASTNode* ASTree::parse_factor() {
                 id_s.push_back(expression_tree->print_no_endl());
                 id_s.push_back("]");
                 pos = expression_tree->evaluate();
+                if (pos.type_tag != "double") {
+                    throw EvaluationError("index is not a number.");
+                }
+                if (pos.Double < 0 || pos.Double >= id_n.size()) {
+                    throw EvaluationError("index out of bounds.");
+                }
                 delete expression_tree;
                 return new ArrayNode(temp_row, temp_col, node, pos, id_s, name);
             }
