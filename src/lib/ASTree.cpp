@@ -691,7 +691,6 @@ ASTNode* ASTree::parse_assignment() {
             int temp_row            = get_current_token().row;
             int temp_col            = get_current_token().col;
             consume_token();
-            delete nodes;
             return new ArrayNode(temp_row, temp_col, true, output, array_ele);
         }
         
