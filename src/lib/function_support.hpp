@@ -29,6 +29,28 @@ struct function_call{
         }
         std::cout << ")";
     }
+
+    value_bd evaluate(std::unordered_map<std::string, value_bd>* var_map){
+        if(var_map->find(name) == var_map->end()){
+            throw EvaluationError("function not found");
+        }
+        value_bd func = (*var_map)[name];
+        if (func.type_tag != "function"){
+            throw EvaluationError("not a function");
+        }
+        FuncNode* myfunc = func.Function_Node;
+        STree* mycode = myfunc->code;
+        std::vector<std::string> myparams = myfunc->parameters;
+        
+        if(myparams.size() != arguments.size()){
+            throw EvaluationError("param size doesnt match");
+        }
+        for(size_t i=0; i<myparams.size(); i++){
+            (*mycode->var_map)[myparams[i]] = arguments[i]->evaluate();
+        }
+
+        return mycode->evaluate;
+    }
 };
 
 class EXP{ 

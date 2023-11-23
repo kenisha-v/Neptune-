@@ -198,8 +198,9 @@ FuncNode::FuncNode(std::unordered_map<std::string, value_bd>* local_v, SNode* ne
     parameters(p),
     code(code) {}
 void FuncNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
-    std::unordered_map<std::string, value_bd> var_map_copy = (*var_map); //will this work
-    local_var_map = &var_map_copy;
+    if (code){
+        code->var_map = new std::unordered_map<std::string, value_bd>(*var_map);
+    }
     if(next){
         next->evaluate(var_map);
     }
@@ -582,7 +583,6 @@ SNode* STree::parse_block() {
         std::vector<std::string> params;
         std::vector<token> block_tokens;
         std::vector<token> return_tokens;
-        std::unordered_map<std::string, value_bd>* local_var_map = new std::unordered_map<std::string, value_bd>; // does this work?
         consume_token(); //consume def
         if (get_current_token().type != TokenType::VARIABLES) {
             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
@@ -634,11 +634,11 @@ SNode* STree::parse_block() {
         if (block_tokens.size() != 0){
             token end_token{get_current_token().row,get_current_token().col,"END",TokenType::END};
             block_tokens.push_back(end_token);
-            code = new STree(block_tokens, local_var_map); //does this work
+            code = new STree(block_tokens, nullptr); //does this work
         }
         consume_token(); //consume }
         
-        return new FuncNode(local_var_map, parse_block(), code, params, func_name);;
+        return new FuncNode(nullptr, parse_block(), code, params, func_name);;
     }
 
 

@@ -90,7 +90,6 @@ class STree {
     SNode* head = nullptr;
     std::vector<token> block;
     size_t current_token_index = 0;
-    std::unordered_map<std::string, value_bd>* var_map;
 
 
     token get_current_token()   {return block[current_token_index];}
@@ -98,6 +97,8 @@ class STree {
     SNode* parse_block();
 
 public:
+    std::unordered_map<std::string, value_bd>* var_map;
+
     STree(std::vector<token> tokens, std::unordered_map<std::string, value_bd>* var_map);
     SNode* get_head();
     void evaluate();
