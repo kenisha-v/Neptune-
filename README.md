@@ -1,4 +1,21 @@
+## Complilation and Run Commmands
 
+### For Scrypt:
+    g++ -std=c++17 -Werror -Wextra -Wall  lib/*.cpp scrypt.cpp -o scrypt
+    ./scrypt
+
+### For Format:
+    g++ -std=c++17 -Werror -Wextra -Wall  lib/*.cpp format.cpp -o format
+    ./format
+
+### For Calc:
+    g++ -std=c++17 -Werror -Wextra -Wall  lib/*.cpp calc.cpp -o calc
+    ./calc
+
+### For Lex:
+    g++ -std=c++17 -Werror -Wextra -Wall  lib/*.cpp lex.cpp -o lex
+    ./lex
+    
 ## LEXER Documentation
 
 ### Introduction
@@ -240,4 +257,57 @@ This documentation is for the format part of the project in which it can read in
 
 *errors.h*: It acts as a unified file for all errors, for readability.
 Includes: SyntaxError, ParseError, EvaluationError.
+
+## Function Documentation
+
+### Introduction
+Track B adds function support to our programming language.
+
+### Files (new features)
+
+
+1. STree.hpp:
+        - The header file is updated to suppport functions.
+        - `FuncNode` class:
+            - Inheritance : SNode Class.
+            - Function Name: Saves the name of the function in f_name.
+            - Parameters:Contains a collection of parameter names (std::vectorstd::string>).
+            - Function Body: An STree object containing the function's code.
+            - Constructor: Sets the function's name, parameters, and code.
+            - Evaluate Method: Logic for evaluating the function, including scope handling, is implemented.
+            - Print Method: Allows you to print the structure of a function.
+        - `ReturnNode` class:
+            - Inheritance: SNode Class.
+            - Type Identification: The type string "return" identifies it.
+            - Constructor: Creates the return node and the next node in the syntax tree by passing in an optional expression.
+            - Evaluate Method: Handles the evaluation of the return statement and, if present, the expression.
+            - Print Method: Allows the return statement to be printed.
+
+2. Stree.cpp:
+    - The file was updated to support functions.
+    - Logic for parsing and defining functions, which is included in the main parsing process or a separate function for parsing function definitions.
+    - Handling Function Calls: It contains logic for parsing and executing function calls, either as part of the expression parsing or as a distinct function.
+    - Handling of Return Statements: It has logic within functions to handle return statements, ensuring the right value is returned and control flow exits the function.
+
+### Main Features-
+
+
+    - Management of the Function Scope:Managing local and global scopes, especially when entering and exiting functions.
+    - Closure Techniques: When a function is defined, the state of the environment (scope variables) is captured.
+    - Function Error Handling: Function-specific error checks, such as calling a non-function, having an erroneous argument count, or returning unexpectedly.
+    -Function Evaluation: Evaluating a function definition stores the function in a variable, capturing the current scope's variables.
+    Evaluating a function call involves setting up a new scope, populating it with captured variables, and executing the function body.
+
+### Conculsion-
+
+    In conclusion, the FuncNode and ReturnNode classes are essential for managing functions within the programming language. FuncNode handles function definitions, including names, parameters, and code bodies, to make function execution and scope management easier. ReturnNode, on the other hand, deals with return statements within functions, ensuring that values are properly evaluated and returned. 
+
+##  Updation In Old Files Documentation-
+    - Track A has updation of old files to support the enitre new updates such as functions and arrays.
+    
+    CHANGES MADE IN ALL FILES:
+    - Added support for two new tokens: comma and semicolon; to the lexer.
+    -Updated the parser to require a trailing semicolon ; for any statements that finish with expressions.
+    -Modifed the parser and AST to allow non-variable assignments (e.g., 1 = 2 or x + 3 = 4) without parse errors.Implemented a runtime check for such assignments that returns the error "Runtime error: invalid assignee.
+    -Instead of throwing type errors, use the == and!= operators to compare values of various types as not equal.
 
