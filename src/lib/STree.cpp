@@ -7,20 +7,28 @@ SNode::~SNode() {
     delete expression;
     delete next;
 }
-void SNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+value_bd SNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
     (void)var_map;
-    return;
+    value_bd null = value_bd();
+    return null;
 }
 
 //-----------------
 
-ExpressionNode::ExpressionNode(EXP* exp, SNode* next): SNode(exp, next) {
-    
-}
-void ExpressionNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
-    expression->expression->evaluate();
-    if (next!= nullptr){
-        next->evaluate(var_map);
+ExpressionNode::ExpressionNode(EXP* exp, SNode* next): SNode(exp, next) {}
+value_bd ExpressionNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+    if (expression->type == "expression"){
+        expression->expression->evaluate();
+    } else if (expression->type == "function"){
+        expression->function->evaluate(var_map);
+    } else if (expression->type == "function_assigner"){
+        (*var_map)[expression->expression->print_no_endl()] = expression->function->evaluate(var_map);
+    }
+    if (next){
+        return next->evaluate(var_map);
+    } else {
+        value_bd null = value_bd();
+        return null;
     }
 }
 void ExpressionNode::print(int tab) {
@@ -45,16 +53,12 @@ void ExpressionNode::print(int tab) {
         next->print(tab);
     }
 }
-ExpressionNode::~ExpressionNode() {
-    
-}
+ExpressionNode::~ExpressionNode() {}
 
 //-----------------
 
-WhileNode::WhileNode(EXP* exp, SNode* next, STree* t): SNode(exp, next), trueBranch(t) {
-    
-}
-void WhileNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+WhileNode::WhileNode(EXP* exp, SNode* next, STree* t): SNode(exp, next), trueBranch(t) {}
+value_bd WhileNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
     value_bd exp_eval;
     while (true){
         exp_eval = expression->expression->evaluate();
@@ -68,7 +72,10 @@ void WhileNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
         }
     }
     if (next!= nullptr){ 
-        next->evaluate(var_map);
+        return next->evaluate(var_map);
+    } else {
+        value_bd null = value_bd();
+        return null;
     }
 }
 void WhileNode::print(int tab) {
@@ -84,7 +91,7 @@ void WhileNode::print(int tab) {
     tab -= 4;
     if(next != nullptr) {
         next->print(tab);
-    }
+    } 
 }
 WhileNode::~WhileNode() {
     delete trueBranch;
@@ -92,24 +99,32 @@ WhileNode::~WhileNode() {
 
 //-----------------
 
-PrintNode::PrintNode(EXP* exp, SNode* next): SNode(exp, next) {
-    
-}
-void PrintNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
-    value_bd ans = expression->expression->evaluate();
+PrintNode::PrintNode(EXP* exp, SNode* next): SNode(exp, next) {}
+value_bd PrintNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+    value_bd ans;
+    if (expression->type == "expression"){
+        ans = expression->expression->evaluate();
+    } else if (expression->type == "function"){
+        ans = expression->function->evaluate(var_map);
+    }
+
     if (ans.type_tag == "bool"){
         if (ans.Bool) {
             std::cout << "true" << std::endl;
         } else {
             std::cout << "false" << std::endl;
         }
-        
+    } else if (ans.type_tag == "null") {
+        std::cout << "null" << std::endl;
     } else {
         std::cout << ans.Double << std::endl;
     }
 
-    if(next!= nullptr){
-        next->evaluate(var_map);
+    if(next){
+        return next->evaluate(var_map);
+    } else {
+        value_bd null = value_bd();
+        return null;
     }
 }
 void PrintNode::print(int tab) {
@@ -127,16 +142,12 @@ void PrintNode::print(int tab) {
         next->print(tab);
     }
 }
-PrintNode::~PrintNode() {
-    
-}
+PrintNode::~PrintNode() {}
 
 //-----------------
 
-IfNode::IfNode(EXP* exp, SNode* next, STree* t, STree* f): SNode(exp, next), trueBranch(t), falseBranch(f) {
-    
-}
-void IfNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+IfNode::IfNode(EXP* exp, SNode* next, STree* t, STree* f): SNode(exp, next), trueBranch(t), falseBranch(f) {}
+value_bd IfNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
     value_bd exp_eval = expression->expression->evaluate();
     if (exp_eval.type_tag != "bool") {
         throw EvaluationError("condition is not a bool.");
@@ -148,8 +159,11 @@ void IfNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
             falseBranch->evaluate();
         }
     }
-    if (next!=nullptr){
-        next->evaluate(var_map);
+    if (next){
+        return next->evaluate(var_map);
+    } else {
+        value_bd null = value_bd();
+        return null;
     }
 }
 void IfNode::print(int tab) {
@@ -191,24 +205,24 @@ IfNode::~IfNode() {
 
 //-----------------
 
-FuncNode::FuncNode(std::unordered_map<std::string, value_bd>* local_v, SNode* next, STree* code, std::vector<std::string> p, std::string name): 
+FuncNode::FuncNode(SNode* next, STree* code, std::vector<std::string> p, std::string name): 
     SNode(nullptr, next),
     f_name(name),
-    local_var_map(local_v),
     parameters(p),
     code(code) {}
-void FuncNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+value_bd FuncNode::evaluate(std::unordered_map<std::string, value_bd>* var_map) {
+    (*var_map)[f_name] = value_bd(this);
+
     if (code){
         code->var_map = new std::unordered_map<std::string, value_bd>(*var_map);
     }
     if(next){
-        next->evaluate(var_map);
+        return next->evaluate(var_map);
+    } else {
+        value_bd null = value_bd();
+        return null;
     }
 }
-// void FuncNode::call(std::vector<token> arguments){
-//     (void)arguments;
-//     return; 
-// }
 void FuncNode::print(int tab) {
     for (int i = 0; i < tab; ++i) {
         std::cout << " ";
@@ -239,24 +253,21 @@ void FuncNode::print(int tab) {
 }
 FuncNode::~FuncNode() {
     delete code;
-    delete local_var_map;
 }
 
 //-----------------
 
 ReturnNode::ReturnNode(EXP* exp, SNode* next): SNode(exp,next){}
-
-void ReturnNode::evaluate(std::unordered_map<std::string, value_bd>* var_map){
-    expression->expression->evaluate();
+value_bd ReturnNode::evaluate(std::unordered_map<std::string, value_bd>* var_map){
+    if (!expression){
+        value_bd null = value_bd();
+        return null;
+    } else {
+        return expression->expression->evaluate();
+    }
     (void)var_map;
     //does not call next, as we dont need to evaluate after return.
     }
-
-// value_bd ReturnNode::call(std::unordered_map<std::string, value_bd>* var_map){
-//     expression->evaluate();
-//     //does not call next, as we dont need to evaluate after return.
-//     }
-
 void ReturnNode::print(int tab){
     for (int i = 0; i < tab; ++i) {
         std::cout << " ";
@@ -270,10 +281,7 @@ void ReturnNode::print(int tab){
         next->print(tab);
     }
 }
-
-ReturnNode::~ReturnNode(){
-    
-}
+ReturnNode::~ReturnNode(){}
 
 //-----------------
 
@@ -288,8 +296,13 @@ STree::STree(std::vector<token> tokens, std::unordered_map<std::string, value_bd
     }
 }
 
-void STree::evaluate(){
-    head->evaluate(var_map);
+value_bd STree::evaluate(){
+    if (head) {
+        return head->evaluate(var_map);
+    } else {
+        value_bd null = value_bd();
+        return null;
+    }
 }
 
 SNode* STree::get_head() {
@@ -638,7 +651,7 @@ SNode* STree::parse_block() {
         }
         consume_token(); //consume }
         
-        return new FuncNode(nullptr, parse_block(), code, params, func_name);;
+        return new FuncNode(parse_block(), code, params, func_name);;
     }
 
 
@@ -668,7 +681,7 @@ SNode* STree::parse_block() {
         }
 
         //Add end token to end of each expression that is being sent to ASTree
-        if (return_value.size() != 0){
+        if (return_value.size() != 0 && return_value.at(0).text != "null"){
             token end_token{temp_row,temp_col+1,"END",TokenType::END};
             return_value.push_back(end_token);  
             exp = new EXP(new ASTree(return_value, var_map));
