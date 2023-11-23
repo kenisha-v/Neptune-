@@ -35,7 +35,6 @@ void ExpressionNode::print(int tab) {
     for (int i = 0; i < tab; ++i) {
         std::cout << " ";
     }
-
     if (expression->type == "expression"){
         std::cout << expression->expression->print_no_endl();
     } else if (expression->type == "funciton"){
@@ -47,6 +46,7 @@ void ExpressionNode::print(int tab) {
     } else {
         std::cout << "SOMTHING BAD IS HAPPENING \n NOT SUPPOSED TO REACH HERE" << std::endl;
     }
+
     std::cout << ";\n";
     
     if(next != nullptr) {
@@ -132,13 +132,11 @@ void PrintNode::print(int tab) {
         std::cout << " ";
     }
     std::cout << "print ";
-
     if(expression->type == "expression"){
         std::cout << expression->expression->print_no_endl();
     } else{
         expression->function->print();
     }
-  
     std::cout << ";\n";
     if(next != nullptr) {
         next->print(tab);
@@ -261,7 +259,7 @@ FuncNode::~FuncNode() {
 
 ReturnNode::ReturnNode(EXP* exp, SNode* next): SNode(exp,next){}
 value_bd ReturnNode::evaluate(std::unordered_map<std::string, value_bd>* var_map){
-    if (!expression){
+    if (!expression || expression->expression->print_no_endl() == "null"){
         value_bd null = value_bd();
         return null;
     } else {
@@ -530,7 +528,6 @@ SNode* STree::parse_block() {
         int temp_col = get_current_token().col;
         bool semi_colon = false;
         consume_token(); //consume print
-
         if(get_current_token().type == TokenType::VARIABLES && block[current_token_index+1].type == TokenType::LEFT_PAREN) { //function
             std::vector<ASTree*> arg;
             std::string name = get_current_token().text;
@@ -666,26 +663,19 @@ SNode* STree::parse_block() {
         int temp_col = get_current_token().col;
         consume_token(); //consume return
         std::vector<token> return_value;
-        bool semi_colon = false;
-
-        while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) {
-            if (get_current_token().text == ";") {
-                semi_colon = true;
-                consume_token();
-                break;
+        while (get_current_token().type != TokenType::SEMI_COLON) {
+            if(get_current_token().type == TokenType::END){
+                throw ParseError(get_current_token().row, get_current_token().col, get_current_token());           
             }
             temp_row = get_current_token().row;
             temp_col = get_current_token().col;
             return_value.push_back(get_current_token());
             consume_token();
         }
-
-        if (semi_colon == false) {
-            throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
-        }
+        consume_token();//consume ;
 
         //Add end token to end of each expression that is being sent to ASTree
-        if (return_value.size() != 0 && return_value.at(0).text != "null"){
+        if (return_value.size() != 0){
             token end_token{temp_row,temp_col+1,"END",TokenType::END};
             return_value.push_back(end_token);  
             exp = new EXP(new ASTree(return_value, var_map));
