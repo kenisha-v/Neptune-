@@ -31,14 +31,14 @@ struct function_call{
     }
 };
 
-class EXP{
+class EXP{ 
 public:
     std::string type;
     ASTree*        expression;
     function_call*   function;
     std::unordered_map<std::string, value_bd> dummy;
-    EXP(ASTree* e):        type("expression"), expression(e){}
-    EXP(function_call* f):   type("function")  , function(f){}
+    EXP(ASTree* e):          type("expression"), expression(e),        function(nullptr){}
+    EXP(function_call* f):   type("function")  , expression(nullptr),  function(f)      {}
     EXP(std::vector<token> before_func, function_call* f):   type("function_assigner")  , function(f){
         if (before_func.size()!=0) {
             int temp_row = before_func.back().row;

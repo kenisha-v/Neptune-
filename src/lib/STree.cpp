@@ -709,7 +709,7 @@ SNode* STree::parse_block() {
                         arg.push_back(single_argument);
                         expression_tokens.clear();
                         consume_token();
-                    }   else {
+                    } else {
                         expression_tokens.push_back(get_current_token());
                         consume_token();
                     }
