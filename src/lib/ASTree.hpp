@@ -222,7 +222,7 @@ public:
     std::vector<std::string> array_ele;
     value_bd position;
     std::string name;
-    ArrayNode(int line, int column, std::vector<value_bd> array, std::vector<std::string> array_ele);
+    ArrayNode(int line, int column, std::vector<value_bd> array, std::vector<std::string> array_ele, std::string name);
     ArrayNode(int line, int column, ASTNode* node, value_bd position, std::vector<std::string> array_ele, std::string name);
     ArrayNode(int line, int column, std::vector<value_bd> array);
     ~ArrayNode();
