@@ -15,6 +15,7 @@ struct value_bd{
     std::string type_tag;
     bool Bool;
     double Double;
+    std::string Null;
     std::vector<std::string> array_ele;
     std::vector<value_bd> array;
 
@@ -32,6 +33,7 @@ struct value_bd{
             Double = value;
         }
     }
+    value_bd(std::string tag, std::string null): type_tag(tag), Null(null){}
     value_bd(std::string tag, std::vector<value_bd> array): type_tag(tag), array(array){}
     value_bd(std::string tag, std::vector<value_bd> array, std::vector<std::string> array_str): type_tag(tag), array_ele(array_str), array(array){}
     // value_bd value_bd_ele(value_bd array){

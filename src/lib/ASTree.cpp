@@ -56,6 +56,9 @@ std::string IdentifierNode::print() {
 }
 
 value_bd IdentifierNode::evaluate(std::unordered_map<std::string, value_bd>* var_map){
+    if (name == "null") {
+        return value_bd("null", "null");
+    }
     if ((*var_map).find(name) == (*var_map).end()) {
         throw EvaluationError("unknown identifier " + name);
     }
@@ -491,7 +494,6 @@ value_bd ArrayNode::evaluate(std::unordered_map<std::string, value_bd>* var_map)
             }
             return val.array[position.Double];
         }
-        // std::cout << array.size() << "\n";
         return value_bd("array", array, array_ele);
     }
     
@@ -511,17 +513,23 @@ std::string ArrayNode::print(){
             // } else {
             //     array_str += evaluate_print(val.array[position].array);
             // }
+            // std::cout << "not null"<< std::endl;
             for (size_t i = 0; i< array_ele.size(); ++i ) {
                 array_str+= array_ele[i];
             }
             return array_str;
         }
+        // std::cout << "null"<< std::endl;
         array_str+="[";
-        for (size_t i = 0; i< array_ele.size()-1; ++i ) {
-            array_str+= array_ele[i];
-            array_str+=", ";
+        if (array_ele.size()>0) {
+            // std::cout << "called: " << array_ele.size() << std::endl;
+            // std::cout << array_ele[2] << std::endl;
+            for (size_t i = 0; i< array_ele.size()-1; ++i ) {
+                array_str+= array_ele[i];
+                array_str+=", ";
+            }
+            array_str+= array_ele[array_ele.size()-1];
         }
-        array_str+= array_ele[array_ele.size()-1];
         array_str+="]";
         // array_str += "[";
         // for (size_t i = 0; i< array.size()-1; ++i ) {
@@ -564,42 +572,48 @@ std::string ArrayNode::print(){
 std::string ArrayNode::evaluate_print(std::vector<value_bd> arr) {
     std::string str;
     str+="[";
-    for (size_t i = 0; i< arr.size()-1; ++i) {
+    if (arr.size()>0) {
+        for (size_t i = 0; i< arr.size()-1; ++i) {
+            std::ostringstream os;
+            if(arr[i].type_tag == "bool") {
+                os << arr[i].Bool;
+                if (os.str()=="1"){
+                    str+="true";
+                } else {
+                    str+="false";
+                }
+            } else if(arr[i].type_tag == "double") {
+                os << arr[i].Double;
+                str+=os.str();
+            } else if (arr[i].type_tag == "null") {
+                str+=arr[i].Null;
+            } else {
+                ArrayNode* arr_ele = new ArrayNode(0,0, arr[i].array);
+                str+=arr_ele->evaluate_print(arr[i].array);
+                delete arr_ele;
+                arr_ele = nullptr;
+            }
+            str+=", ";
+        }
         std::ostringstream os;
-        if(arr[i].type_tag == "bool") {
-            os << arr[i].Bool;
+        if(arr[arr.size()-1].type_tag == "bool") {
+            os << arr[arr.size()-1].Bool;
             if (os.str()=="1"){
                 str+="true";
             } else {
                 str+="false";
             }
-        } else if(arr[i].type_tag == "double") {
-            os << arr[i].Double;
+        } else if(arr[arr.size()-1].type_tag == "double") {
+            os << arr[arr.size()-1].Double;
             str+=os.str();
+        } else if (arr[arr.size()-1].type_tag == "null") {
+            str+=arr[arr.size()-1].Null;
         } else {
-            ArrayNode* arr_ele = new ArrayNode(0,0, arr[i].array);
-            str+=arr_ele->evaluate_print(arr[i].array);
+            ArrayNode* arr_ele = new ArrayNode(0,0, arr[arr.size()-1].array);
+            str+=arr_ele->evaluate_print(arr[arr.size()-1].array);
             delete arr_ele;
             arr_ele = nullptr;
         }
-        str+=", ";
-    }
-    std::ostringstream os;
-    if(arr[arr.size()-1].type_tag == "bool") {
-        os << arr[arr.size()-1].Bool;
-        if (os.str()=="1"){
-            str+="true";
-        } else {
-            str+="false";
-        }
-    } else if(arr[arr.size()-1].type_tag == "double") {
-        os << arr[arr.size()-1].Double;
-        str+=os.str();
-    } else {
-        ArrayNode* arr_ele = new ArrayNode(0,0, arr[arr.size()-1].array);
-        str+=arr_ele->evaluate_print(arr[arr.size()-1].array);
-        delete arr_ele;
-        arr_ele = nullptr;
     }
     str+="]";
     return str;
@@ -1008,7 +1022,13 @@ ASTNode* ASTree::parse_factor() {
             int square_paren = 1;
             name += get_current_token().text;
             consume_token();
-            std::vector<token> elements;
+            if (get_current_token().type == TokenType::R_SQUARE) {
+                name+=get_current_token().text;
+                ASTNode* node = new ArrayNode(get_current_token().row, get_current_token().col, array, array_ele, name);
+                consume_token();
+                return node;
+            }
+            std::vector<token> elements = {};
             bool nested_array = false;
             while (square_paren >= 1) {
                 if (get_current_token().type == TokenType::END) {
@@ -1034,16 +1054,23 @@ ASTNode* ASTree::parse_factor() {
                 } 
                 if ((get_current_token().type == TokenType::COMMA && !nested_array) || square_paren == 0) {
                     elements.push_back(getToken(get_current_token().row, get_current_token().col, "END", TokenType::END));
+                    // std::cout << "Starting" << std::endl;
+                    // for(auto i: elements){
+                    //     std::cout << i.text << std::endl;
+                    // }
+                    // std::cout << "Ending" << std::endl;
                     ASTree* tree_eval = new ASTree(elements, var_map);
                     value_bd eval = tree_eval->evaluate();
                     array.push_back(eval);
                     array_ele.push_back(tree_eval->print_no_endl());
+                    //std::cout<< "          size:      " << elements.size() << std::endl;
+                    // std::cout << tree_eval->print_no_endl() << std::endl;
                     elements = {};
+                    delete tree_eval;
                     if (square_paren != 0) {
                         name += get_current_token().text;
                         consume_token();
                     }
-                    delete tree_eval;
                 } else if (get_current_token().type == TokenType::COMMA && nested_array) {
                     elements.push_back(get_current_token());
                     name += get_current_token().text;
