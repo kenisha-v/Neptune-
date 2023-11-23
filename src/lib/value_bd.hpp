@@ -16,7 +16,7 @@ struct value_bd{
 
     
     value_bd() : type_tag("null"), Bool(false), Double(0.0), Function_Node(nullptr),array({}) {}
-    value_bd(std::string tag, double value): type_tag(tag), Function_Node(nullptr), {
+    value_bd(std::string tag, double value): type_tag(tag), Function_Node(nullptr){
         if (tag == "bool"){
             if (value==0){
                 Bool = false;
