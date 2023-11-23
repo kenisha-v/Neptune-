@@ -490,7 +490,7 @@ value_bd ArrayNode::evaluate(std::unordered_map<std::string, value_bd>* var_map)
             // }
             // int pos = std::stod(position);
             if (position.Double < 0 || position.Double >= val.array.size()) {
-                throw EvaluationError("index out of bounds.");
+                throw EvaluationError("index out of bounds. really?");
             }
             return val.array[position.Double];
         }
@@ -1010,7 +1010,7 @@ ASTNode* ASTree::parse_factor() {
                 if (pos.type_tag != "double") {
                     throw EvaluationError("index is not a number.");
                 }
-                if (pos.Double < 0 || pos.Double >= id_n.size()) {
+                if (pos.Double < 0 || pos.Double >= id_s.size()) {
                     throw EvaluationError("index out of bounds.");
                 }
                 delete expression_tree;
