@@ -19,8 +19,15 @@ int main() {
                 } else {
                     std::cout << "false" << std::endl;
                 }
-            } else {
+            } else if(curr_tree->evaluate().type_tag == "double") {
                 std::cout << curr_tree->evaluate().Double << std::endl;
+            } else if (curr_tree->evaluate().type_tag == "null") {
+                std::cout << "null" << std::endl;
+            } else {
+                ArrayNode* arr_node = new ArrayNode(0, 0, curr_tree->evaluate().array);\
+                std::cout << arr_node->evaluate_print(curr_tree->evaluate().array) << std::endl;
+                delete arr_node;
+                arr_node = nullptr;
             }
         } catch (const SyntaxError& e) {
             std::cout << e.what() << std::endl;

@@ -23,7 +23,11 @@ enum class TokenType {
     STATEMENT,
     L_CURLY,
     R_CURLY,
-    BOOLEAN
+    BOOLEAN,
+    COMMA,
+    SEMI_COLON,
+    L_SQUARE,
+    R_SQUARE
 };
 
 struct token {

@@ -27,7 +27,9 @@ void ExpressionNode::print(int tab) {
     for (int i = 0; i < tab; ++i) {
         std::cout << " ";
     }
-    expression->print();
+    std::cout << expression->print_no_endl();
+    std::cout << ";\n";
+    
     if(next != nullptr) {
         next->print(tab);
     }
@@ -104,7 +106,8 @@ void PrintNode::print(int tab) {
         std::cout << " ";
     }
     std::cout << "print ";
-    expression->print();
+    std::cout << expression->print_no_endl();
+    std::cout << ";\n";
     if(next != nullptr) {
         next->print(tab);
     }
@@ -411,8 +414,14 @@ SNode* STree::parse_block() {
         int temp_col = get_current_token().col;
         consume_token(); //consume print
         std::vector<token> expression_tokens;
+        bool semi_colon = false;
         //store the expression condition to give to ASTree
         while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) {
+            if (get_current_token().text == ";") {
+                semi_colon = true;
+                consume_token();
+                break;
+            }
             temp_row = get_current_token().row;
             temp_col = get_current_token().col;
             expression_tokens.push_back(get_current_token());
@@ -420,6 +429,9 @@ SNode* STree::parse_block() {
         }
         //Add end token to end of each expression that is being sent to ASTree
         token end_token{temp_row,temp_col+1,"END",TokenType::END};
+        if (semi_colon == false) {
+            throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+        }
         expression_tokens.push_back(end_token);
         exp = new ASTree(expression_tokens, var_map);
         return new PrintNode(exp, parse_block());
@@ -433,12 +445,21 @@ SNode* STree::parse_block() {
         std::vector<token> expression_tokens;
         int temp_row = get_current_token().row;
         int temp_col = get_current_token().col;
+        bool semi_colon = false;
         //store entire line to give to ASTree
         while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) {
+            if (get_current_token().text == ";") {
+                semi_colon = true;
+                consume_token();
+                break;
+            }
             temp_row = get_current_token().row;
             temp_col = get_current_token().col;
             expression_tokens.push_back(get_current_token());
             consume_token();
+        }
+        if (semi_colon == false) {
+            throw ParseError(get_current_token().row, get_current_token().col+1, get_current_token());
         }
         //Add end token to end of each expression that is being sent to ASTree
         token end_token{temp_row,temp_col+1,"END",TokenType::END};

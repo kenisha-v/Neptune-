@@ -15,8 +15,13 @@ struct value_bd{
     std::string type_tag;
     bool Bool;
     double Double;
+    std::string Null;
+    std::vector<std::string> array_ele;
+    std::vector<value_bd> array;
 
-    value_bd() : type_tag(""), Bool(false), Double(0.0) {}
+    value_bd() : type_tag(""), Bool(false), Double(0.0) {
+        array = {};
+    }
     value_bd(std::string tag, double value): type_tag(tag){
         if (tag == "bool"){
             if (value==0){
@@ -28,6 +33,9 @@ struct value_bd{
             Double = value;
         }
     }
+    value_bd(std::string tag, std::string null): type_tag(tag), Null(null){}
+    value_bd(std::string tag, std::vector<value_bd> array): type_tag(tag), array(array){}
+    value_bd(std::string tag, std::vector<value_bd> array, std::vector<std::string> array_str): type_tag(tag), array_ele(array_str), array(array){}
 };
 
 // Base class for AST nodes
@@ -70,9 +78,9 @@ public:
 
 class AssignmentNode : public ASTNode {
 public:
-    IdentifierNode* id;
+    ASTNode* id;
     ASTNode* value;
-    AssignmentNode(int line, int column, IdentifierNode* id, ASTNode* value);
+    AssignmentNode(int line, int column, ASTNode* id, ASTNode* value);
     ~AssignmentNode();
     value_bd evaluate(std::unordered_map<std::string, value_bd>* var_map);
     std::string print();
@@ -202,6 +210,22 @@ public:
     ~LorNode();
     value_bd evaluate(std::unordered_map<std::string, value_bd>* var_map);
     std::string print();
+};
+
+class ArrayNode : public ASTNode {
+public:
+    ASTNode* node;
+    std::vector<value_bd> array;
+    std::vector<std::string> array_ele;
+    value_bd position;
+    std::string name;
+    ArrayNode(int line, int column, std::vector<value_bd> array, std::vector<std::string> array_ele, std::string name);
+    ArrayNode(int line, int column, ASTNode* node, value_bd position, std::vector<std::string> array_ele, std::string name);
+    ArrayNode(int line, int column, std::vector<value_bd> array);
+    ~ArrayNode();
+    value_bd evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    std::string print();
+    std::string evaluate_print(std::vector<value_bd> arr);
 };
 
 
