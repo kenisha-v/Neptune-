@@ -32,8 +32,9 @@ void ExpressionNode::print(int tab) {
     } else if (expression->type == "funciton"){
         expression->function->print();
     } else if (expression->type == "function_assigner"){
-        std::cout << expression->expression->print_no_endl() << " = ";
+        std::cout << "(" << expression->expression->print_no_endl() << " = ";
         expression->function->print();
+        std::cout << ")"; 
     } else {
         std::cout << "SOMTHING BAD IS HAPPENING \n NOT SUPPOSED TO REACH HERE" << std::endl;
     }
