@@ -12,6 +12,7 @@
 #include "errors.h"//error classes defined here
 #include "value_bd.hpp"
 
+
 // Base class for AST nodes
 class ASTNode {
 protected:
@@ -184,6 +185,22 @@ public:
     ~LorNode();
     value_bd evaluate(std::unordered_map<std::string, value_bd>* var_map);
     std::string print();
+};
+
+class ArrayNode : public ASTNode {
+public:
+    ASTNode* node;
+    std::vector<value_bd> array;
+    std::vector<std::string> array_ele;
+    value_bd position;
+    std::string name;
+    ArrayNode(int line, int column, std::vector<value_bd> array, std::vector<std::string> array_ele, std::string name);
+    ArrayNode(int line, int column, ASTNode* node, value_bd position, std::vector<std::string> array_ele, std::string name);
+    ArrayNode(int line, int column, std::vector<value_bd> array);
+    ~ArrayNode();
+    value_bd evaluate(std::unordered_map<std::string, value_bd>* var_map);
+    std::string print();
+    std::string evaluate_print(std::vector<value_bd> arr);
 };
 
 

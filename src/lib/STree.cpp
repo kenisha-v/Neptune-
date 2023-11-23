@@ -35,6 +35,7 @@ void ExpressionNode::print(int tab) {
     for (int i = 0; i < tab; ++i) {
         std::cout << " ";
     }
+
     if (expression->type == "expression"){
         std::cout << expression->expression->print_no_endl();
     } else if (expression->type == "funciton"){
@@ -46,7 +47,6 @@ void ExpressionNode::print(int tab) {
     } else {
         std::cout << "SOMTHING BAD IS HAPPENING \n NOT SUPPOSED TO REACH HERE" << std::endl;
     }
-
     std::cout << ";\n";
     
     if(next != nullptr) {
@@ -132,11 +132,13 @@ void PrintNode::print(int tab) {
         std::cout << " ";
     }
     std::cout << "print ";
+
     if(expression->type == "expression"){
         std::cout << expression->expression->print_no_endl();
     } else{
         expression->function->print();
     }
+  
     std::cout << ";\n";
     if(next != nullptr) {
         next->print(tab);
@@ -528,6 +530,7 @@ SNode* STree::parse_block() {
         int temp_col = get_current_token().col;
         bool semi_colon = false;
         consume_token(); //consume print
+
         if(get_current_token().type == TokenType::VARIABLES && block[current_token_index+1].type == TokenType::LEFT_PAREN) { //function
             std::vector<ASTree*> arg;
             std::string name = get_current_token().text;
@@ -664,6 +667,7 @@ SNode* STree::parse_block() {
         consume_token(); //consume return
         std::vector<token> return_value;
         bool semi_colon = false;
+
         while (get_current_token().row == temp_row && get_current_token().type != TokenType::END) {
             if (get_current_token().text == ";") {
                 semi_colon = true;
@@ -689,6 +693,7 @@ SNode* STree::parse_block() {
         // if an empty list, exp will be passed on as nullptr
         return new ReturnNode(exp, parse_block());
     }
+
 
 
     //EXPRESSION STATEMENT
@@ -761,7 +766,6 @@ SNode* STree::parse_block() {
         } else { // expression with function
             exp = new EXP(expression_tokens, fc);
         }
-
         return new ExpressionNode(exp, parse_block());
     }
 }
