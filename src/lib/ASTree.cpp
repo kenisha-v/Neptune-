@@ -611,6 +611,10 @@ std::string ArrayNode::evaluate_print(std::vector<value_bd> arr) {
 //ASTree Public Function Definitions
 ASTree::ASTree(const std::vector<token>& Tokens, std::unordered_map<std::string, value_bd>* map){
     tokens=Tokens;
+    var_map = map;
+    if (var_map == nullptr) {
+        var_map = new std::unordered_map<std::string, value_bd>;
+    }
     try {
         head = parse_expression();
         if (get_current_token().type != TokenType::END){
@@ -619,10 +623,6 @@ ASTree::ASTree(const std::vector<token>& Tokens, std::unordered_map<std::string,
     }  catch (const ParseError& e){
         delete head;
         throw e;
-    }
-    var_map = map;
-    if (var_map == nullptr) {
-        var_map = new std::unordered_map<std::string, value_bd>;
     }
 }
 
