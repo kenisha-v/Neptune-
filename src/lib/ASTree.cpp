@@ -309,7 +309,11 @@ value_bd EqualNode::evaluate(std::unordered_map<std::string, value_bd>* var_map)
             return value_bd("bool", false);
         }
         if (left->evaluate(var_map).type_tag == "array" || right->evaluate(var_map).type_tag == "array") {
-            return value_bd("bool", false);
+            if (left->evaluate(var_map).array.size() != right->evaluate(var_map).array.size()) {
+                return value_bd("bool", false);
+            }
+            // for (size_t i = 0; i< )
+            return value_bd("bool",true);
         }
         if(left->evaluate(var_map).type_tag == "bool") {
             return value_bd("bool", left->evaluate(var_map).Bool == right->evaluate(var_map).Bool);
@@ -665,23 +669,29 @@ ASTNode* ASTree::parse_assignment() {
                 }
                 consume_token();
             }
+            ASTree* nodes = nullptr;
             if (funcs.size()==1) {
                 output = (*var_map)[funcs[0].text];
                 array_ele.push_back(funcs[0].text);
             } else {
                 funcs.push_back(getToken(get_current_token().row, get_current_token().col, "END", TokenType::END));
-                ASTree* nodes = new ASTree(funcs, var_map);
+                nodes = new ASTree(funcs, var_map);
                 output = nodes->evaluate();
                 array_ele.push_back(nodes->print_no_endl());
-                delete nodes;
             }
             array_ele.push_back(get_current_token().text);
             if (node->print() == "len") {
                     output = len(output);
+                    int temp_row            = get_current_token().row;
+                    int temp_col            = get_current_token().col;
+                    consume_token();
+                    delete nodes;
+                    return new ArrayNode(temp_row, temp_col, true, output, array_ele);
             }
             int temp_row            = get_current_token().row;
             int temp_col            = get_current_token().col;
             consume_token();
+            delete nodes;
             return new ArrayNode(temp_row, temp_col, true, output, array_ele);
         }
         
