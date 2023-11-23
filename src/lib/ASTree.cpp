@@ -81,9 +81,8 @@ value_bd AssignmentNode::evaluate(std::unordered_map<std::string, value_bd>* var
             std::vector<value_bd> array_left = (*var_map)[id_n->name].array;
             // id_n->evaluate(var_map) = solved_value_right_node;
             std::ostringstream os;
-                    // os << array[i].Double;
-                    // array_str+=os.str();
-            size_t pos = std::stoi(id_n->position);
+            os << id_n->position.Double;
+            size_t pos = std::stoi(os.str());
             std::vector<value_bd> array_changed;
             for (size_t i = 0; i < array_left.size();++i){
                 if (i==pos) {
@@ -419,7 +418,7 @@ ArrayNode::ArrayNode(int line, int column, std::vector<value_bd> array, std::vec
     this->node = nullptr;
 }
 
-ArrayNode::ArrayNode(int line, int column, ASTNode* node, std::string position, std::vector<std::string> array_ele, std::string name) : ASTNode(line, column), node(node), array_ele(array_ele), position(position), name(name) {}
+ArrayNode::ArrayNode(int line, int column, ASTNode* node, value_bd position, std::vector<std::string> array_ele, std::string name) : ASTNode(line, column), node(node), array_ele(array_ele), position(position), name(name) {}
     
 ArrayNode::ArrayNode(int line, int column, std::vector<value_bd> array): ASTNode(line, column){
     this->array = {};
@@ -475,13 +474,20 @@ value_bd ArrayNode::evaluate(std::unordered_map<std::string, value_bd>* var_map)
         // }
         if (node != nullptr) {
             value_bd val = (*var_map)[node->print()];
-            for (size_t i = 0; i< position.size();++i) {
-                if (!isdigit(position[i])) {
-                    throw EvaluationError("index is not a number");
-                }
+            if (position.type_tag!="double") {
+                std::cout << position.type_tag;
+                throw EvaluationError("expression not valid");
             }
-            int pos = std::stod(position);
-            return val.array[pos];
+            // for (size_t i = 0; i< position.size();++i) {
+            //     if (!isdigit(position[i])) {
+            //         throw EvaluationError("index is not a number");
+            //     }
+            // }
+            // int pos = std::stod(position);
+            if (position.Double < 0 || position.Double >= val.array.size()) {
+                throw EvaluationError("index out of bounds.");
+            }
+            return val.array[position.Double];
         }
         // std::cout << array.size() << "\n";
         return value_bd("array", array, array_ele);
@@ -914,33 +920,38 @@ ASTNode* ASTree::parse_factor() {
         } else if (get_current_token().type == TokenType::VARIABLES) {
             std::string name = get_current_token().text;
             ASTNode* node = new IdentifierNode(get_current_token().row, get_current_token().col, get_current_token().text);
-            std::vector<std::string> id_n;
-            id_n.push_back(node->print());
+            std::vector<std::string> id_s;
+            id_s.push_back(node->print());
+            std::vector<token> id_n;
             consume_token();
             if (get_current_token().type == TokenType::L_SQUARE){
                 // std::cout << "new one - enetered else if in parse_assignment\n";
                 int temp_row            = get_current_token().row;
                 int temp_col            = get_current_token().col;
                 token temp_token        = get_current_token();
-                id_n.push_back(get_current_token().text);
+                id_s.push_back(get_current_token().text);
                 consume_token();
-                std::string pos;
+                value_bd pos;
                 while (true) {
                     if (get_current_token().type == TokenType::END) {
                         throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
                     } else if (get_current_token().type == TokenType::R_SQUARE) {
                         break;
                     }
-                    id_n.push_back(get_current_token().text);
-                    pos += get_current_token().text;
+                    id_n.push_back(get_current_token());
                     consume_token();
                 }
-                id_n.push_back(get_current_token().text);
                 if (get_current_token().type != TokenType::R_SQUARE) {
                     throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
                 }
                 consume_token();
-                return new ArrayNode(temp_row, temp_col, node, pos, id_n, name);
+                id_n.push_back(getToken(get_current_token().row, get_current_token().col, "END", TokenType::END));
+                ASTree* expression_tree = new ASTree(id_n, var_map);
+                id_s.push_back(expression_tree->print_no_endl());
+                id_s.push_back("]");
+                pos = expression_tree->evaluate();
+                delete expression_tree;
+                return new ArrayNode(temp_row, temp_col, node, pos, id_s, name);
             }
             return node;
         } else if (get_current_token().type == TokenType::BOOLEAN) {
