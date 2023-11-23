@@ -27,7 +27,17 @@ void ExpressionNode::print(int tab) {
     for (int i = 0; i < tab; ++i) {
         std::cout << " ";
     }
-    std::cout << expression->expression->print_no_endl();
+    if (expression->type == "expression"){
+        std::cout << expression->expression->print_no_endl();
+    } else if (expression->type == "funciton"){
+        expression->function->print();
+    } else if (expression->type == "function_assigner"){
+        std::cout << expression->expression->print_no_endl() << " = ";
+        expression->function->print();
+    } else {
+        std::cout << "SOMTHING BAD IS HAPPENING \n NOT SUPPOSED TO REACH HERE" << std::endl;
+    }
+
     std::cout << ";\n";
     
     if(next != nullptr) {
@@ -670,6 +680,7 @@ SNode* STree::parse_block() {
     //EXPRESSION STATEMENT
     else {
         EXP* exp = nullptr;
+        function_call* fc = nullptr;
         std::vector<token> expression_tokens;
         int temp_row = get_current_token().row;
         int temp_col = get_current_token().col;
@@ -681,9 +692,9 @@ SNode* STree::parse_block() {
                 consume_token();
                 break;
             }
-            if(get_current_token().type == TokenType::VARIABLES && block[current_token_index+1].type == TokenType::LEFT_PAREN) {
-                //this checks if current expression line has a function. if it does dont send the line to ASTree, instead create your own FuncCall node
-                std::vector<ASTree*> arguement;
+
+            if(get_current_token().type == TokenType::VARIABLES && block[current_token_index+1].type == TokenType::LEFT_PAREN) { //function
+                std::vector<ASTree*> arg;
                 std::string name = get_current_token().text;
                 consume_token(); consume_token(); //consume func_name and left paren
                 std::vector<token> expression_tokens;
@@ -693,10 +704,11 @@ SNode* STree::parse_block() {
                             throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
                         }
                         token end_token{temp_row,temp_col+1,"END",TokenType::END};
-                        expression_tokens.push_back(end_token);  
+                        expression_tokens.push_back(end_token);
                         ASTree* single_argument = new ASTree(expression_tokens, var_map);
-                        arguement.push_back(single_argument);
+                        arg.push_back(single_argument);
                         expression_tokens.clear();
+                        consume_token();
                     }   else {
                         expression_tokens.push_back(get_current_token());
                         consume_token();
@@ -704,25 +716,37 @@ SNode* STree::parse_block() {
 
                 }
                 if (expression_tokens.size()!=0){
-                    throw ParseError(get_current_token().row, get_current_token().col, get_current_token());
+                    token end_token{temp_row,temp_col+1,"END",TokenType::END};
+                    expression_tokens.push_back(end_token);
+                    ASTree* single_argument = new ASTree(expression_tokens, var_map);
+                    arg.push_back(single_argument);
+                    expression_tokens.clear();
                 }
-
                 consume_token(); // consuming right paren
-
-                exp = new EXP(new function_call(name, arguement));
+                fc = new function_call(name, arg);
+            } else {
+                temp_row = get_current_token().row;
+                temp_col = get_current_token().col;
+                expression_tokens.push_back(get_current_token());
+                consume_token();
             }
-            temp_row = get_current_token().row;
-            temp_col = get_current_token().col;
-            expression_tokens.push_back(get_current_token());
-            consume_token();
         }
+        
         if (semi_colon == false) {
             throw ParseError(get_current_token().row, get_current_token().col+1, get_current_token());
         }
-        //Add end token to end of each expression that is being sent to ASTree
-        token end_token{temp_row,temp_col+1,"END",TokenType::END};
-        expression_tokens.push_back(end_token);
-        exp = new EXP(new ASTree(expression_tokens, var_map));
+
+        if (fc==nullptr){//only expression
+            {//add end token to end of each expression that is being sent to ASTree
+            token end_token{temp_row,temp_col+1,"END",TokenType::END};
+            expression_tokens.push_back(end_token);
+            }
+            exp = new EXP(new ASTree(expression_tokens, var_map));
+        } else if (expression_tokens.size() == 0){ //only function
+            exp = new EXP(fc);
+        } else { // expression with function
+            exp = new EXP(expression_tokens, fc);
+        }
 
         return new ExpressionNode(exp, parse_block());
     }
