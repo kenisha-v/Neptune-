@@ -312,7 +312,11 @@ value_bd EqualNode::evaluate(std::unordered_map<std::string, value_bd>* var_map)
             if (left->evaluate(var_map).array.size() != right->evaluate(var_map).array.size()) {
                 return value_bd("bool", false);
             }
-            // for (size_t i = 0; i< )
+            for (size_t i = 0; i< left->evaluate(var_map).array.size() ; ++i) {
+                if (left->evaluate(var_map).array[i].type_tag!= right->evaluate(var_map).array[i].type_tag) {
+                    return value_bd("bool",false);
+                }
+            }
             return value_bd("bool",true);
         }
         if(left->evaluate(var_map).type_tag == "bool") {
