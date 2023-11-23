@@ -719,12 +719,12 @@ ASTNode* ASTree::parse_assignment() {
                 id_s.push_back(expression_tree->print_no_endl());
                 id_s.push_back("]");
                 pos = expression_tree->evaluate();
-                delete expression_tree;
                 value_bd value_var_map = value_bd("array", (*nod).array);
                 if(var_map == nullptr){
                     var_map = new std::unordered_map<std::string, value_bd>;
                 }
                 (*var_map)[name] = value_var_map;
+                // delete expression_tree;
                 return new ArrayNode(temp_row, temp_col, nod, pos, id_s, name);
             }
         }
