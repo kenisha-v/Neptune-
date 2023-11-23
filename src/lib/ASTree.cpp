@@ -724,7 +724,7 @@ ASTNode* ASTree::parse_assignment() {
                     var_map = new std::unordered_map<std::string, value_bd>;
                 }
                 (*var_map)[name] = value_var_map;
-                // delete expression_tree;
+                delete expression_tree;
                 return new ArrayNode(temp_row, temp_col, nod, pos, id_s, name);
             }
         }
