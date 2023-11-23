@@ -11,7 +11,9 @@ struct function_call{
     function_call(std::string n, std::vector<ASTree*> arg): name(n), arguments(arg){}
     ~function_call(){
         for (auto i: arguments){
-            delete i;
+            if (i!= nullptr){
+                delete i;
+            }
         }
     }
 
@@ -46,8 +48,8 @@ public:
             }
             before_func.pop_back();
             {//add end token to end of each expression that is being sent to ASTree
-            token end_token{temp_row,temp_col+1,"END",TokenType::END};
-            before_func.push_back(end_token);
+                token end_token{temp_row,temp_col+1,"END",TokenType::END};
+                before_func.push_back(end_token);
             }
             expression = new ASTree(before_func, &dummy);
         }
